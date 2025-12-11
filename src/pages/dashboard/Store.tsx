@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, Filter, ShoppingCart, Plus } from 'lucide-react';
+import { Search, Filter, ShoppingCart, Plus, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,6 +17,8 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/contexts/CartContext';
 import type { Product } from '@/lib/api';
 
 // Mock data
@@ -56,6 +59,24 @@ const mockProducts: Product[] = [
     type: 'aluminum',
     image: 'https://images.unsplash.com/photo-1558618047-f4b511d0b435?w=400',
   },
+  {
+    id: '5',
+    name: 'خشب كونتر ملامين',
+    description: 'لوح كونتر ملامين أبيض بسمك 16مم',
+    price: 650,
+    size: '244×122 سم',
+    type: 'wood',
+    image: 'https://images.unsplash.com/photo-1541123603104-512919d6a96c?w=400',
+  },
+  {
+    id: '6',
+    name: 'سكة درج تيليسكوبيك',
+    description: 'سكة درج تيليسكوبيك بطول 45سم',
+    price: 85,
+    size: '45 سم',
+    type: 'metal',
+    image: 'https://images.unsplash.com/photo-1558618047-f4b511d0b435?w=400',
+  },
 ];
 
 const typeLabels: Record<string, string> = {
@@ -67,10 +88,12 @@ const typeLabels: Record<string, string> = {
 };
 
 export default function Store() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { addToCart, getCartCount, getCartTotal } = useCart();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [products] = useState<Product[]>(mockProducts);
-  const [cart, setCart] = useState<{ id: string; quantity: number }[]>([]);
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch = p.name.includes(search) || p.description.includes(search);
@@ -78,22 +101,16 @@ export default function Store() {
     return matchesSearch && matchesType;
   });
 
-  const addToCart = (productId: string) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.id === productId);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prev, { id: productId, quantity: 1 }];
+  const handleAddToCart = (product: Product) => {
+    addToCart(product);
+    toast({
+      title: 'تمت الإضافة',
+      description: `تم إضافة "${product.name}" إلى السلة`,
     });
   };
 
-  const cartTotal = cart.reduce((total, item) => {
-    const product = products.find((p) => p.id === item.id);
-    return total + (product?.price || 0) * item.quantity;
-  }, 0);
+  const cartCount = getCartCount();
+  const cartTotal = getCartTotal();
 
   return (
     <div className="space-y-8">
@@ -109,10 +126,10 @@ export default function Store() {
             تصفح وشراء المواد والأدوات
           </p>
         </div>
-        {cart.length > 0 && (
-          <Button variant="hero">
+        {cartCount > 0 && (
+          <Button variant="hero" onClick={() => navigate('/dashboard/cart')}>
             <ShoppingCart className="h-5 w-5" />
-            السلة ({cart.length}) - {cartTotal} ج.م
+            السلة ({cartCount}) - {cartTotal} ج.م
           </Button>
         )}
       </motion.div>
@@ -190,7 +207,7 @@ export default function Store() {
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-primary">{product.price} ج.م</span>
-                    <Button size="sm" onClick={() => addToCart(product.id)}>
+                    <Button size="sm" onClick={() => handleAddToCart(product)}>
                       <Plus className="h-4 w-4" />
                       أضف
                     </Button>
@@ -199,6 +216,17 @@ export default function Store() {
               </motion.div>
             ))}
           </motion.div>
+
+          {filteredProducts.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center py-12"
+            >
+              <ShoppingBag className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">لا توجد منتجات مطابقة للبحث</p>
+            </motion.div>
+          )}
         </TabsContent>
 
         <TabsContent value="manage" className="space-y-6">
