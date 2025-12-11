@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { CartProvider } from "@/contexts/CartContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -14,7 +15,11 @@ import CuttingSettings from "./pages/dashboard/CuttingSettings";
 import Projects from "./pages/dashboard/Projects";
 import NewProject from "./pages/dashboard/NewProject";
 import ProjectDetails from "./pages/dashboard/ProjectDetails";
+import UnitDetails from "./pages/dashboard/UnitDetails";
 import Store from "./pages/dashboard/Store";
+import Cart from "./pages/dashboard/Cart";
+import Checkout from "./pages/dashboard/Checkout";
+import Orders from "./pages/dashboard/Orders";
 import AccountSettings from "./pages/dashboard/AccountSettings";
 import NotFound from "./pages/NotFound";
 
@@ -24,27 +29,33 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/dashboard" element={<DashboardLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="cutting-settings" element={<CuttingSettings />} />
-                <Route path="projects" element={<Projects />} />
-                <Route path="projects/new" element={<NewProject />} />
-                <Route path="projects/:id" element={<ProjectDetails />} />
-                <Route path="store" element={<Store />} />
-                <Route path="account" element={<AccountSettings />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <CartProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/dashboard" element={<DashboardLayout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="cutting-settings" element={<CuttingSettings />} />
+                  <Route path="projects" element={<Projects />} />
+                  <Route path="projects/new" element={<NewProject />} />
+                  <Route path="projects/:id" element={<ProjectDetails />} />
+                  <Route path="units/:id" element={<UnitDetails />} />
+                  <Route path="store" element={<Store />} />
+                  <Route path="cart" element={<Cart />} />
+                  <Route path="checkout" element={<Checkout />} />
+                  <Route path="orders" element={<Orders />} />
+                  <Route path="account" element={<AccountSettings />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </CartProvider>
       </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>

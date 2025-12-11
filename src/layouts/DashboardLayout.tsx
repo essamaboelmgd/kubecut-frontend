@@ -7,12 +7,15 @@ import {
   Settings2, 
   FolderKanban, 
   ShoppingCart, 
+  ShoppingBag,
+  ClipboardList,
   User, 
   LogOut,
   Menu,
   ChefHat,
   X
 } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
@@ -32,13 +35,17 @@ const sidebarItems = [
   { icon: Settings2, label: 'إعدادات التقطيع', href: '/dashboard/cutting-settings' },
   { icon: FolderKanban, label: 'المشاريع', href: '/dashboard/projects' },
   { icon: ShoppingCart, label: 'المتجر', href: '/dashboard/store' },
+  { icon: ShoppingBag, label: 'السلة', href: '/dashboard/cart', showBadge: true },
+  { icon: ClipboardList, label: 'الطلبات', href: '/dashboard/orders' },
   { icon: User, label: 'إعدادات الحساب', href: '/dashboard/account' },
 ];
 
 export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user, logout, isAuthenticated, isLoading } = useAuth();
+  const { getCartCount } = useCart();
   const location = useLocation();
+  const cartCount = getCartCount();
 
   if (isLoading) {
     return (
@@ -95,7 +102,12 @@ export default function DashboardLayout() {
                 onClick={() => setIsSidebarOpen(false)}
               >
                 <item.icon className="h-5 w-5" />
-                <span>{item.label}</span>
+                <span className="flex-1">{item.label}</span>
+                {item.showBadge && cartCount > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground">
+                    {cartCount}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
