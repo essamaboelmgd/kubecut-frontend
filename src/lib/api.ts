@@ -598,6 +598,12 @@ export const marketplaceApi = {
         });
         return handleResponse(response);
     },
+    getMyListings: async (): Promise<MarketplaceItem[]> => {
+        const response = await fetch(`${API_URL}/marketplace/my-listings`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
     buy: async (itemId: string, quantity: number = 1): Promise<MarketplaceItem> => {
         const response = await fetch(`${API_URL}/marketplace/items/${itemId}/buy`, {
             method: "POST",

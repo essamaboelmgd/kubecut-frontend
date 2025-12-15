@@ -1,6 +1,5 @@
-import { ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { Outlet } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Navigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -14,12 +13,11 @@ import {
   Menu,
   X,
   Users,
-  TrendingUp
+  TrendingUp,
+  Package,
+  LucideIcon
 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { NavLink } from '@/components/NavLink';
 import { Button } from '@/components/ui/button';
@@ -33,16 +31,45 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-const sidebarItems = [
-  { icon: LayoutDashboard, label: 'لوحة التحكم', href: '/dashboard' },
-  { icon: Settings2, label: 'إعدادات التقطيع', href: '/dashboard/cutting-settings' },
-  { icon: FolderKanban, label: 'المشاريع', href: '/dashboard/projects' },
-  { icon: ShoppingCart, label: 'المتجر', href: '/dashboard/store' },
-  { icon: ShoppingBag, label: 'السلة', href: '/dashboard/cart', showBadge: true },
-  { icon: ClipboardList, label: 'الطلبات', href: '/dashboard/orders' },
-  { icon: TrendingUp, label: 'المبيعات', href: '/dashboard/sales' },
-  { icon: Users, label: 'المستخدمين', href: '/dashboard/users', adminOnly: true },
-  { icon: User, label: 'إعدادات الحساب', href: '/dashboard/account' },
+interface SidebarItem {
+  icon: LucideIcon;
+  label: string;
+  href: string;
+  showBadge?: boolean;
+  adminOnly?: boolean;
+}
+
+interface SidebarCategory {
+  title: string;
+  items: SidebarItem[];
+}
+
+const sidebarCategories: SidebarCategory[] = [
+  {
+    title: 'رئيسي',
+    items: [
+      { icon: LayoutDashboard, label: 'لوحة التحكم', href: '/dashboard' },
+      { icon: FolderKanban, label: 'المشاريع', href: '/dashboard/projects' },
+      { icon: Settings2, label: 'إعدادات التقطيع', href: '/dashboard/cutting-settings' },
+    ]
+  },
+  {
+    title: 'التجارة',
+    items: [
+      { icon: ShoppingCart, label: 'المتجر', href: '/dashboard/store' },
+      { icon: ShoppingBag, label: 'السلة', href: '/dashboard/cart', showBadge: true },
+      { icon: ClipboardList, label: 'الطلبات', href: '/dashboard/orders' },
+      { icon: TrendingUp, label: 'المبيعات', href: '/dashboard/sales' },
+      { icon: Package, label: 'إدارة منتجاتي', href: '/dashboard/my-products' },
+    ]
+  },
+  {
+    title: 'الحساب',
+    items: [
+       { icon: Users, label: 'المستخدمين', href: '/dashboard/users', adminOnly: true },
+       { icon: User, label: 'إعدادات الحساب', href: '/dashboard/account' },
+    ]
+  }
 ];
 
 export default function DashboardLayout() {
@@ -106,37 +133,44 @@ export default function DashboardLayout() {
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 space-y-1.5 p-4 overflow-y-auto custom-scrollbar">
-            {sidebarItems.map((item) => {
-              if (item.adminOnly && user?.role !== 'admin') return null;
-              
-              return (
-                <NavLink
-                  key={item.href}
-                  to={item.href}
-                  end={item.href === '/dashboard'}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-medium transition-all duration-300 group relative overflow-hidden",
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-[1.02]"
-                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:translate-x-1"
-                    )
-                  }
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  <item.icon className={cn("h-5 w-5 transition-transform duration-300 group-hover:scale-110", )} />
-                  <span className="relative z-10">{item.label}</span>
-                  {item.showBadge && cartCount > 0 && (
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground shadow-sm ring-2 ring-background">
-                      {cartCount}
-                    </span>
-                  )}
-                  {/* Active Shine Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                </NavLink>
-              );
-            })}
+          <nav className="flex-1 space-y-6 p-4 overflow-y-auto custom-scrollbar">
+            {sidebarCategories.map((category, index) => (
+              <div key={index} className="space-y-1">
+                <h3 className="px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 mb-2 font-mono">
+                  {category.title}
+                </h3>
+                {category.items.map((item) => {
+                  if (item.adminOnly && user?.role !== 'admin') return null;
+                  
+                  return (
+                    <NavLink
+                      key={item.href}
+                      to={item.href}
+                      end={item.href === '/dashboard'}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-medium transition-all duration-300 group relative overflow-hidden",
+                          isActive
+                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-[1.02]"
+                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:translate-x-1"
+                        )
+                      }
+                      onClick={() => setIsSidebarOpen(false)}
+                    >
+                      <item.icon className={cn("h-5 w-5 transition-transform duration-300 group-hover:scale-110")} />
+                      <span className="relative z-10">{item.label}</span>
+                      {item.showBadge && cartCount > 0 && (
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground shadow-sm ring-2 ring-background">
+                          {cartCount}
+                        </span>
+                      )}
+                      {/* Active Shine Effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                    </NavLink>
+                  );
+                })}
+              </div>
+            ))}
           </nav>
 
           {/* User Profile Snippet */}
