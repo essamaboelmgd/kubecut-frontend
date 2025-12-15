@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ChefHat, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 
 const footerLinks = {
   product: [
@@ -26,10 +26,8 @@ export function Footer() {
           {/* Brand */}
           <div>
             <Link to="/" className="mb-4 flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <ChefHat className="h-6 w-6" />
-              </div>
-              <span className="text-xl font-bold">قطّع</span>
+              <img src="/logo.png" alt="KubeCut Logo" className="h-10 w-10 object-contain" />
+              <span className="text-xl font-bold">كيوب كت</span>
             </Link>
             <p className="mb-6 text-sm text-muted-foreground">
               منصة متكاملة لحساب وتقطيع وحدات المطابخ للنجارين والصنايعية
@@ -102,7 +100,7 @@ export function Footer() {
 
         {/* Bottom */}
         <div className="mt-12 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} قطّع. جميع الحقوق محفوظة.</p>
+          <p>© {new Date().getFullYear()}كيوب كت. جميع الحقوق محفوظة.</p>
         </div>
       </div>
     </footer>

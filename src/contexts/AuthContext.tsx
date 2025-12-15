@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, getToken, removeToken, setToken } from '@/lib/api';
+import { User, getToken, removeToken, setToken, authApi } from '../lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -19,13 +19,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check for existing token on mount
     const token = getToken();
     if (token) {
-      // In production, validate token with API
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
+      authApi.me()
+        .then(userData => {
+          setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
+        })
+        .catch(() => {
+          // If token is invalid
+          removeToken();
+          localStorage.removeItem('user');
+          setUser(null);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const login = (token: string, userData: User) => {

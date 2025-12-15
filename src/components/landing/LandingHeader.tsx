@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChefHat } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -19,10 +19,8 @@ export function LandingHeader() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <ChefHat className="h-6 w-6" />
-          </div>
-          <span className="text-xl font-bold">قطّع</span>
+          <img src="/logo.png" alt="KubeCut Logo" className="h-10 w-10 object-contain" />
+          <span className="text-xl font-bold">كيوب كت</span>
         </Link>
 
         {/* Desktop Nav */}

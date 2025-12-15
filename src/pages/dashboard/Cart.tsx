@@ -10,10 +10,17 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
+import { API_URL } from '@/lib/api';
 
 export default function Cart() {
   const navigate = useNavigate();
   const { items, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
+
+  const getImageUrl = (path: string) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return `${API_URL}${path}`;
+  };
 
   if (items.length === 0) {
     return (
@@ -66,58 +73,62 @@ export default function Cart() {
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
-          {items.map((item, index) => (
+              {items.map((item, index) => (
             <motion.div
-              key={item.product.id}
+              key={item.product.item_id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="glass-card flex flex-col gap-4 p-4 sm:flex-row sm:items-center"
+              className="glass-card group flex flex-col gap-6 p-6 transition-all duration-300 hover:shadow-glow sm:flex-row sm:items-center"
             >
-              <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
+              <div className="relative h-28 w-28 flex-shrink-0 overflow-hidden rounded-2xl bg-muted shadow-inner">
                 <img
-                  src={item.product.image}
-                  alt={item.product.name}
-                  className="h-full w-full object-cover"
+                  src={getImageUrl(item.product.images[0])}
+                  alt={item.product.title}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
+                <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl" />
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold">{item.product.name}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-1">
+              <div className="flex-1 space-y-2">
+                <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">{item.product.title}</h3>
+                    <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 -mt-1 -mr-2"
+                    onClick={() => removeFromCart(item.product.item_id)}
+                    >
+                    <Trash2 className="h-5 w-5" />
+                    </Button>
+                </div>
+                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed max-w-md">
                   {item.product.description}
                 </p>
-                <p className="mt-1 text-lg font-bold text-primary">
-                  {item.product.price} ج.م
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 rounded-lg border border-border bg-background p-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="w-8 text-center font-medium">{item.quantity}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
+                <div className="flex items-end justify-between pt-2">
+                    <p className="text-xl font-bold text-primary font-mono">
+                    {item.product.price} <span className="text-sm text-muted-foreground font-sans font-normal">ج.م</span>
+                    </p>
+                    
+                    <div className="flex items-center gap-3 rounded-xl bg-background/50 p-1 ring-1 ring-border/50 backdrop-blur-sm">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-background shadow-sm"
+                            onClick={() => updateQuantity(item.product.item_id, item.quantity - 1)}
+                        >
+                            <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="w-8 text-center font-bold font-mono">{item.quantity}</span>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-background shadow-sm"
+                            onClick={() => updateQuantity(item.product.item_id, item.quantity + 1)}
+                        >
+                            <Plus className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-destructive hover:bg-destructive/10"
-                  onClick={() => removeFromCart(item.product.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </div>
             </motion.div>
           ))}
@@ -134,9 +145,9 @@ export default function Cart() {
             <h3 className="mb-4 text-lg font-semibold">ملخص الطلب</h3>
             <div className="space-y-3">
               {items.map((item) => (
-                <div key={item.product.id} className="flex items-center justify-between text-sm">
+                <div key={item.product.item_id} className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {item.product.name} × {item.quantity}
+                    {item.product.title} × {item.quantity}
                   </span>
                   <span>{item.product.price * item.quantity} ج.م</span>
                 </div>

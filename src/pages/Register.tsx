@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChefHat, Eye, EyeOff, Loader2 } from 'lucide-react';
+import {Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { authApi } from '@/lib/api';
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [full_name, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +24,7 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !password || !confirmPassword) {
+    if (!full_name || !phone || !password || !confirmPassword) {
       toast({
         title: 'خطأ',
         description: 'يرجى ملء جميع الحقول',
@@ -41,37 +42,41 @@ export default function Register() {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       toast({
         title: 'خطأ',
-        description: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+        description: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
         variant: 'destructive',
       });
       return;
+    }
+    
+    // Validate Egyptian Phone Number
+    const phoneRegex = /^01[0-9]{9}$/;
+    if (!phoneRegex.test(phone)) {
+        toast({
+            title: 'خطأ',
+            description: 'رقم الهاتف غير صحيح (يجب أن يبدأ ب 01 ويتكون من 11 رقم)',
+            variant: 'destructive',
+        });
+        return;
     }
 
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await authApi.register({ phone, password, full_name });
       
-      login('mock-token', {
-        id: '1',
-        email,
-        name,
-      });
-
-      toast({
+     toast({
         title: 'تم إنشاء الحساب',
-        description: 'مرحباً بك في قطّع',
+        description: 'مرحباً بك في كيوب كت. يرجى تسجيل الدخول.',
       });
 
-      navigate('/dashboard');
-    } catch (error) {
+      navigate('/login');
+    } catch (error: any) {
       toast({
         title: 'خطأ',
-        description: 'حدث خطأ أثناء إنشاء الحساب',
+        description: error.message || 'حدث خطأ أثناء إنشاء الحساب',
         variant: 'destructive',
       });
     } finally {
@@ -91,7 +96,7 @@ export default function Register() {
         >
           <div className="absolute -inset-20 rounded-full bg-accent/10 blur-3xl" />
           <div className="relative glass-card p-12 text-center">
-            <ChefHat className="mx-auto mb-6 h-24 w-24 text-primary" />
+            <img src="/logo.png" alt="KubeCut Logo" className="h-10 w-10 object-contain" />
             <h2 className="mb-4 text-2xl font-bold">انضم إلينا اليوم</h2>
             <p className="max-w-sm text-muted-foreground">
               اكتشف قوة الحساب الدقيق والتخطيط المتقن لمشاريع المطابخ
@@ -114,15 +119,13 @@ export default function Register() {
         >
           {/* Logo */}
           <Link to="/" className="mb-8 flex items-center gap-2">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <ChefHat className="h-7 w-7" />
-            </div>
-            <span className="text-2xl font-bold">قطّع</span>
+            <img src="/logo.png" alt="KubeCut Logo" className="h-10 w-10 object-contain" />
+            <span className="text-2xl font-bold">كيوب كت</span>
           </Link>
 
           <h1 className="mb-2 text-3xl font-bold">إنشاء حساب جديد</h1>
           <p className="mb-8 text-muted-foreground">
-            ابدأ رحلتك مع منصة قطّع الاحترافية
+            ابدأ رحلتك مع منصة كيوب كت الاحترافية
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -132,20 +135,20 @@ export default function Register() {
                 id="name"
                 type="text"
                 placeholder="أدخل اسمك"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={full_name}
+                onChange={(e) => setFullName(e.target.value)}
                 className="h-12"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Label htmlFor="phone">رقم الهاتف</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="example@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="phone"
+                type="tel"
+                placeholder="01xxxxxxxxx"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 className="h-12"
                 dir="ltr"
               />

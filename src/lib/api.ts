@@ -1,235 +1,675 @@
-// API Configuration and helpers
-const API_BASE_URL = '/api'; // Replace with actual API URL
 
-// Auth token management
-export const getToken = () => localStorage.getItem('auth_token');
-export const setToken = (token: string) => localStorage.setItem('auth_token', token);
-export const removeToken = () => localStorage.removeItem('auth_token');
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-// API request helper
-async function request<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = getToken();
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` }),
-    ...options.headers,
-  };
-
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'خطأ في الاتصال' }));
-    throw new Error(error.message || 'حدث خطأ غير متوقع');
-  }
-
-  return response.json();
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 
-// Auth API
-export const authApi = {
-  login: (email: string, password: string) =>
-    request<{ token: string; user: User }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    }),
-  register: (data: RegisterData) =>
-    request<{ token: string; user: User }>('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-};
+export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-// Settings API
-export const settingsApi = {
-  get: () => request<Settings>('/settings'),
-  update: (data: Partial<Settings>) =>
-    request<Settings>('/settings', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
-};
+// --- Types ---
 
-// Projects API
-export const projectsApi = {
-  getAll: () => request<Project[]>('/projects/'),
-  getById: (id: string) => request<Project>(`/projects/${id}`),
-  create: (data: CreateProjectData) =>
-    request<Project>('/projects/', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-  update: (id: string, data: Partial<CreateProjectData>) =>
-    request<Project>(`/projects/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
-  delete: (id: string) =>
-    request<void>(`/projects/${id}`, { method: 'DELETE' }),
-};
+// Auth
+export type UserRole = "admin" | "user";
 
-// Units API
-export const unitsApi = {
-  calculate: (projectId: string, data: CreateUnitData) =>
-    request<Unit>(`/units/calculate?project_id=${projectId}`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-  getById: (id: string) => request<Unit>(`/units/${id}`),
-  estimate: (data: EstimateData) =>
-    request<CostEstimate>('/units/estimate', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-  calculateInternalCounter: (unitId: string) =>
-    request<InternalCounter>(`/units/${unitId}/internal-counter/calculate`, {
-      method: 'POST',
-    }),
-  getEdgeBreakdown: (unitId: string) =>
-    request<EdgeBreakdown>(`/units/${unitId}/edge-breakdown`),
-};
-
-// Store API
-export const storeApi = {
-  getProducts: (params?: ProductFilters) => {
-    const searchParams = new URLSearchParams();
-    if (params?.type) searchParams.append('type', params.type);
-    if (params?.minPrice) searchParams.append('minPrice', params.minPrice.toString());
-    if (params?.maxPrice) searchParams.append('maxPrice', params.maxPrice.toString());
-    if (params?.search) searchParams.append('search', params.search);
-    return request<Product[]>(`/store/products?${searchParams.toString()}`);
-  },
-  getProductById: (id: string) => request<Product>(`/store/products/${id}`),
-  createProduct: (data: CreateProductData) =>
-    request<Product>('/store/products', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-};
-
-// Types
 export interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-}
-
-export interface RegisterData {
-  email: string;
-  password: string;
-  name: string;
-}
-
-export interface Settings {
-  assembly_method: 'lamello' | 'screws' | 'dowels';
-  handle_type: 'knob' | 'bar' | 'hidden';
-  handle_recess_height_mm: number;
-  default_board_thickness_mm: number;
-  back_panel_thickness_mm: number;
-  edge_overlap_mm: number;
-  back_clearance_mm: number;
-  top_clearance_mm: number;
-  bottom_clearance_mm: number;
-  side_overlap_mm: number;
-  sheet_size_m2: number;
-  materials: {
-    plywood_sheet_price: number;
-    edge_band_price: number;
+  user_id: string;
+  phone: string;
+  full_name: string;
+  role: UserRole;
+  subscription: {
+      max_units_per_month: number;
+      max_devices: number;
+      validity_days?: number;
+      is_unlimited_units: boolean;
+      is_unlimited_devices: boolean;
   };
-}
-
-export interface Project {
-  id: string;
-  name: string;
-  client: string;
-  description: string;
-  units_count: number;
   created_at: string;
-  updated_at: string;
 }
 
-export interface CreateProjectData {
-  name: string;
-  client: string;
-  description: string;
+export interface Token {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  user_id: string;
+  role: UserRole;
 }
 
-export interface Unit {
-  id: string;
-  type: 'ground' | 'wall' | 'double_door' | 'sink_ground';
-  width: number;
-  height: number;
-  depth: number;
-  shelves_count: number;
-  parts: UnitPart[];
-  total_area: number;
-  total_edge_length: number;
+export interface LoginRequest {
+  phone: string;
+  password: string;
+  device_id: string;
+  device_name?: string;
 }
 
-export interface UnitPart {
-  name: string;
-  width: number;
-  height: number;
-  quantity: number;
+export interface RegisterRequest {
+  phone: string;
+  password: string;
+  full_name: string;
+  role?: UserRole;
 }
 
-export interface CreateUnitData {
-  type: 'ground' | 'wall' | 'double_door' | 'sink_ground';
-  width: number;
-  height: number;
-  depth: number;
-  shelves_count: number;
-  options?: Record<string, unknown>;
-}
-
-export interface EstimateData {
-  unit_id: string;
-}
-
-export interface CostEstimate {
-  material_cost: number;
-  edge_cost: number;
-  total: number;
-}
-
-export interface InternalCounter {
-  drawers: number;
-  shelves: number;
-}
-
-export interface EdgeBreakdown {
-  edges: { type: string; length: number }[];
-  total: number;
-}
-
-export interface Product {
-  id: string;
+// Projects
+export interface Project {
+  project_id: string;
   name: string;
   description: string;
-  price: number;
-  size: string;
-  type: 'wood' | 'metal' | 'aluminum' | 'other';
-  image: string;
+  client_name: string;
+  units: Unit[];
+  created_at: string;
+  updated_at?: string;
 }
 
-export interface CreateProductData {
+export interface ProjectCreateRequest {
   name: string;
-  description: string;
-  price: number;
-  size: string;
-  type: 'wood' | 'metal' | 'aluminum' | 'other';
-  image: string;
+  description?: string;
+  client_name?: string;
 }
 
-export interface ProductFilters {
-  type?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  search?: string;
+// Units
+export type UnitType =
+  | "ground" | "ground_side_panel" | "ground_fixed" | "ground_fixed_side_panel"
+  | "sink" | "sink_side_panel" | "sink_fixed" | "sink_fixed_side_panel"
+  | "drawers" | "drawers_side_panel" | "drawers_bottom_rail" | "drawers_bottom_rail_side_panel"
+  | "corner_90_ground" | "corner_45_ground"
+  | "wall" | "wall_side_panel" | "wall_fixed" | "wall_fixed_side_panel" | "wall_flip_top_doors_bottom"
+  | "dish_rack" | "dish_rack_side_panel"
+  | "corner_l_wall" | "corner_45_wall"
+  | "tall_doors" | "tall_doors_side_panel" | "tall_doors_appliances" | "tall_doors_appliances_side_panel"
+  | "tall_drawers_side_doors_top" | "tall_drawers_side_doors_top_side_panel"
+  | "tall_drawers_bottom_doors_top" | "tall_drawers_bottom_doors_top_side_panel"
+  | "tall_drawers_side_appliances_doors" | "tall_drawers_side_appliances_doors_side_panel"
+  | "tall_drawers_bottom_appliances_doors_top" | "tall_drawers_bottom_appliances_doors_top_side_panel"
+  | "two_small_20_one_large_side" | "two_small_20_one_large_bottom"
+  | "one_small_16_two_large_side" | "one_small_16_two_large_bottom"
+  | "side_flush" | "wall_microwave" | "wall_microwave_side_panel" | "wardrobe_wooden_base";
+
+export type DoorType = "hinged" | "flip";
+
+export interface Part {
+  name: string;
+  width_cm: number;
+  height_cm: number;
+  depth_cm?: number;
+  qty: number;
+  edge_distribution?: {
+    top: boolean;
+    left: boolean;
+    right: boolean;
+    bottom: boolean;
+  };
+  area_m2?: number;
+  edge_band_m?: number;
 }
+
+export interface UnitCalculateRequest {
+  type: UnitType;
+  width_cm: number;
+  width_2_cm?: number;
+  height_cm: number;
+  depth_cm: number;
+  depth_2_cm?: number;
+  shelf_count?: number;
+  door_count?: number;
+  door_type?: DoorType;
+  flip_door_height?: number;
+  bottom_door_height?: number;
+  oven_height?: number;
+  microwave_height?: number;
+  vent_height?: number;
+  drawer_count?: number;
+  drawer_height_cm?: number;
+  fixed_part_cm?: number;
+  options?: Record<string, any>;
+}
+
+export interface UnitCalculateResponse {
+  unit_id?: string;
+  type: UnitType;
+  width_cm: number;
+  height_cm: number;
+  depth_cm: number;
+  shelf_count: number;
+  parts: Part[];
+  total_edge_band_m: number;
+  total_area_m2: number;
+  material_usage: Record<string, number>;
+  cost_breakdown: Record<string, number>;
+  total_cost: number;
+}
+
+export interface UnitEstimateRequest {
+    type: UnitType;
+    width_cm: number;
+    width_2_cm?: number;
+    height_cm: number;
+    depth_cm: number;
+    depth_2_cm?: number;
+    shelf_count?: number;
+    door_count?: number;
+    door_type?: DoorType;
+    flip_door_height?: number;
+    bottom_door_height?: number;
+    oven_height?: number;
+    microwave_height?: number;
+    vent_height?: number;
+    drawer_count?: number;
+    drawer_height_cm?: number;
+    fixed_part_cm?: number;
+    options?: Record<string, any>;
+}
+
+export interface UnitEstimateResponse {
+    unit_id?: string;
+    type: UnitType;
+    width_cm: number;
+    height_cm: number;
+    depth_cm: number;
+    shelf_count: number;
+    parts: Part[];
+    total_edge_band_m: number;
+    total_area_m2: number;
+    material_usage: Record<string, number>;
+    cost_breakdown: Record<string, number>;
+    total_cost: number;
+}
+
+// Internal Counter
+export interface InternalCounterPart {
+    name: string;
+    type: string;
+    width_cm: number;
+    height_cm: number;
+    depth_cm?: number;
+    qty: number;
+    cutting_dimensions?: Record<string, number>;
+    area_m2?: number;
+    edge_band_m?: number;
+}
+
+export interface InternalCounterOptions {
+    add_mirror?: boolean;
+    add_base?: boolean;
+    add_internal_shelf?: boolean;
+    drawer_count?: number;
+    back_clearance_cm?: number;
+    expansion_gap_cm?: number;
+}
+
+export interface InternalCounterRequest {
+    options?: InternalCounterOptions;
+}
+
+export interface InternalCounterResponse {
+    unit_id: string;
+    unit_type: UnitType;
+    parts: InternalCounterPart[];
+    total_edge_band_m: number;
+    total_area_m2: number;
+    material_usage: Record<string, number>;
+}
+
+// Edge Breakdown
+export type EdgeType = "wood" | "pvc";
+
+export interface EdgeDetail {
+    edge: string;
+    length_mm: number;
+    length_m: number;
+    edge_type: EdgeType;
+    has_edge: boolean;
+}
+
+export interface EdgeBandPart {
+    part_name: string;
+    qty: number;
+    edges: EdgeDetail[];
+    total_edge_m: number;
+    edge_type: EdgeType;
+}
+
+export interface EdgeBreakdownResponse {
+    unit_id: string;
+    parts: EdgeBandPart[];
+    total_edge_m: number;
+    total_cost?: number;
+    cost_breakdown?: Record<string, number>;
+}
+
+export type CostEstimate = UnitEstimateResponse;
+export type InternalCounter = InternalCounterResponse;
+export type EdgeBreakdown = EdgeBreakdownResponse;
+export type UnitPart = Part;
+
+export interface Unit extends UnitCalculateResponse {
+    id?: string; // MongoDB use _id but mapped to id in frontend usually
+    project_id?: string;
+    created_by?: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
+
+// Settings
+export interface SettingsModel {
+    assembly_method: string;
+    handle_type: string;
+    handle_profile_height: number;
+    chassis_handle_drop: number;
+    counter_thickness: number;
+    mirror_width: number;
+    back_deduction: number;
+    router_depth: number;
+    router_distance: number;
+    router_thickness: number;
+    door_width_deduction_no_edge: number;
+    shelf_depth_deduction: number;
+    ground_door_height_deduction_no_edge: number;
+    edge_banding_waste_per_size: number;
+    materials?: Record<string, MaterialInfo>;
+}
+
+export interface MaterialInfo {
+    price_per_sheet?: number;
+    sheet_size_m2?: number;
+    price_per_meter?: number;
+    description?: string;
+}
+
+// Marketplace
+export enum ItemStatus {
+    AVAILABLE = 'available',
+    PENDING = 'pending',
+    SOLD = 'sold',
+    RESERVED = 'reserved'
+}
+
+export interface MarketplaceItem {
+    item_id: string;
+    seller_id?: string;
+    seller_name?: string;
+    buyer_id?: string;
+    title: string;
+    description: string;
+    price: number;
+    quantity: number;
+    unit: string;
+    images: string[];
+    status: ItemStatus;
+    location?: string;
+    created_at: string;
+    updated_at?: string;
+}
+
+export interface MarketplaceItemCreate {
+    title: string;
+    description: string;
+    price: number;
+    quantity: number;
+    unit?: string;
+    images?: string[];
+    location?: string;
+}
+
+// Dashboard
+export interface DashboardStats {
+    projects: number;
+    units: number;
+    cutting_calculations: number;
+    savings_percentage: number;
+}
+
+export interface RecentProject {
+    id: string;
+    name: string;
+    units: number;
+    date: string;
+}
+
+export interface TipOfTheDay {
+    title: string;
+    content: string;
+}
+
+// Auth Helpers
+export const setToken = (token: string) => localStorage.setItem("token", token);
+export const getToken = () => localStorage.getItem("token");
+export const removeToken = () => localStorage.removeItem("token");
+
+// --- API Client ---
+
+export const getHeaders = () => {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+};
+
+export const handleResponse = async <T>(response: Response): Promise<T> => {
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: "An error occurred" }));
+    throw new Error(error.detail || "Request failed");
+  }
+  return response.json();
+};
+
+// API Objects
+export const authApi = {
+  login: async (data: LoginRequest): Promise<Token> => {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  register: async (data: RegisterRequest): Promise<User> => {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+  
+  me: async (): Promise<User> => {
+    const response = await fetch(`${API_URL}/auth/me`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+};
+
+export const projectsApi = {
+  getAll: async (): Promise<Project[]> => {
+    const response = await fetch(`${API_URL}/projects/`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  getById: async (id: string): Promise<Project> => {
+    const response = await fetch(`${API_URL}/projects/${id}`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  create: async (data: ProjectCreateRequest): Promise<Project> => {
+    const response = await fetch(`${API_URL}/projects/`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+  update: async (id: string, data: Partial<ProjectCreateRequest>): Promise<Project> => {
+    const response = await fetch(`${API_URL}/projects/${id}`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+  delete: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/projects/${id}`, {
+      method: "DELETE",
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  addUnitToProject: async (projectId: string, unitId: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/projects/${projectId}/units/${unitId}`, {
+        method: "POST",
+        headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  removeUnitFromProject: async (projectId: string, unitId: string): Promise<void> => {
+      const response = await fetch(`${API_URL}/projects/${projectId}/units/${unitId}`, {
+          method: "DELETE",
+          headers: getHeaders(),
+      });
+      return handleResponse(response);
+  }
+};
+
+export const unitsApi = {
+    calculate: async (data: UnitCalculateRequest): Promise<UnitCalculateResponse> => {
+        const response = await fetch(`${API_URL}/units/calculate`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    },
+    estimate: async (data: UnitEstimateRequest): Promise<UnitEstimateResponse> => {
+        const response = await fetch(`${API_URL}/units/estimate`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    },
+    getById: async (id: string): Promise<UnitCalculateResponse> => {
+        const response = await fetch(`${API_URL}/units/${id}`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    save: async (data: UnitCalculateRequest): Promise<UnitCalculateResponse> => {
+        const response = await fetch(`${API_URL}/units`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    },
+    create: async (data: UnitCalculateRequest): Promise<UnitCalculateResponse> => {
+        return unitsApi.save(data);
+    },
+    calculateInternalCounter: async (unitId: string, options?: InternalCounterOptions): Promise<InternalCounterResponse> => {
+        const response = await fetch(`${API_URL}/units/${unitId}/internal-counter/calculate`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify({ options }),
+        });
+        return handleResponse(response);
+    },
+    getEdgeBreakdown: async (unitId: string, edgeType?: string): Promise<EdgeBreakdownResponse> => {
+        const url = new URL(`${API_URL}/units/${unitId}/edge-breakdown`);
+        if (edgeType) url.searchParams.append('edge_type', edgeType);
+        
+        const response = await fetch(url.toString(), {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    delete: async (projectId: string, unitId: string): Promise<void> => {
+        const response = await fetch(`${API_URL}/projects/${projectId}/units/${unitId}`, {
+            method: "DELETE",
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    }
+};
+
+export const settingsApi = {
+    get: async (): Promise<SettingsModel> => {
+        const response = await fetch(`${API_URL}/settings/`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    update: async (data: Partial<SettingsModel>): Promise<SettingsModel> => {
+        const response = await fetch(`${API_URL}/settings/`, {
+            method: "PUT",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    }
+};
+
+export const marketplaceApi = {
+    getAll: async (search?: string, status?: string): Promise<MarketplaceItem[]> => {
+        const queryParams = new URLSearchParams();
+        if (search) queryParams.append('q', search);
+        if (status && status !== 'all') queryParams.append('status', status);
+        
+        const response = await fetch(`${API_URL}/marketplace/items?${queryParams.toString()}`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    getMyOrders: async (): Promise<MarketplaceItem[]> => {
+        const response = await fetch(`${API_URL}/marketplace/my-orders`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    async getSales(): Promise<MarketplaceItem[]> {
+        const response = await fetch(`${API_URL}/marketplace/sales`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    getItem: async (id: string): Promise<MarketplaceItem> => {
+        const response = await fetch(`${API_URL}/marketplace/items/${id}`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    uploadImage: async (file: File): Promise<{ url: string }> => {
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        const token = getToken();
+        // Do NOT set Content-Type header, let browser set it with boundary
+        const headers: Record<string, string> = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        
+        const response = await fetch(`${API_URL}/marketplace/upload`, {
+            method: "POST",
+            headers: headers,
+            body: formData,
+        });
+        
+        return handleResponse(response);
+    },
+    create: async (data: MarketplaceItemCreate): Promise<MarketplaceItem> => {
+        const response = await fetch(`${API_URL}/marketplace/items`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    },
+    update: async (id: string, data: Partial<MarketplaceItemCreate>): Promise<MarketplaceItem> => {
+        const response = await fetch(`${API_URL}/marketplace/items/${id}`, {
+            method: "PUT",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+        });
+        return handleResponse(response);
+    },
+    async acceptOrder(itemId: string): Promise<MarketplaceItem> {
+        const response = await fetch(`${API_URL}/marketplace/items/${itemId}/accept`, {
+            method: "POST",
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    async denyOrder(itemId: string): Promise<MarketplaceItem> {
+        const response = await fetch(`${API_URL}/marketplace/items/${itemId}/deny`, {
+            method: "POST",
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    async getBuyerDetails(itemId: string): Promise<{ name: string; phone: string; email: string }> {
+        const response = await fetch(`${API_URL}/marketplace/items/${itemId}/buyer-contact`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    buy: async (itemId: string, quantity: number = 1): Promise<MarketplaceItem> => {
+        const response = await fetch(`${API_URL}/marketplace/items/${itemId}/buy`, {
+            method: "POST",
+            headers: { ...getHeaders(), "Content-Type": "application/json" },
+            body: JSON.stringify({ quantity }),
+        });
+        return handleResponse(response);
+    },
+    deleteItem: async (id: string): Promise<void> => {
+        const response = await fetch(`${API_URL}/marketplace/items/${id}`, {
+            method: "DELETE",
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    }
+};
+
+export const dashboardApi = {
+    getStats: async (): Promise<DashboardStats> => {
+        const response = await fetch(`${API_URL}/dashboard/stats`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    getRecentProjects: async (): Promise<RecentProject[]> => {
+        const response = await fetch(`${API_URL}/dashboard/recent-projects`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    getTipOfTheDay: async (): Promise<TipOfTheDay> => {
+        const response = await fetch(`${API_URL}/dashboard/tip-of-the-day`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    }
+};
+
+export const cartApi = {
+    get: async (): Promise<{ items: any[], total: number, count: number }> => {
+        const response = await fetch(`${API_URL}/cart/`, {
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    addItem: async (itemId: string, quantity: number = 1): Promise<any> => {
+        const response = await fetch(`${API_URL}/cart/items`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify({ item_id: itemId, quantity }),
+        });
+        return handleResponse(response);
+    },
+    removeItem: async (itemId: string): Promise<any> => {
+        const response = await fetch(`${API_URL}/cart/items/${itemId}`, {
+            method: "DELETE",
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+    updateQuantity: async (itemId: string, quantity: number): Promise<any> => {
+        const response = await fetch(`${API_URL}/cart/items/${itemId}`, {
+            method: "PUT",
+            headers: getHeaders(),
+            body: JSON.stringify({ quantity }),
+        });
+        return handleResponse(response);
+    },
+    clear: async (): Promise<any> => {
+        const response = await fetch(`${API_URL}/cart/`, {
+            method: "DELETE",
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    }
+};

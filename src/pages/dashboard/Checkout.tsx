@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { API_URL } from '@/lib/api';
 
 const paymentMethods = [
   { id: 'cash', label: 'الدفع عند الاستلام', icon: Wallet },
@@ -41,6 +42,12 @@ export default function Checkout() {
   });
 
   const [paymentMethod, setPaymentMethod] = useState('cash');
+
+  const getImageUrl = (path: string) => {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return `${API_URL}${path}`;
+  };
 
   if (items.length === 0 && !orderComplete) {
     navigate('/dashboard/cart');
@@ -137,27 +144,48 @@ export default function Checkout() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="flex items-center justify-center gap-4"
+        className="flex items-center justify-center max-w-2xl mx-auto mb-10"
       >
-        <div className={`flex items-center gap-2 ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-            <Truck className="h-4 w-4" />
-          </div>
-          <span className="hidden sm:inline">الشحن</span>
-        </div>
-        <div className="h-px w-8 bg-border" />
-        <div className={`flex items-center gap-2 ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-            <CreditCard className="h-4 w-4" />
-          </div>
-          <span className="hidden sm:inline">الدفع</span>
-        </div>
-        <div className="h-px w-8 bg-border" />
-        <div className={`flex items-center gap-2 ${step >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
-          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-            <CheckCircle className="h-4 w-4" />
-          </div>
-          <span className="hidden sm:inline">التأكيد</span>
+        <div className="relative flex Items-center justify-between w-full">
+            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-muted -z-10 -translate-y-1/2" />
+            
+            {/* Step 1 */}
+            <div className={`relative flex flex-col items-center gap-2 ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
+                <div className={`relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300 z-10 bg-background ${
+                    step >= 1 ? 'border-primary shadow-lg shadow-primary/20 scale-110' : 'border-muted'
+                }`}>
+                    <Truck className="h-5 w-5" />
+                    {step === 1 && <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />}
+                </div>
+                <span className="text-sm font-bold">الشحن</span>
+            </div>
+
+             {/* Line 1 */}
+            <div className={`flex-1 h-0.5 mx-2 transition-colors duration-500 ${step >= 2 ? 'bg-primary' : 'bg-muted'}`} />
+
+            {/* Step 2 */}
+             <div className={`relative flex flex-col items-center gap-2 ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
+                <div className={`relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300 z-10 bg-background ${
+                    step >= 2 ? 'border-primary shadow-lg shadow-primary/20 scale-110' : 'border-muted'
+                }`}>
+                    <CreditCard className="h-5 w-5" />
+                     {step === 2 && <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />}
+                </div>
+                <span className="text-sm font-bold">الدفع</span>
+            </div>
+
+             {/* Line 2 */}
+            <div className={`flex-1 h-0.5 mx-2 transition-colors duration-500 ${step >= 3 ? 'bg-primary' : 'bg-muted'}`} />
+
+             {/* Step 3 */}
+            <div className={`relative flex flex-col items-center gap-2 ${step >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
+                <div className={`relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300 z-10 bg-background ${
+                    step >= 3 ? 'border-primary shadow-lg shadow-primary/20 scale-110' : 'border-muted'
+                }`}>
+                    <CheckCircle className="h-5 w-5" />
+                </div>
+                <span className="text-sm font-bold">التأكيد</span>
+            </div>
         </div>
       </motion.div>
 
@@ -168,66 +196,89 @@ export default function Checkout() {
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="glass-card p-6"
+              className="glass-card p-8 border-primary/10"
             >
-              <h2 className="mb-6 flex items-center gap-2 text-lg font-semibold">
-                <Truck className="h-5 w-5 text-primary" />
-                معلومات الشحن
-              </h2>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="mb-8 flex items-center gap-3 border-b border-border/50 pb-4">
+                 <div className="p-2.5 bg-primary/10 rounded-xl text-primary ring-1 ring-primary/20">
+                    <Truck className="h-6 w-6" />
+                 </div>
+                 <div>
+                    <h2 className="text-lg font-bold">معلومات الشحن</h2>
+                    <p className="text-sm text-muted-foreground">أدخل تفاصيل التوصيل الخاصة بك</p>
+                 </div>
+              </div>
+              
+              <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="name">الاسم الكامل *</Label>
-                  <Input
-                    id="name"
-                    value={shippingInfo.name}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, name: e.target.value })}
-                    placeholder="أدخل اسمك الكامل"
-                  />
+                  <Label htmlFor="name" className="text-sm font-medium">الاسم الكامل *</Label>
+                   <div className="relative group">
+                    <Input
+                        id="name"
+                        value={shippingInfo.name}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, name: e.target.value })}
+                        className="h-12 bg-background/50 focus:bg-background transition-colors"
+                        placeholder="أدخل اسمك الكامل"
+                    />
+                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">رقم الهاتف *</Label>
-                  <Input
-                    id="phone"
-                    value={shippingInfo.phone}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
-                    placeholder="01xxxxxxxxx"
-                  />
+                  <Label htmlFor="phone" className="text-sm font-medium">رقم الهاتف *</Label>
+                   <div className="relative group">
+                    <Input
+                        id="phone"
+                        value={shippingInfo.phone}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
+                        className="h-12 bg-background/50 focus:bg-background transition-colors font-mono"
+                        placeholder="01xxxxxxxxx"
+                        dir="ltr"
+                    />
+                   </div>
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="address">العنوان التفصيلي *</Label>
-                  <Input
-                    id="address"
-                    value={shippingInfo.address}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, address: e.target.value })}
-                    placeholder="الشارع، المنطقة، المبنى"
-                  />
+                  <Label htmlFor="address" className="text-sm font-medium">العنوان التفصيلي *</Label>
+                   <div className="relative group">
+                    <Input
+                        id="address"
+                        value={shippingInfo.address}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, address: e.target.value })}
+                        className="h-12 bg-background/50 focus:bg-background transition-colors"
+                        placeholder="الشارع، المنطقة، المبنى"
+                    />
+                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="city">المدينة *</Label>
-                  <Input
-                    id="city"
-                    value={shippingInfo.city}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
-                    placeholder="القاهرة"
-                  />
+                  <Label htmlFor="city" className="text-sm font-medium">المدينة *</Label>
+                   <div className="relative group">
+                    <Input
+                        id="city"
+                        value={shippingInfo.city}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
+                        className="h-12 bg-background/50 focus:bg-background transition-colors"
+                        placeholder="القاهرة"
+                    />
+                   </div>
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="notes">ملاحظات إضافية</Label>
-                  <Textarea
-                    id="notes"
-                    value={shippingInfo.notes}
-                    onChange={(e) => setShippingInfo({ ...shippingInfo, notes: e.target.value })}
-                    placeholder="تعليمات خاصة للتوصيل..."
-                    rows={3}
-                  />
+                  <Label htmlFor="notes" className="text-sm font-medium">ملاحظات إضافية</Label>
+                   <div className="relative group">
+                    <Textarea
+                        id="notes"
+                        value={shippingInfo.notes}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, notes: e.target.value })}
+                        className="bg-background/50 focus:bg-background transition-colors resize-none"
+                        placeholder="تعليمات خاصة للتوصيل..."
+                        rows={4}
+                    />
+                   </div>
                 </div>
               </div>
               <Button
                 variant="hero"
-                className="mt-6"
+                className="mt-8 w-full sm:w-auto min-w-[150px]"
                 onClick={() => setStep(2)}
               >
                 متابعة للدفع
+                <ArrowRight className="mr-2 h-4 w-4 rotate-180" />
               </Button>
             </motion.div>
           )}
@@ -329,16 +380,16 @@ export default function Checkout() {
             <h3 className="mb-4 text-lg font-semibold">ملخص الطلب</h3>
             <div className="space-y-3">
               {items.map((item) => (
-                <div key={item.product.id} className="flex items-center gap-3">
+                <div key={item.product.item_id} className="flex items-center gap-3">
                   <div className="h-12 w-12 overflow-hidden rounded-lg bg-muted">
                     <img
-                      src={item.product.image}
-                      alt={item.product.name}
+                      src={getImageUrl(item.product.images[0])}
+                      alt={item.product.title}
                       className="h-full w-full object-cover"
                     />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium line-clamp-1">{item.product.name}</p>
+                    <p className="text-sm font-medium line-clamp-1">{item.product.title}</p>
                     <p className="text-xs text-muted-foreground">الكمية: {item.quantity}</p>
                   </div>
                   <span className="text-sm font-medium">

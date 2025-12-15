@@ -1,50 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Search, FolderKanban, Calendar, User2 } from 'lucide-react';
+import { Plus, Search, FolderKanban, Calendar, User2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { Project } from '@/lib/api';
-
-// Mock data
-const mockProjects: Project[] = [
-  {
-    id: '1',
-    name: 'مطبخ فيلا المعادي',
-    client: 'أحمد محمد',
-    description: 'مطبخ فاخر على شكل حرف U مع جزيرة',
-    units_count: 8,
-    created_at: '2024-01-15',
-    updated_at: '2024-01-20',
-  },
-  {
-    id: '2',
-    name: 'مطبخ شقة مدينة نصر',
-    client: 'سارة أحمد',
-    description: 'مطبخ عصري مستطيل الشكل',
-    units_count: 5,
-    created_at: '2024-01-10',
-    updated_at: '2024-01-18',
-  },
-  {
-    id: '3',
-    name: 'مطبخ عمارة الشروق',
-    client: 'محمد علي',
-    description: 'مطبخ كبير للمطعم',
-    units_count: 12,
-    created_at: '2024-01-05',
-    updated_at: '2024-01-17',
-  },
-];
+import { projectsApi, type Project } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Projects() {
   const [search, setSearch] = useState('');
-  const [projects] = useState<Project[]>(mockProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await projectsApi.getAll();
+        setProjects(data);
+      } catch (error) {
+        toast({
+          title: 'خطأ',
+          description: 'فشل تحميل المشاريع',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, [toast]);
 
   const filteredProjects = projects.filter(
     (p) =>
       p.name.includes(search) ||
-      p.client.includes(search) ||
+      p.client_name.includes(search) ||
       p.description.includes(search)
   );
 
@@ -87,61 +78,81 @@ export default function Projects() {
       </motion.div>
 
       {/* Projects Grid */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-      >
-        {filteredProjects.map((project, index) => (
-          <motion.div
-            key={project.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + index * 0.05, duration: 0.4 }}
-          >
-            <Link
-              to={`/dashboard/projects/${project.id}`}
-              className="glass-card group block p-5 transition-all hover:border-primary/30 hover-lift"
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {filteredProjects.map((project, index) => (
+            <motion.div
+              key={project.project_id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.05, duration: 0.4 }}
             >
-              <div className="mb-4 flex items-center gap-3">
-                <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
-                  <FolderKanban className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="truncate font-semibold group-hover:text-primary transition-colors">
-                    {project.name}
-                  </h3>
-                </div>
-              </div>
+              <Link
+                to={`/dashboard/projects/${project.project_id}`}
+                className="glass-card group relative block h-full overflow-hidden p-6 transition-all duration-300 hover:shadow-glow hover:-translate-y-1"
+              >
+                {/* Decorative fade */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                
+                <div className="relative z-10">
+                  <div className="mb-5 flex items-start justify-between">
+                    <div className="rounded-xl bg-primary/10 p-3 text-primary ring-1 ring-primary/20 transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                      <FolderKanban className="h-6 w-6" />
+                    </div>
+                    <span className="rounded-full bg-secondary/50 px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                      {project.status === 'completed' ? 'مكتمل' : 'قيد العمل'}
+                    </span>
+                  </div>
 
-              <p className="mb-4 text-sm text-muted-foreground line-clamp-2">
-                {project.description}
-              </p>
+                  <div className="mb-4">
+                    <h3 className="mb-2 text-lg font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                      {project.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                      {project.description || 'لا يوجد وصف'}
+                    </p>
+                  </div>
 
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <User2 className="h-3.5 w-3.5" />
-                  {project.client}
+                  <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground/80">
+                    <div className="flex items-center gap-1.5">
+                      <User2 className="h-3.5 w-3.5" />
+                      <span className="truncate max-w-[80px]">{project.client_name}</span>
+                    </div>
+                    <div className="h-1 w-1 rounded-full bg-border" />
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5" />
+                      {new Date(project.updated_at || project.created_at).toLocaleDateString('ar-EG')}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {new Date(project.updated_at).toLocaleDateString('ar-EG')}
+
+                <div className="relative z-10 mt-6 flex items-center justify-between border-t border-border/50 pt-4">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-[10px] font-bold">
+                       {project.units.length}
+                    </span>
+                    <span className="text-xs text-muted-foreground">وحدة</span>
+                  </div>
+                  <span className="flex items-center text-xs font-bold text-primary opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">
+                    عرض التفاصيل ←
+                  </span>
                 </div>
-              </div>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
 
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-                <span className="text-sm font-medium">{project.units_count} وحدة</span>
-                <span className="text-xs text-primary group-hover:underline">
-                  عرض التفاصيل ←
-                </span>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {filteredProjects.length === 0 && (
+      {!isLoading && filteredProjects.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

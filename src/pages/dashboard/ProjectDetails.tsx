@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -9,7 +9,8 @@ import {
   Layers,
   Calculator,
   Ruler,
-  Settings2
+  Settings2,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,85 +28,216 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import type { Project, Unit } from '@/lib/api';
+import { projectsApi, unitsApi, type Project, type UnitCalculateRequest as CreateUnitData } from '../../lib/api';
 
-// Mock data
-const mockProject: Project = {
-  id: '1',
-  name: 'مطبخ فيلا المعادي',
-  client: 'أحمد محمد',
-  description: 'مطبخ فاخر على شكل حرف U مع جزيرة',
-  units_count: 3,
-  created_at: '2024-01-15',
-  updated_at: '2024-01-20',
-};
-
-const mockUnits: Unit[] = [
+// Unit Categories and Types with Arabic Labels
+const unitCategories = [
   {
-    id: '1',
-    type: 'ground',
-    width: 600,
-    height: 850,
-    depth: 560,
-    shelves_count: 2,
-    parts: [],
-    total_area: 2.4,
-    total_edge_length: 12.5,
+    label: 'وحدات أرضية',
+    types: [
+      { value: 'ground', label: 'أرضي' },
+      { value: 'ground_side_panel', label: 'أرضي (جنب عيرة)' },
+      { value: 'ground_fixed', label: 'أرضي ثابت' },
+      { value: 'ground_fixed_side_panel', label: 'أرضي ثابت (جنب عيرة)' },
+    ]
   },
   {
-    id: '2',
-    type: 'wall',
-    width: 800,
-    height: 700,
-    depth: 350,
-    shelves_count: 2,
-    parts: [],
-    total_area: 1.8,
-    total_edge_length: 10.2,
+    label: 'وحدات حوض',
+    types: [
+      { value: 'sink', label: 'حوض' },
+      { value: 'sink_side_panel', label: 'حوض (جنب عيرة)' },
+      { value: 'sink_fixed', label: 'حوض ثابت' },
+      { value: 'sink_fixed_side_panel', label: 'حوض ثابت (جنب عيرة)' },
+    ]
   },
+  {
+    label: 'أدراج',
+    types: [
+      { value: 'drawers', label: 'أدراج' },
+      { value: 'drawers_side_panel', label: 'أدراج (جنب عيرة)' },
+      { value: 'drawers_bottom_rail', label: 'أدراج مجرة سفلية' },
+      { value: 'drawers_bottom_rail_side_panel', label: 'أدراج مجرة سفلية (جنب عيرة)' },
+    ]
+  },
+  {
+    label: 'ركنة أرضية',
+    types: [
+      { value: 'corner_90_ground', label: 'ركنة 90 أرضي' },
+      { value: 'corner_45_ground', label: 'ركنة 45 أرضي' },
+    ]
+  },
+  {
+    label: 'وحدات علوية',
+    types: [
+      { value: 'wall', label: 'علوي' },
+      { value: 'wall_side_panel', label: 'علوي (جنب عيرة)' },
+      { value: 'wall_fixed', label: 'علوي ثابت' },
+      { value: 'wall_fixed_side_panel', label: 'علوي ثابت (جنب عيرة)' },
+      { value: 'wall_flip_top_doors_bottom', label: 'علوي قلاب + ضلف' },
+    ]
+  },
+  {
+    label: 'ركنة علوية',
+    types: [
+      { value: 'corner_l_wall', label: 'ركنة L علوي' },
+      { value: 'corner_45_wall', label: 'ركنة 45 علوي' },
+    ]
+  },
+  {
+    label: 'دواليب (Tall Units)',
+    types: [
+      { value: 'tall_doors', label: 'دولاب ضلف' },
+      { value: 'tall_doors_side_panel', label: 'دولاب ضلف (جنب عيرة)' },
+      { value: 'tall_doors_appliances', label: 'دولاب أجهزة' },
+      { value: 'tall_doors_appliances_side_panel', label: 'دولاب أجهزة (جنب عيرة)' },
+    ]
+  },
+  // Add other categories as needed based on backend
 ];
 
-const unitTypeLabels: Record<string, string> = {
-  ground: 'وحدة أرضية',
-  wall: 'وحدة حائطية',
-  double_door: 'وحدة بابين',
-  sink_ground: 'وحدة حوض',
-};
+// Map for quick label lookup
+const unitTypeLabels: Record<string, string> = {};
+unitCategories.forEach(cat => {
+  cat.types.forEach(type => {
+    unitTypeLabels[type.value] = type.label;
+  });
+});
 
 export default function ProjectDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [project] = useState<Project>(mockProject);
-  const [units] = useState<Unit[]>(mockUnits);
+  const [project, setProject] = useState<Project | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAddUnitOpen, setIsAddUnitOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [newUnit, setNewUnit] = useState({
-    type: 'ground' as const,
-    width: 600,
-    height: 850,
-    depth: 560,
-    shelves_count: 2,
+    type: 'ground',
+    width_cm: 60, // Changed default to generic 60
+    width_2_cm: 0,
+    height_cm: 85, // Default ground height
+    depth_cm: 56, // Default ground depth
+    depth_2_cm: 0,
+    shelf_count: 1,
+    door_count: 2,
+    drawer_count: 0,
+    fixed_part_cm: 0,
+    oven_height: 60,
+    microwave_height: 38,
   });
 
+  // Reset/Adjust defaults when type changes
+  const handleTypeChange = (type: string) => {
+    let defaults = { ...newUnit, type };
+    
+    // Set sensible defaults based on type category
+    if (type.includes('wall')) {
+      defaults.height_cm = 70;
+      defaults.depth_cm = 32;
+    } else if (type.includes('tall')) {
+      defaults.height_cm = 220;
+      defaults.depth_cm = 58;
+    } else {
+      // Ground/Sink/Corner Ground
+      defaults.height_cm = 85;
+      defaults.depth_cm = 56;
+    }
+
+    if (type.includes('corner')) {
+       defaults.width_cm = 90;
+       defaults.width_2_cm = 90; // Default for 90 degree corner
+       if (type.includes('corner_45')) {
+          defaults.width_cm = 105; // Common for 45 corner
+       }
+    } else {
+        defaults.width_cm = 60;
+        defaults.width_2_cm = 0;
+    }
+
+    setNewUnit(defaults);
+  };
+
+  const isCorner = newUnit.type.includes('corner');
+  const isTall = newUnit.type.includes('tall');
+  const isAppliances = newUnit.type.includes('appliances') || newUnit.type.includes('microwave') || newUnit.type.includes('oven');
+  const isFixed = newUnit.type.includes('fixed');
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      if (!id) return;
+      try {
+        const data = await projectsApi.getById(id);
+        setProject(data);
+      } catch (error) {
+        toast({
+          title: 'خطأ',
+          description: 'فشل تحميل تفاصيل المشروع',
+          variant: 'destructive',
+        });
+        navigate('/dashboard/projects');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProject();
+  }, [id, navigate, toast]);
+
   const handleAddUnit = async () => {
+    if (!project) return;
+    setIsSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const unitData: CreateUnitData = {
+        type: newUnit.type as any,
+        width_cm: Number(newUnit.width_cm),
+        height_cm: Number(newUnit.height_cm),
+        depth_cm: Number(newUnit.depth_cm),
+        shelf_count: Number(newUnit.shelf_count),
+        // Optional fields
+        width_2_cm: isCorner ? Number(newUnit.width_2_cm) : 0,
+        depth_2_cm: isCorner ? Number(newUnit.depth_2_cm) : 0,
+        fixed_part_cm: isFixed ? Number(newUnit.fixed_part_cm) : 0,
+        oven_height: isAppliances ? Number(newUnit.oven_height) : 0,
+        microwave_height: isAppliances ? Number(newUnit.microwave_height) : 0,
+      };
+      
+      const savedUnit = await unitsApi.create(unitData);
+      
+      const unitId = (savedUnit as any).unit_id || savedUnit.unit_id;
+      await projectsApi.addUnitToProject(project.project_id, unitId);
+      
+      const updatedProject = await projectsApi.getById(project.project_id);
+      setProject(updatedProject);
+      
+      setIsAddUnitOpen(false);
       toast({
-        title: 'تم الإضافة',
+        title: 'تم إضافة الوحدة',
         description: 'تم إضافة الوحدة بنجاح',
       });
-      setIsAddUnitOpen(false);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error adding unit:', error);
       toast({
         title: 'خطأ',
-        description: 'حدث خطأ أثناء إضافة الوحدة',
+        description: error.message || 'فشل إضافة الوحدة',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  if (isLoading || !project) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -114,31 +246,51 @@ export default function ProjectDetails() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Button
-          variant="ghost"
-          className="mb-4"
-          onClick={() => navigate('/dashboard/projects')}
-        >
-          <ArrowRight className="h-4 w-4" />
-          العودة للمشاريع
-        </Button>
+        <div className="mb-6 flex items-center justify-between">
+            <Button
+            variant="ghost"
+            className="group hover:bg-background/20"
+            onClick={() => navigate('/dashboard/projects')}
+            >
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            العودة للمشاريع
+            </Button>
+            
+            <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="hover:bg-primary/5 hover:text-primary hover:border-primary/20">
+                <Edit2 className="h-4 w-4 ml-2" />
+                تعديل
+            </Button>
+            <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 hover:border-destructive/20">
+                <Trash2 className="h-4 w-4 ml-2" />
+                حذف
+            </Button>
+            </div>
+        </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold md:text-3xl">{project.name}</h1>
-            <p className="mt-1 text-muted-foreground">{project.client}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{project.description}</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Edit2 className="h-4 w-4" />
-              تعديل
-            </Button>
-            <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10">
-              <Trash2 className="h-4 w-4" />
-              حذف
-            </Button>
-          </div>
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 border border-white/10 shadow-2xl">
+           <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+             <Layers className="h-64 w-64 text-primary" />
+           </div>
+           
+           <div className="relative z-10">
+                <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary ring-1 ring-inset ring-primary/20 mb-4">
+                  <span className="relative flex h-2 w-2 mr-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                  </span>
+                  قيد العمل
+                </div>
+                <h1 className="text-4xl font-bold tracking-tight mb-2">{project.name}</h1>
+                <div className="flex items-center gap-2 text-muted-foreground mb-4">
+                    <span className="font-semibold text-foreground/80">{project.client_name}</span>
+                    <span>•</span>
+                    <span>تم التحديث {new Date(project.updated_at || project.created_at).toLocaleDateString('ar-EG')}</span>
+                </div>
+                <p className="max-w-2xl text-lg text-muted-foreground/90 leading-relaxed">
+                    {project.description || 'لا يوجد وصف للمشروع'}
+                </p>
+           </div>
         </div>
       </motion.div>
 
@@ -147,45 +299,46 @@ export default function ProjectDetails() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
-        className="grid gap-4 sm:grid-cols-3"
+        className="grid gap-6 sm:grid-cols-3"
       >
-        <div className="glass-card p-5">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
-              <Layers className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{units.length}</p>
-              <p className="text-sm text-muted-foreground">وحدة</p>
-            </div>
-          </div>
-        </div>
-        <div className="glass-card p-5">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-accent/10 p-2.5 text-accent">
-              <Ruler className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">
-                {units.reduce((acc, u) => acc + u.total_area, 0).toFixed(1)} م²
-              </p>
-              <p className="text-sm text-muted-foreground">المساحة الإجمالية</p>
-            </div>
-          </div>
-        </div>
-        <div className="glass-card p-5">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
-              <Calculator className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">
-                {units.reduce((acc, u) => acc + u.total_edge_length, 0).toFixed(1)} م
-              </p>
-              <p className="text-sm text-muted-foreground">شريط الحافة</p>
-            </div>
-          </div>
-        </div>
+        {[
+            {
+                label: 'عدد الوحدات',
+                value: project.units.length,
+                unit: 'وحدة',
+                icon: Layers,
+                color: 'text-blue-500',
+                bg: 'bg-blue-500/10'
+            },
+            {
+                label: 'المساحة الإجمالية',
+                value: project.units.reduce((acc, u) => acc + u.total_area_m2, 0).toFixed(1),
+                unit: 'م²',
+                icon: Ruler,
+                color: 'text-emerald-500',
+                bg: 'bg-emerald-500/10'
+            },
+            {
+                label: 'شريط الحافة',
+                value: project.units.reduce((acc, u) => acc + u.total_edge_band_m, 0).toFixed(1),
+                unit: 'م',
+                icon: Calculator,
+                color: 'text-amber-500',
+                bg: 'bg-amber-500/10'
+            }
+        ].map((stat, idx) => (
+             <div key={idx} className="glass-card p-6 flex items-center justify-between hover:scale-[1.02] transition-transform duration-300">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">{stat.label}</p>
+                  <p className="text-3xl font-bold tracking-tight">
+                    {stat.value} <span className="text-lg text-muted-foreground/60 font-medium">{stat.unit}</span>
+                  </p>
+                </div>
+                <div className={`rounded-2xl p-4 ${stat.bg} ${stat.color}`}>
+                  <stat.icon className="h-6 w-6" />
+                </div>
+             </div>
+        ))}
       </motion.div>
 
       {/* Units */}
@@ -203,69 +356,155 @@ export default function ProjectDetails() {
                 إنشاء وحدة جديدة
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>إنشاء وحدة جديدة</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 py-4">
+              <div className="grid gap-6 py-4">
+                {/* Unit Type Selection */}
                 <div className="space-y-2">
-                  <Label>النوع</Label>
+                  <Label>نوع الوحدة</Label>
                   <Select
                     value={newUnit.type}
-                    onValueChange={(v) => setNewUnit({ ...newUnit, type: v as any })}
+                    onValueChange={handleTypeChange}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="اختر نوع الوحدة" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="ground">وحدة أرضية</SelectItem>
-                      <SelectItem value="wall">وحدة حائطية</SelectItem>
-                      <SelectItem value="double_door">وحدة بابين</SelectItem>
-                      <SelectItem value="sink_ground">وحدة حوض</SelectItem>
+                      {unitCategories.map((category, index) => (
+                        <SelectGroup key={category.label}>
+                          {index > 0 && <div className="my-1 h-px bg-secondary/50 mx-1" />}
+                          <SelectLabel className="bg-muted/50 px-2 py-1.5 text-xs font-bold text-primary">
+                            {category.label}
+                          </SelectLabel>
+                          {category.types.map((type) => (
+                            <SelectItem key={type.value} value={type.value} className="pl-6">
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+
+                {/* Dimensions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>العرض (مم)</Label>
+                    <Label>{isCorner ? 'العرض 1 (سم)' : 'العرض (سم)'}</Label>
                     <Input
                       type="number"
-                      value={newUnit.width}
-                      onChange={(e) => setNewUnit({ ...newUnit, width: Number(e.target.value) })}
+                      value={newUnit.width_cm}
+                      onChange={(e) => setNewUnit({ ...newUnit, width_cm: Number(e.target.value) })}
                     />
                   </div>
+                  
+                  {isCorner && (
+                     <div className="space-y-2">
+                      <Label>العرض 2 (سم)</Label>
+                      <Input
+                        type="number"
+                        value={newUnit.width_2_cm}
+                        onChange={(e) => setNewUnit({ ...newUnit, width_2_cm: Number(e.target.value) })}
+                      />
+                    </div>
+                  )}
+
                   <div className="space-y-2">
-                    <Label>الارتفاع (مم)</Label>
+                    <Label>الارتفاع (سم)</Label>
                     <Input
                       type="number"
-                      value={newUnit.height}
-                      onChange={(e) => setNewUnit({ ...newUnit, height: Number(e.target.value) })}
+                      value={newUnit.height_cm}
+                      onChange={(e) => setNewUnit({ ...newUnit, height_cm: Number(e.target.value) })}
                     />
                   </div>
+
                   <div className="space-y-2">
-                    <Label>العمق (مم)</Label>
+                    <Label>{isCorner ? 'العمق 1 (سم)' : 'العمق (سم)'}</Label>
                     <Input
                       type="number"
-                      value={newUnit.depth}
-                      onChange={(e) => setNewUnit({ ...newUnit, depth: Number(e.target.value) })}
+                      value={newUnit.depth_cm}
+                      onChange={(e) => setNewUnit({ ...newUnit, depth_cm: Number(e.target.value) })}
+                    />
+                  </div>
+
+                  {isCorner && (
+                    <div className="space-y-2">
+                      <Label>العمق 2 (سم) - اختياري</Label>
+                      <Input
+                        type="number"
+                        value={newUnit.depth_2_cm}
+                        onChange={(e) => setNewUnit({ ...newUnit, depth_2_cm: Number(e.target.value) })}
+                      />
+                    </div>
+                  )}
+
+                  {isFixed && (
+                    <div className="space-y-2">
+                      <Label>الجزء الثابت (سم)</Label>
+                      <Input
+                        type="number"
+                        value={newUnit.fixed_part_cm}
+                        onChange={(e) => setNewUnit({ ...newUnit, fixed_part_cm: Number(e.target.value) })}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Appliances */}
+                {isAppliances && (
+                   <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                      {newUnit.type.includes('oven') || newUnit.type.includes('appliances') ? (
+                         <div className="space-y-2">
+                          <Label>ارتفاع الفرن (سم)</Label>
+                          <Input
+                            type="number"
+                            value={newUnit.oven_height}
+                            onChange={(e) => setNewUnit({ ...newUnit, oven_height: Number(e.target.value) })}
+                          />
+                        </div>
+                      ) : null}
+                      
+                      {newUnit.type.includes('microwave') || newUnit.type.includes('appliances') ? (
+                         <div className="space-y-2">
+                          <Label>ارتفاع الميكرويف (سم)</Label>
+                          <Input
+                            type="number"
+                            value={newUnit.microwave_height}
+                            onChange={(e) => setNewUnit({ ...newUnit, microwave_height: Number(e.target.value) })}
+                          />
+                        </div>
+                      ) : null}
+                   </div>
+                )}
+
+                {/* Basic Options */}
+                <div className="grid grid-cols-2 gap-4 border-t pt-4">
+                   <div className="space-y-2">
+                    <Label>عدد الرفوف</Label>
+                    <Input
+                      type="number"
+                      value={newUnit.shelf_count}
+                      onChange={(e) => setNewUnit({ ...newUnit, shelf_count: Number(e.target.value) })}
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>عدد الرفوف</Label>
-                  <Input
-                    type="number"
-                    value={newUnit.shelves_count}
-                    onChange={(e) => setNewUnit({ ...newUnit, shelves_count: Number(e.target.value) })}
-                  />
-                </div>
+
               </div>
               <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => setIsAddUnitOpen(false)}>
+                <Button variant="outline" className="flex-1" onClick={() => setIsAddUnitOpen(false)} disabled={isSubmitting}>
                   إلغاء
                 </Button>
-                <Button variant="hero" className="flex-1" onClick={handleAddUnit}>
-                  إنشاء الوحدة
+                <Button variant="hero" className="flex-1" onClick={handleAddUnit} disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                      جاري الإنشاء...
+                    </>
+                  ) : (
+                    'إنشاء الوحدة'
+                  )}
                 </Button>
               </div>
             </DialogContent>
@@ -273,7 +512,7 @@ export default function ProjectDetails() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {units.map((unit, index) => (
+          {project.units.map((unit, index) => (
             <motion.div
               key={unit.id}
               initial={{ opacity: 0, y: 20 }}
@@ -282,32 +521,40 @@ export default function ProjectDetails() {
             >
               <Link
                 to={`/dashboard/units/${unit.id}`}
-                className="glass-card group block p-5 transition-all hover:border-primary/30 hover-lift"
+                className="glass-card group relative block overflow-hidden p-6 transition-all duration-300 hover:shadow-glow hover:-translate-y-1"
               >
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                    {unitTypeLabels[unit.type]}
-                  </span>
-                  <Settings2 className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="mb-4 grid grid-cols-3 gap-2 text-center text-sm">
-                  <div>
-                    <p className="font-semibold">{unit.width}</p>
-                    <p className="text-xs text-muted-foreground">عرض</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold">{unit.height}</p>
-                    <p className="text-xs text-muted-foreground">ارتفاع</p>
-                  </div>
-                  <div>
-                    <p className="font-semibold">{unit.depth}</p>
-                    <p className="text-xs text-muted-foreground">عمق</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
-                  <span>{unit.total_area} م²</span>
-                  <span>{unit.total_edge_length} م شريط</span>
-                </div>
+                 <div className="mb-4 flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/80 text-secondary-foreground shadow-sm">
+                        <Layers className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">
+                            {unitTypeLabels[unit.type] || unit.type}
+                        </h4>
+                        <span className="text-xs text-muted-foreground font-mono">
+                            {unit.width_cm} × {unit.height_cm} × {unit.depth_cm}
+                        </span>
+                      </div>
+                   </div>
+                   <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                     <Settings2 className="h-4 w-4" />
+                   </Button>
+                 </div>
+                 
+                 <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50">
+                    <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        <span>مس: {unit.total_area_m2?.toFixed(2) || '0.00'} م²</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                        <span>حافة: {unit.total_edge_band_m?.toFixed(2) || '0.00'} م</span>
+                    </div>
+                 </div>
+                 
+                 {/* Decorative Corner */}
+                 <div className="absolute top-0 left-0 h-16 w-16 bg-gradient-to-br from-primary/10 to-transparent -translate-x-8 -translate-y-8 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out" />
               </Link>
             </motion.div>
           ))}

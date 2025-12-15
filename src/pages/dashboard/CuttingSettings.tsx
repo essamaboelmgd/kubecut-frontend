@@ -1,55 +1,63 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, RefreshCw, Loader2, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
 } from '@/components/ui/select';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import type { Settings } from '@/lib/api';
+import { settingsApi, type SettingsModel } from '@/lib/api';
 
-const defaultSettings: Settings = {
-  assembly_method: 'screws',
-  handle_type: 'bar',
-  handle_recess_height_mm: 30,
-  default_board_thickness_mm: 18,
-  back_panel_thickness_mm: 4,
-  edge_overlap_mm: 1,
-  back_clearance_mm: 3,
-  top_clearance_mm: 2,
-  bottom_clearance_mm: 2,
-  side_overlap_mm: 2,
-  sheet_size_m2: 2.88,
-  materials: {
-    plywood_sheet_price: 850,
-    edge_band_price: 15,
-  },
+const assemblyMethods = {
+  full_sides_back_routed: 'جانبين كاملين (ظهر مفحار)',
+  full_base_back_routed: 'أرضية كاملة (ظهر مفحار)',
+  base_full_top_sides_back_routed: 'قاعدة كاملة + علوي جانبين (ظهر مفحار)',
+  full_sides_back_flush: 'جانبين كاملين (ظهر لطش)',
+  full_base_back_flush: 'أرضية كاملة (ظهر لطش)',
+  base_full_top_sides_back_flush: 'قاعدة كاملة + علوي جانبين (ظهر لطش)',
+};
+
+const handleTypes = {
+  built_in: 'مقبض بيلت ان',
+  regular: 'مقبض عادي',
+  hidden_cl_chassis: 'مقبض مخفي (C-L) / شاسية',
+  hidden_cl_drop: 'مقبض مخفي (C-L) / ساقط',
 };
 
 export default function CuttingSettings() {
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
-  const [isLoading, setIsLoading] = useState(false);
+  const [settings, setSettings] = useState<SettingsModel | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const handleSave = async () => {
-    setIsLoading(true);
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast({
-        title: 'تم الحفظ',
-        description: 'تم حفظ إعدادات التقطيع بنجاح',
-      });
+      setIsLoading(true);
+      const data = await settingsApi.get();
+      setSettings(data);
     } catch (error) {
       toast({
         title: 'خطأ',
-        description: 'حدث خطأ أثناء حفظ الإعدادات',
+        description: 'فشل تحميل الإعدادات',
         variant: 'destructive',
       });
     } finally {
@@ -57,219 +65,245 @@ export default function CuttingSettings() {
     }
   };
 
-  const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
+  const calculateEdgeBandCost = () => {
+    // This function needs to be implemented or removed if not needed.
+    // For now, it's a placeholder if there was similar logic.
+    // Assuming backend handles calculations.
+  };
+  
+  const handleInputChange = (key: keyof SettingsModel, value: any) => {
+    if (!settings) return;
+    setSettings({ ...settings, [key]: value });
   };
 
+  const handleSave = async () => {
+    if (!settings) return;
+    try {
+      setIsSaving(true);
+      await settingsApi.update(settings);
+      toast({
+        title: 'تم الحفظ',
+        description: 'تم تحديث الإعدادات بنجاح',
+      });
+    } catch (error) {
+      toast({
+        title: 'خطأ',
+        description: 'فشل حفظ الإعدادات',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!settings) return null;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-2xl font-bold md:text-3xl">إعدادات التقطيع</h1>
-        <p className="mt-1 text-muted-foreground">
-          خصص معايير وإعدادات التقطيع الخاصة بك
-        </p>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.5 }}
-        className="grid gap-6 lg:grid-cols-2"
-      >
-        {/* Assembly & Handles */}
-        <div className="glass-card p-6">
-          <h2 className="mb-6 text-lg font-semibold">التجميع والمقابض</h2>
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <Label>طريقة التجميع</Label>
-              <Select
-                value={settings.assembly_method}
-                onValueChange={(v) => updateSetting('assembly_method', v as Settings['assembly_method'])}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="lamello">لاميلو</SelectItem>
-                  <SelectItem value="screws">مسامير</SelectItem>
-                  <SelectItem value="dowels">خوابير</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>نوع المقبض</Label>
-              <Select
-                value={settings.handle_type}
-                onValueChange={(v) => updateSetting('handle_type', v as Settings['handle_type'])}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="knob">مقبض دائري</SelectItem>
-                  <SelectItem value="bar">مقبض طولي</SelectItem>
-                  <SelectItem value="hidden">مخفي</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>ارتفاع تجويف المقبض (مم)</Label>
-              <Input
-                type="number"
-                value={settings.handle_recess_height_mm}
-                onChange={(e) => updateSetting('handle_recess_height_mm', Number(e.target.value))}
-              />
-            </div>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold md:text-3xl">إعدادات التقطيع</h1>
+            <p className="mt-1 text-muted-foreground">
+              تخصيص طريقة الحساب والهدر وأسعار الخامات
+            </p>
           </div>
-        </div>
-
-        {/* Board Thickness */}
-        <div className="glass-card p-6">
-          <h2 className="mb-6 text-lg font-semibold">سمك الألواح</h2>
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <Label>سمك اللوح الافتراضي (مم)</Label>
-              <Input
-                type="number"
-                value={settings.default_board_thickness_mm}
-                onChange={(e) => updateSetting('default_board_thickness_mm', Number(e.target.value))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>سمك اللوح الخلفي (مم)</Label>
-              <Input
-                type="number"
-                value={settings.back_panel_thickness_mm}
-                onChange={(e) => updateSetting('back_panel_thickness_mm', Number(e.target.value))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>مساحة اللوح (م²)</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={settings.sheet_size_m2}
-                onChange={(e) => updateSetting('sheet_size_m2', Number(e.target.value))}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Clearances */}
-        <div className="glass-card p-6">
-          <h2 className="mb-6 text-lg font-semibold">الخلوصات والتداخلات</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>تداخل الحافة (مم)</Label>
-              <Input
-                type="number"
-                value={settings.edge_overlap_mm}
-                onChange={(e) => updateSetting('edge_overlap_mm', Number(e.target.value))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>خلوص الظهر (مم)</Label>
-              <Input
-                type="number"
-                value={settings.back_clearance_mm}
-                onChange={(e) => updateSetting('back_clearance_mm', Number(e.target.value))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>خلوص الأعلى (مم)</Label>
-              <Input
-                type="number"
-                value={settings.top_clearance_mm}
-                onChange={(e) => updateSetting('top_clearance_mm', Number(e.target.value))}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>خلوص الأسفل (مم)</Label>
-              <Input
-                type="number"
-                value={settings.bottom_clearance_mm}
-                onChange={(e) => updateSetting('bottom_clearance_mm', Number(e.target.value))}
-              />
-            </div>
-
-            <div className="space-y-2 col-span-2">
-              <Label>تداخل الجوانب (مم)</Label>
-              <Input
-                type="number"
-                value={settings.side_overlap_mm}
-                onChange={(e) => updateSetting('side_overlap_mm', Number(e.target.value))}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Materials Pricing */}
-        <div className="glass-card p-6">
-          <h2 className="mb-6 text-lg font-semibold">أسعار المواد</h2>
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <Label>سعر لوح الخشب (ج.م)</Label>
-              <Input
-                type="number"
-                value={settings.materials.plywood_sheet_price}
-                onChange={(e) =>
-                  updateSetting('materials', {
-                    ...settings.materials,
-                    plywood_sheet_price: Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>سعر شريط الحافة (ج.م/متر)</Label>
-              <Input
-                type="number"
-                value={settings.materials.edge_band_price}
-                onChange={(e) =>
-                  updateSetting('materials', {
-                    ...settings.materials,
-                    edge_band_price: Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-          </div>
+          <Button onClick={handleSave} disabled={isSaving} variant="hero">
+            {isSaving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            حفظ التغييرات
+          </Button>
         </div>
       </motion.div>
 
-      {/* Save Button */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="flex justify-end"
-      >
-        <Button variant="hero" size="lg" onClick={handleSave} disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="animate-spin" />
-              جاري الحفظ...
-            </>
-          ) : (
-            <>
-              <Save className="h-5 w-5" />
-              حفظ الإعدادات
-            </>
-          )}
-        </Button>
-      </motion.div>
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Assembly Settings */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+        >
+          <Card className="glass-card h-full border-primary/10">
+            <CardHeader className="pb-4 border-b border-border/40">
+              <div className="flex items-center gap-3">
+                 <div className="rounded-xl bg-primary/10 p-2.5 text-primary ring-1 ring-primary/20">
+                    <Settings2 className="h-5 w-5" />
+                 </div>
+                 <div>
+                    <CardTitle className="text-lg font-bold">طريقة التجميع</CardTitle>
+                    <CardDescription>
+                        تحديد كيفية تجميع الوحدات والمقابض
+                    </CardDescription>
+                 </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">نظام التجميع</Label>
+                <Select
+                  value={settings.assembly_method}
+                  onValueChange={(value) => handleInputChange('assembly_method', value)}
+                >
+                  <SelectTrigger className="h-11 bg-background/50 focus:ring-primary/20 transition-all">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(assemblyMethods).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">نوع المقبض</Label>
+                <Select
+                  value={settings.handle_type}
+                  onValueChange={(value) => handleInputChange('handle_type', value)}
+                >
+                  <SelectTrigger className="h-11 bg-background/50 focus:ring-primary/20 transition-all">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(handleTypes).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">ارتفاع قطاع المقبض</Label>
+                  <div className="relative">
+                     <Input
+                        type="number"
+                        value={settings.handle_profile_height}
+                        onChange={(e) => handleInputChange('handle_profile_height', parseFloat(e.target.value))}
+                        className="h-11 pr-3 bg-background/50"
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">سم</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">سقوط الضلفة</Label>
+                  <div className="relative">
+                    <Input
+                        type="number"
+                        value={settings.chassis_handle_drop}
+                        onChange={(e) => handleInputChange('chassis_handle_drop', parseFloat(e.target.value))}
+                        className="h-11 pr-3 bg-background/50"
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">سم</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Dimensions & Deductions */}
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <Card className="glass-card h-full border-accent/10">
+             <CardHeader className="pb-4 border-b border-border/40">
+              <div className="flex items-center gap-3">
+                 <div className="rounded-xl bg-accent/10 p-2.5 text-accent ring-1 ring-accent/20">
+                    <Settings2 className="h-5 w-5" />
+                 </div>
+                 <div>
+                    <CardTitle className="text-lg font-bold">الأبعاد والخصومات</CardTitle>
+                    <CardDescription>
+                        تحديد سمك الخامات وقيم الخصم المختلفة
+                    </CardDescription>
+                 </div>
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-5 sm:grid-cols-2 pt-6">
+              {[
+                { label: 'سمك الكونتر', key: 'counter_thickness' },
+                { label: 'عرض المرآة', key: 'mirror_width' },
+                { label: 'خصم الظهر', key: 'back_deduction' },
+                { label: 'خصم الرف من العمق', key: 'shelf_depth_deduction' },
+                { label: 'خصم عرض الضلفة', key: 'door_width_deduction_no_edge' },
+                { label: 'خصم ارتفاع ضلفة أرضي', key: 'ground_door_height_deduction_no_edge' },
+              ].map((item) => (
+                  <div key={item.key} className="space-y-2">
+                    <Label className="text-sm font-medium">{item.label}</Label>
+                    <div className="relative group">
+                        <Input
+                        type="number"
+                        value={(settings as any)[item.key]}
+                        onChange={(e) => handleInputChange(item.key as keyof SettingsModel, parseFloat(e.target.value))}
+                        className="h-11 pr-3 bg-background/50 focus:bg-background transition-colors"
+                        />
+                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">سم</span>
+                    </div>
+                  </div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Router Settings */}
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.3, duration: 0.5 }}
+           className="md:col-span-2"
+        >
+          <Card className="glass-card border-white/5">
+            <CardHeader className="pb-4 border-b border-border/40">
+                <CardTitle className="text-lg font-bold">إعدادات المفحار</CardTitle>
+                <CardDescription>
+                تحديد أبعاد ومسافات المفحار
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-6 sm:grid-cols-3 pt-6">
+              {[
+                  { label: 'عمق المفحار', key: 'router_depth' },
+                  { label: 'بعد المفحار', key: 'router_distance' },
+                  { label: 'سمك المفحار', key: 'router_thickness' },
+              ].map(item => (
+                <div key={item.key} className="space-y-2">
+                    <Label className="text-sm font-medium">{item.label}</Label>
+                    <div className="relative group">
+                        <Input
+                        type="number"
+                        value={(settings as any)[item.key]}
+                        onChange={(e) => handleInputChange(item.key as keyof SettingsModel, parseFloat(e.target.value))}
+                        className="h-11 pr-3 bg-background/50 focus:bg-background transition-colors"
+                        />
+                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">سم</span>
+                    </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
     </div>
   );
 }

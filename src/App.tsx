@@ -3,9 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { CartProvider } from "@/contexts/CartContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { CartProvider } from "./contexts/CartContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -20,6 +20,8 @@ import Store from "./pages/dashboard/Store";
 import Cart from "./pages/dashboard/Cart";
 import Checkout from "./pages/dashboard/Checkout";
 import Orders from "./pages/dashboard/Orders";
+import Sales from "./pages/dashboard/Sales";
+import Users from "./pages/dashboard/Users";
 import AccountSettings from "./pages/dashboard/AccountSettings";
 import NotFound from "./pages/NotFound";
 
@@ -49,6 +51,8 @@ const App = () => (
                   <Route path="cart" element={<Cart />} />
                   <Route path="checkout" element={<Checkout />} />
                   <Route path="orders" element={<Orders />} />
+                  <Route path="sales" element={<Sales />} />
+                  <Route path="users" element={<Users />} />
                   <Route path="account" element={<AccountSettings />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />

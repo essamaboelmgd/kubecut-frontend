@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   FolderKanban, 
@@ -5,55 +6,92 @@ import {
   TrendingUp, 
   Calculator,
   ArrowUpLeft,
-  ArrowDownLeft
+  ArrowDownLeft,
+  Lightbulb
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-
-const stats = [
-  { 
-    label: 'المشاريع النشطة', 
-    value: '12', 
-    icon: FolderKanban, 
-    change: '+2', 
-    trend: 'up',
-    color: 'text-primary'
-  },
-  { 
-    label: 'الوحدات المحسوبة', 
-    value: '48', 
-    icon: Layers, 
-    change: '+8', 
-    trend: 'up',
-    color: 'text-accent'
-  },
-  { 
-    label: 'التكلفة الإجمالية', 
-    value: '15,420 ج.م', 
-    icon: Calculator, 
-    change: '-5%', 
-    trend: 'down',
-    color: 'text-primary'
-  },
-  { 
-    label: 'المواد المستخدمة', 
-    value: '24 لوح', 
-    icon: TrendingUp, 
-    change: '+12%', 
-    trend: 'up',
-    color: 'text-accent'
-  },
-];
-
-const recentProjects = [
-  { id: '1', name: 'مطبخ فيلا المعادي', client: 'أحمد محمد', units: 8, updatedAt: 'منذ ساعتين' },
-  { id: '2', name: 'مطبخ شقة مدينة نصر', client: 'سارة أحمد', units: 5, updatedAt: 'منذ يوم' },
-  { id: '3', name: 'مطبخ عمارة الشروق', client: 'محمد علي', units: 12, updatedAt: 'منذ 3 أيام' },
-];
+import { dashboardApi, type DashboardStats, type RecentProject, type TipOfTheDay } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
+  const [tip, setTip] = useState<TipOfTheDay | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsData, projectsData, tipData] = await Promise.all([
+          dashboardApi.getStats(),
+          dashboardApi.getRecentProjects(),
+          dashboardApi.getTipOfTheDay()
+        ]);
+        
+        setStats(statsData);
+        setRecentProjects(projectsData);
+        setTip(tipData);
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: 'خطأ',
+          description: 'فشل تحميل بيانات لوحة التحكم',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [toast]);
+
+  const statItems = [
+    { 
+      label: 'المشاريع النشطة', 
+      value: stats?.projects.toString() || '0', 
+      icon: FolderKanban, 
+      change: '+2', // Demo value for change
+      trend: 'up',
+      color: 'text-primary'
+    },
+    { 
+      label: 'الوحدات المحسوبة', 
+      value: stats?.units.toString() || '0', 
+      icon: Layers, 
+      change: '+8', // Demo value
+      trend: 'up',
+      color: 'text-accent'
+    },
+    { 
+      label: 'حسابات التقطيع', 
+      value: stats?.cutting_calculations.toString() || '0', 
+      icon: Calculator, 
+      change: 'جديد', 
+      trend: 'up',
+      color: 'text-primary'
+    },
+    { 
+      label: 'نسبة التوفير', 
+      value: `${stats?.savings_percentage || 0}%`, 
+      icon: TrendingUp, 
+      change: '+12%', // Demo value
+      trend: 'up',
+      color: 'text-accent'
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -64,7 +102,7 @@ export default function Dashboard() {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-2xl font-bold md:text-3xl">
-          مرحباً، {user?.name || 'مستخدم'} 👋
+          مرحباً، {user?.full_name || 'مستخدم'} 👋
         </h1>
         <p className="mt-1 text-muted-foreground">
           إليك نظرة عامة على نشاطك اليوم
@@ -78,7 +116,7 @@ export default function Dashboard() {
         transition={{ delay: 0.1, duration: 0.5 }}
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {stats.map((stat, index) => (
+        {statItems.map((stat, index) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, scale: 0.95 }}
@@ -109,38 +147,64 @@ export default function Dashboard() {
         ))}
       </motion.div>
 
-      {/* Recent Projects */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-        className="glass-card"
-      >
-        <div className="flex items-center justify-between border-b border-border p-5">
-          <h2 className="text-lg font-semibold">أحدث المشاريع</h2>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/dashboard/projects">عرض الكل</Link>
-          </Button>
-        </div>
-        <div className="divide-y divide-border">
-          {recentProjects.map((project) => (
-            <Link
-              key={project.id}
-              to={`/dashboard/projects/${project.id}`}
-              className="flex items-center justify-between p-5 transition-colors hover:bg-muted/50"
-            >
-              <div>
-                <p className="font-medium">{project.name}</p>
-                <p className="text-sm text-muted-foreground">{project.client}</p>
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* Recent Projects */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="glass-card h-full"
+        >
+          <div className="flex items-center justify-between border-b border-border p-5">
+            <h2 className="text-lg font-semibold">أحدث المشاريع</h2>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/dashboard/projects">عرض الكل</Link>
+            </Button>
+          </div>
+          <div className="divide-y divide-border">
+            {recentProjects.length > 0 ? (
+              recentProjects.map((project) => (
+                <Link
+                  key={project.id}
+                  to={`/dashboard/projects/${project.id}`}
+                  className="flex items-center justify-between p-5 transition-colors hover:bg-muted/50"
+                >
+                  <div>
+                    <p className="font-medium">{project.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <FolderKanban className="h-3 w-3 text-muted-foreground" />
+                      <p className="text-xs text-muted-foreground">{project.units} وحدة</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">{project.date}</span>
+                </Link>
+              ))
+            ) : (
+              <div className="p-8 text-center text-muted-foreground">
+                لا توجد مشاريع حديثة
               </div>
-              <div className="text-left">
-                <p className="text-sm font-medium">{project.units} وحدة</p>
-                <p className="text-xs text-muted-foreground">{project.updatedAt}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </motion.div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Tip of the Day */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.5 }}
+          className="glass-card h-full flex flex-col"
+        >
+          <div className="flex items-center gap-2 border-b border-border p-5">
+            <Lightbulb className="h-5 w-5 text-yellow-500" />
+            <h2 className="text-lg font-semibold">{tip?.title || 'نصيحة اليوم'}</h2>
+          </div>
+          <div className="p-6 flex-1 flex items-center justify-center text-center">
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              {tip?.content || 'جاري تحميل النصيحة...'}
+            </p>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Quick Actions */}
       <motion.div

@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChefHat, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/contexts/AuthContext';
+import { authApi, LoginRequest, User, setToken } from '../lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +22,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
+    if (!phone || !password) {
       toast({
         title: 'خطأ',
         description: 'يرجى ملء جميع الحقول',
@@ -33,15 +34,18 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // Simulate API call - replace with actual API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Mock successful login
-      login('mock-token', {
-        id: '1',
-        email,
-        name: email.split('@')[0],
+      const response = await authApi.login({
+        phone,
+        password,
+        device_id: 'web-client', // or generate a UUID if needed, but static for now is okay for web
+        device_name: navigator.userAgent
       });
+      
+      // Fetch real user data
+      setToken(response.access_token); // Set token temporarily for the next request
+      const userData = await authApi.me();
+      
+      login(response.access_token, userData);
 
       toast({
         title: 'مرحباً بك',
@@ -49,10 +53,10 @@ export default function Login() {
       });
 
       navigate('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'خطأ في تسجيل الدخول',
-        description: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+        description: error.message || 'رقم الهاتف أو كلمة المرور غير صحيحة',
         variant: 'destructive',
       });
     } finally {
@@ -76,10 +80,8 @@ export default function Login() {
         >
           {/* Logo */}
           <Link to="/" className="mb-8 flex items-center gap-2">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <ChefHat className="h-7 w-7" />
-            </div>
-            <span className="text-2xl font-bold">قطّع</span>
+            <img src="/logo.png" alt="KubeCut Logo" className="h-10 w-10 object-contain" />
+            <span className="text-xl font-bold">كيوب كت</span>
           </Link>
 
           <h1 className="mb-2 text-3xl font-bold">مرحباً بعودتك</h1>
@@ -89,13 +91,13 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Label htmlFor="phone">رقم الهاتف</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="example@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="phone"
+                type="tel"
+                placeholder="01xxxxxxxxx"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 className="h-12"
                 dir="ltr"
               />
@@ -164,8 +166,8 @@ export default function Login() {
         >
           <div className="absolute -inset-20 rounded-full bg-primary/10 blur-3xl" />
           <div className="relative glass-card p-12 text-center">
-            <ChefHat className="mx-auto mb-6 h-24 w-24 text-primary" />
-            <h2 className="mb-4 text-2xl font-bold">منصة قطّع</h2>
+            <img src="/logo.png" alt="KubeCut Logo" className="h-10 w-10 object-contain" />
+            <h2 className="mb-4 text-2xl font-bold">منصةكيوب كت</h2>
             <p className="max-w-sm text-muted-foreground">
               منصة متكاملة لحساب وتقطيع وحدات المطابخ بدقة واحترافية عالية
             </p>

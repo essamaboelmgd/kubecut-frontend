@@ -47,7 +47,7 @@ export function HeroSection() {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="mb-6 text-4xl font-bold leading-tight tracking-tight md:text-6xl lg:text-7xl"
           >
-            احسب وقطّع المطابخ
+            احسب وقطع المطابخ
             <br />
             <span className="gradient-text">بدقة واحترافية</span>
           </motion.h1>
