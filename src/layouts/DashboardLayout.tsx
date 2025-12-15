@@ -17,7 +17,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -52,6 +52,11 @@ export default function DashboardLayout() {
   const location = useLocation();
   const cartCount = getCartCount();
 
+  // Close sidebar on route change
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -74,7 +79,7 @@ export default function DashboardLayout() {
       <aside
         className={cn(
           "fixed inset-y-0 right-0 z-50 w-72 border-l border-white/10 bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-2xl transition-transform duration-300 lg:relative lg:translate-x-0 shadow-2xl",
-          isSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0 invisible lg:visible'
+          isSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
         )}
       >
         <div className="flex h-full flex-col">
@@ -227,7 +232,7 @@ export default function DashboardLayout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-auto p-3 md:p-6">
+        <main className="flex-1 overflow-auto p-6">
           <Outlet />
         </main>
       </div>

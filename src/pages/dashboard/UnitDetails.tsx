@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { unitsApi, type Unit, type CostEstimate, type InternalCounter, type EdgeBreakdown } from '@/lib/api';
+import { unitsApi, type Unit, type CostEstimate, type InternalCounter, type EdgeBreakdown, type UnitPart } from '@/lib/api';
 import {
   Table,
   TableBody,
@@ -77,7 +77,7 @@ export default function UnitDetails() {
         width_cm: unit.width_cm,
         height_cm: unit.height_cm,
         depth_cm: unit.depth_cm,
-        shelf_count: unit.shelf_count || 0,
+        shelf_count: unit.shelves_count || 0,
       });
       setCostEstimate(data);
       toast({
@@ -141,23 +141,6 @@ export default function UnitDetails() {
     }
   };
 
-  // Helper to calculate derived stats for Internal Counter
-  const getInternalStats = () => {
-    if (!internalCounter) return { drawers: 0, shelves: 0 };
-    
-    // Count drawers by checking for drawer bottoms (one per drawer)
-    const drawers = internalCounter.parts
-        .filter(p => p.name === 'drawer_bottom')
-        .reduce((sum, part) => sum + part.qty, 0);
-        
-    // Count shelves
-    const shelves = internalCounter.parts
-        .filter(p => p.type === 'shelf')
-        .reduce((sum, part) => sum + part.qty, 0);
-
-    return { drawers, shelves };
-  };
-
   if (isLoading || !unit) {
     return (
       <div className="flex justify-center py-12">
@@ -166,10 +149,8 @@ export default function UnitDetails() {
     );
   }
 
-  const internalStats = getInternalStats();
-
   return (
-    <div className="space-y-8 max-w-full overflow-x-hidden p-1">
+    <div className="space-y-8">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -178,23 +159,22 @@ export default function UnitDetails() {
       >
         <Button
           variant="ghost"
-          size="sm"
-          className="mb-4 h-8 px-2 md:h-10 md:px-4"
+          className="mb-4"
           onClick={() => navigate(-1)}
         >
-          <ArrowRight className="h-4 w-4 ml-2" />
+          <ArrowRight className="h-4 w-4" />
           العودة
         </Button>
 
-        <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <div className="mb-2 flex items-center gap-2 md:gap-3">
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs md:text-sm font-medium text-primary">
+            <div className="mb-2 flex items-center gap-3">
+              <span className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
                 {unitTypeLabels[unit.type]}
               </span>
             </div>
-            <h1 className="text-xl md:text-3xl font-bold">تفاصيل الوحدة</h1>
-            <p className="mt-1 text-sm md:text-base text-muted-foreground">
+            <h1 className="text-2xl font-bold md:text-3xl">تفاصيل الوحدة</h1>
+            <p className="mt-1 text-muted-foreground">
               عرض حسابات التقطيع والأجزاء والتكلفة
             </p>
           </div>
@@ -207,48 +187,48 @@ export default function UnitDetails() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-          <div className="glass-card p-3 md:p-5">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="rounded-lg bg-primary/10 p-2 text-primary">
-                <Ruler className="h-4 w-4 md:h-5 md:w-5" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="glass-card p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
+                <Ruler className="h-5 w-5" />
               </div>
-              <div className="overflow-hidden min-w-0">
-                <p className="text-base md:text-2xl font-bold truncate">{unit.width_cm} <span className="text-xs font-normal text-muted-foreground">سم</span></p>
-                <p className="text-xs md:text-sm text-muted-foreground truncate">العرض</p>
-              </div>
-            </div>
-          </div>
-          <div className="glass-card p-3 md:p-5">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="rounded-lg bg-accent/10 p-2 text-accent">
-                <Ruler className="h-4 w-4 md:h-5 md:w-5" />
-              </div>
-              <div className="overflow-hidden min-w-0">
-                <p className="text-base md:text-2xl font-bold truncate">{unit.height_cm} <span className="text-xs font-normal text-muted-foreground">سم</span></p>
-                <p className="text-xs md:text-sm text-muted-foreground truncate">الارتفاع</p>
+              <div>
+                <p className="text-2xl font-bold">{unit.width_cm} سم</p>
+                <p className="text-sm text-muted-foreground">العرض</p>
               </div>
             </div>
           </div>
-          <div className="glass-card p-3 md:p-5">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="rounded-lg bg-primary/10 p-2 text-primary">
-                <Ruler className="h-4 w-4 md:h-5 md:w-5" />
+          <div className="glass-card p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-accent/10 p-2.5 text-accent">
+                <Ruler className="h-5 w-5" />
               </div>
-              <div className="overflow-hidden min-w-0">
-                <p className="text-base md:text-2xl font-bold truncate">{unit.depth_cm} <span className="text-xs font-normal text-muted-foreground">سم</span></p>
-                <p className="text-xs md:text-sm text-muted-foreground truncate">العمق</p>
+              <div>
+                <p className="text-2xl font-bold">{unit.height_cm} سم</p>
+                <p className="text-sm text-muted-foreground">الارتفاع</p>
               </div>
             </div>
           </div>
-          <div className="glass-card p-3 md:p-5">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="rounded-lg bg-accent/10 p-2 text-accent">
-                <Layers className="h-4 w-4 md:h-5 md:w-5" />
+          <div className="glass-card p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
+                <Ruler className="h-5 w-5" />
               </div>
-              <div className="overflow-hidden min-w-0">
-                <p className="text-base md:text-2xl font-bold truncate">{unit.shelf_count || 0}</p>
-                <p className="text-xs md:text-sm text-muted-foreground truncate">الرفوف</p>
+              <div>
+                <p className="text-2xl font-bold">{unit.depth_cm} سم</p>
+                <p className="text-sm text-muted-foreground">العمق</p>
+              </div>
+            </div>
+          </div>
+          <div className="glass-card p-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-accent/10 p-2.5 text-accent">
+                <Layers className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{(unit as any).shelf_count || unit.shelves_count || 0}</p>
+                <p className="text-sm text-muted-foreground">عدد الرفوف</p>
               </div>
             </div>
           </div>
@@ -260,18 +240,17 @@ export default function UnitDetails() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.5 }}
-        className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:gap-3"
+        className="flex flex-wrap gap-3"
       >
         <Button
           variant="hero"
           onClick={handleCalculateCost}
           disabled={isLoadingCost}
-          className="col-span-2 sm:col-span-1 sm:flex-none"
         >
           {isLoadingCost ? (
-            <RefreshCw className="h-4 w-4 ml-2 animate-spin" />
+            <RefreshCw className="h-4 w-4 animate-spin" />
           ) : (
-            <DollarSign className="h-4 w-4 ml-2" />
+            <DollarSign className="h-4 w-4" />
           )}
           حساب التكلفة
         </Button>
@@ -279,12 +258,11 @@ export default function UnitDetails() {
           variant="outline"
           onClick={handleCalculateCounter}
           disabled={isLoadingCounter}
-          className="col-span-1 sm:flex-none text-xs px-2 md:text-sm md:px-4"
         >
           {isLoadingCounter ? (
-            <RefreshCw className="h-3 w-3 md:h-4 md:w-4 ml-1.5 animate-spin" />
+            <RefreshCw className="h-4 w-4 animate-spin" />
           ) : (
-            <Grid3X3 className="h-3 w-3 md:h-4 md:w-4 ml-1.5" />
+            <Grid3X3 className="h-4 w-4" />
           )}
           حساب الأدراج
         </Button>
@@ -292,49 +270,48 @@ export default function UnitDetails() {
           variant="outline"
           onClick={handleGetEdgeBreakdown}
           disabled={isLoadingEdge}
-          className="col-span-1 sm:flex-none text-xs px-2 md:text-sm md:px-4"
         >
           {isLoadingEdge ? (
-            <RefreshCw className="h-3 w-3 md:h-4 md:w-4 ml-1.5 animate-spin" />
+            <RefreshCw className="h-4 w-4 animate-spin" />
           ) : (
-            <Scissors className="h-3 w-3 md:h-4 md:w-4 ml-1.5" />
+            <Scissors className="h-4 w-4" />
           )}
           تفاصيل الشريط
         </Button>
       </motion.div>
 
       {/* Results Cards */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Cost Estimate */}
         {costEstimate && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass-card p-4 md:p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
+            className="glass-card p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
           >
             <div className="mb-4 flex items-center gap-3">
-               <div className="rounded-xl bg-primary/20 p-2 text-primary ring-1 ring-primary/30">
+               <div className="rounded-xl bg-primary/20 p-2.5 text-primary ring-1 ring-primary/30">
                   <DollarSign className="h-5 w-5" />
                </div>
-              <h3 className="font-bold text-base md:text-lg">تقدير التكلفة</h3>
+              <h3 className="font-bold text-lg">تقدير التكلفة</h3>
             </div>
-            <div className="space-y-3 md:space-y-4">
-              <div className="flex items-center justify-between p-3 bg-background/40 rounded-lg border border-white/5 text-sm md:text-base">
-                <span className="text-muted-foreground">تكلفة المواد</span>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-background/40 rounded-lg border border-white/5">
+                <span className="text-muted-foreground text-sm">تكلفة المواد</span>
                 <span className="font-bold font-mono">
                   {costEstimate.cost_breakdown?.['ألواح الخشب']?.toFixed(2) || '0.00'} ج.م
                 </span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-background/40 rounded-lg border border-white/5 text-sm md:text-base">
-                <span className="text-muted-foreground">تكلفة الشريط</span>
+              <div className="flex items-center justify-between p-3 bg-background/40 rounded-lg border border-white/5">
+                <span className="text-muted-foreground text-sm">تكلفة الشريط</span>
                 <span className="font-bold font-mono">
                   {costEstimate.cost_breakdown?.['شريط الحافة']?.toFixed(2) || '0.00'} ج.م
                 </span>
               </div>
-              <div className="border-t border-primary/20 pt-3 md:pt-4 mt-2">
+              <div className="border-t border-primary/20 pt-4 mt-2">
                 <div className="flex items-center justify-between px-2">
                   <span className="font-bold text-lg">الإجمالي</span>
-                  <span className="text-xl md:text-2xl font-bold text-primary font-mono">
+                  <span className="text-2xl font-bold text-primary font-mono">
                     {costEstimate.total_cost?.toFixed(2) || '0.00'} <span className="text-sm font-sans text-muted-foreground font-normal">ج.م</span>
                   </span>
                 </div>
@@ -348,22 +325,22 @@ export default function UnitDetails() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass-card p-4 md:p-6 border-accent/20 bg-gradient-to-br from-accent/5 to-transparent"
+            className="glass-card p-6 border-accent/20 bg-gradient-to-br from-accent/5 to-transparent"
           >
             <div className="mb-4 flex items-center gap-3">
-              <div className="rounded-xl bg-accent/20 p-2 text-accent ring-1 ring-accent/30">
+              <div className="rounded-xl bg-accent/20 p-2.5 text-accent ring-1 ring-accent/30">
                  <Grid3X3 className="h-5 w-5" />
               </div>
-              <h3 className="font-bold text-base md:text-lg">العناصر الداخلية</h3>
+              <h3 className="font-bold text-lg">العناصر الداخلية</h3>
             </div>
-            <div className="space-y-3 md:space-y-4">
-              <div className="flex items-center justify-between p-3 md:p-4 bg-background/40 rounded-lg border border-white/5">
-                <span className="text-muted-foreground font-medium text-sm md:text-base">عدد الأدراج</span>
-                <span className="text-xl md:text-2xl font-bold font-mono">{internalStats.drawers}</span>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-background/40 rounded-lg border border-white/5">
+                <span className="text-muted-foreground font-medium">عدد الأدراج</span>
+                <span className="text-2xl font-bold font-mono">{internalCounter.drawers}</span>
               </div>
-              <div className="flex items-center justify-between p-3 md:p-4 bg-background/40 rounded-lg border border-white/5">
-                <span className="text-muted-foreground font-medium text-sm md:text-base">عدد الرفوف</span>
-                <span className="text-xl md:text-2xl font-bold font-mono">{internalStats.shelves}</span>
+              <div className="flex items-center justify-between p-4 bg-background/40 rounded-lg border border-white/5">
+                <span className="text-muted-foreground font-medium">عدد الرفوف</span>
+                <span className="text-2xl font-bold font-mono">{internalCounter.shelves}</span>
               </div>
             </div>
           </motion.div>
@@ -374,17 +351,17 @@ export default function UnitDetails() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-             className="glass-card p-4 md:p-6 border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent"
+             className="glass-card p-6 border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-transparent"
           >
             <div className="mb-4 flex items-center gap-3">
-              <div className="rounded-xl bg-blue-500/20 p-2 text-blue-500 ring-1 ring-blue-500/30">
+              <div className="rounded-xl bg-blue-500/20 p-2.5 text-blue-500 ring-1 ring-blue-500/30">
                 <Scissors className="h-5 w-5" />
               </div>
-              <h3 className="font-bold text-base md:text-lg">توزيع الشريط</h3>
+              <h3 className="font-bold text-lg">توزيع الشريط</h3>
             </div>
-             <div className="space-y-2 md:space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
+             <div className="space-y-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
               {edgeBreakdown.parts?.map((part, index) => (
-                <div key={index} className="flex items-center justify-between text-xs md:text-sm p-2 bg-background/30 rounded-lg hover:bg-background/50 transition-colors">
+                <div key={index} className="flex items-center justify-between text-sm p-2 bg-background/30 rounded-lg hover:bg-background/50 transition-colors">
                   <span className="text-muted-foreground font-medium">{part.part_name}</span>
                   <span className="font-bold font-mono">{part.total_edge_m.toFixed(2)} م</span>
                 </div>
@@ -392,8 +369,8 @@ export default function UnitDetails() {
               </div>
               <div className="border-t border-blue-500/20 pt-3 mt-auto">
                 <div className="flex items-center justify-between px-2">
-                  <span className="font-bold text-sm md:text-base">الإجمالي</span>
-                  <span className="text-lg md:text-xl font-bold text-blue-500 font-mono">
+                  <span className="font-bold">الإجمالي</span>
+                  <span className="text-xl font-bold text-blue-500 font-mono">
                     {edgeBreakdown.total_edge_m?.toFixed(2) || '0.00'} م
                   </span>
                 </div>
@@ -409,39 +386,39 @@ export default function UnitDetails() {
         transition={{ delay: 0.2, duration: 0.5 }}
         className="glass-card overflow-hidden ring-1 ring-white/10"
       >
-        <div className="border-b border-border/50 p-4 md:p-6 bg-muted/20">
+        <div className="border-b border-border/50 p-6 bg-muted/20">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                <Package className="h-4 w-4 md:h-5 md:w-5" />
+                <Package className="h-5 w-5" />
             </div>
             <div>
-                 <h3 className="font-bold text-base md:text-lg">قائمة الأجزاء</h3>
-                 <p className="text-xs md:text-sm text-muted-foreground">تفاصيل أبعاد وكميات أجزاء الوحدة</p>
+                 <h3 className="font-bold text-lg">قائمة الأجزاء</h3>
+                 <p className="text-sm text-muted-foreground">تفاصيل أبعاد وكميات أجزاء الوحدة</p>
             </div>
           </div>
         </div>
         <div className="overflow-x-auto">
-          <Table className="w-full min-w-[600px]">
+          <Table className="w-full">
             <TableHeader className="bg-muted/40 text-xs uppercase tracking-wider">
               <TableRow className="hover:bg-transparent border-border/50">
-                <TableHead className="py-3 px-3 md:py-4 md:px-6 text-right font-bold text-muted-foreground">
+                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">
                   القطعة
                 </TableHead>
-                <TableHead className="py-3 px-3 md:py-4 md:px-6 text-right font-bold text-muted-foreground">
+                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">
                   العرض (سم)
                 </TableHead>
-                <TableHead className="py-3 px-3 md:py-4 md:px-6 text-right font-bold text-muted-foreground">
+                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">
                   الارتفاع (سم)
                 </TableHead>
-                <TableHead className="py-3 px-3 md:py-4 md:px-6 text-right font-bold text-muted-foreground">
+                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">
                   الكمية
                 </TableHead>
-                <TableHead className="py-3 px-3 md:py-4 md:px-6 text-right font-bold text-muted-foreground">
+                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">
                   المساحة (م²)
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-border/30 font-medium text-sm md:text-base">
+            <TableBody className="divide-y divide-border/30 font-medium">
               {unit.parts?.map((part, i) => {
                 const partTranslations: Record<string, string> = {
                   'base': 'قاعدة',
@@ -467,15 +444,15 @@ export default function UnitDetails() {
                     key={i}
                     className="hover:bg-primary/5 transition-colors border-border/30"
                   >
-                    <TableCell className="py-3 px-3 md:py-4 md:px-6 font-semibold text-primary">{partTranslations[part.name] || partTranslations[part.name.toLowerCase()] || part.name}</TableCell>
-                    <TableCell className="py-3 px-3 md:py-4 md:px-6 font-mono text-muted-foreground">{part.width_cm}</TableCell>
-                    <TableCell className="py-3 px-3 md:py-4 md:px-6 font-mono text-muted-foreground">{part.height_cm}</TableCell>
-                    <TableCell className="py-3 px-3 md:py-4 md:px-6">
+                    <TableCell className="py-4 px-6 font-semibold text-primary">{partTranslations[part.name] || partTranslations[part.name.toLowerCase()] || part.name}</TableCell>
+                    <TableCell className="py-4 px-6 font-mono text-muted-foreground">{part.width_cm}</TableCell>
+                    <TableCell className="py-4 px-6 font-mono text-muted-foreground">{part.height_cm}</TableCell>
+                    <TableCell className="py-4 px-6">
                         <span className="inline-flex items-center justify-center min-w-[2rem] h-6 rounded bg-muted text-xs font-bold">
-                            {part.qty}
+                            {(part as any).qty || part.quantity || 1}
                         </span>
                     </TableCell>
-                    <TableCell className="py-3 px-3 md:py-4 md:px-6 font-mono font-bold text-foreground/80">
+                    <TableCell className="py-4 px-6 font-mono font-bold text-foreground/80">
                       {part.area_m2?.toFixed(3) || '0.000'}
                     </TableCell>
                   </TableRow>
@@ -484,10 +461,10 @@ export default function UnitDetails() {
             </TableBody>
             <TableFooter className="bg-primary/5 border-t border-primary/10">
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={4} className="py-3 px-3 md:py-4 md:px-6 font-bold text-base md:text-lg">
+                <TableCell colSpan={4} className="py-4 px-6 font-bold text-lg">
                   الإجمالي
                 </TableCell>
-                <TableCell className="py-3 px-3 md:py-4 md:px-6 font-bold text-lg md:text-xl text-primary font-mono whitespace-nowrap">
+                <TableCell className="py-4 px-6 font-bold text-xl text-primary font-mono">
                   {unit.total_area_m2.toFixed(2)} م²
                 </TableCell>
               </TableRow>
@@ -501,27 +478,27 @@ export default function UnitDetails() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25, duration: 0.5 }}
-        className="grid gap-4 md:grid-cols-2"
+        className="grid gap-4 sm:grid-cols-2"
       >
-        <div className="glass-card p-4 md:p-6 flex items-center justify-between group hover:border-primary/50 transition-colors">
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="rounded-xl bg-primary/10 p-2 md:p-3 text-primary ring-1 ring-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-              <Calculator className="h-5 w-5 md:h-6 md:w-6" />
+        <div className="glass-card p-6 flex items-center justify-between group hover:border-primary/50 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="rounded-xl bg-primary/10 p-3 text-primary ring-1 ring-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+              <Calculator className="h-6 w-6" />
             </div>
               <div>
-                <p className="text-xs md:text-sm font-medium text-muted-foreground">المساحة الإجمالية</p>
-                <p className="text-2xl md:text-3xl font-bold font-mono mt-1">{unit.total_area_m2.toFixed(2)} <span className="text-sm text-muted-foreground">م²</span></p>
+                <p className="text-sm font-medium text-muted-foreground">المساحة الإجمالية</p>
+                <p className="text-3xl font-bold font-mono mt-1">{unit.total_area_m2.toFixed(2)} <span className="text-sm text-muted-foreground">م²</span></p>
               </div>
           </div>
         </div>
-        <div className="glass-card p-4 md:p-6 flex items-center justify-between group hover:border-accent/50 transition-colors">
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="rounded-xl bg-accent/10 p-2 md:p-3 text-accent ring-1 ring-accent/20 group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
-              <Scissors className="h-5 w-5 md:h-6 md:w-6" />
+        <div className="glass-card p-6 flex items-center justify-between group hover:border-accent/50 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="rounded-xl bg-accent/10 p-3 text-accent ring-1 ring-accent/20 group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
+              <Scissors className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs md:text-sm font-medium text-muted-foreground">إجمالي شريط الحافة</p>
-              <p className="text-2xl md:text-3xl font-bold font-mono mt-1">{unit.total_edge_band_m.toFixed(2)} <span className="text-sm text-muted-foreground">م</span></p>
+              <p className="text-sm font-medium text-muted-foreground">إجمالي شريط الحافة</p>
+              <p className="text-3xl font-bold font-mono mt-1">{unit.total_edge_band_m.toFixed(2)} <span className="text-sm text-muted-foreground">م</span></p>
             </div>
           </div>
         </div>
