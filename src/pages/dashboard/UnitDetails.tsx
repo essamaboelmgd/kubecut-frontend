@@ -169,7 +169,7 @@ export default function UnitDetails() {
   const internalStats = getInternalStats();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-full overflow-x-hidden p-1">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
