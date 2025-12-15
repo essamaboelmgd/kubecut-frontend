@@ -232,7 +232,7 @@ export default function DashboardLayout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 w-full overflow-x-hidden p-4 lg:p-6">
           <Outlet />
         </main>
       </div>

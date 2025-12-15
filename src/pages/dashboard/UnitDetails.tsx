@@ -77,7 +77,7 @@ export default function UnitDetails() {
         width_cm: unit.width_cm,
         height_cm: unit.height_cm,
         depth_cm: unit.depth_cm,
-        shelf_count: unit.shelves_count || 0,
+        shelf_count: unit.shelf_count || 0,
       });
       setCostEstimate(data);
       toast({
@@ -187,8 +187,8 @@ export default function UnitDetails() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="glass-card p-5">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="glass-card p-4 sm:p-5">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
                 <Ruler className="h-5 w-5" />
@@ -227,7 +227,7 @@ export default function UnitDetails() {
                 <Layers className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{(unit as any).shelf_count || unit.shelves_count || 0}</p>
+                <p className="text-2xl font-bold">{(unit as any).shelf_count || unit.shelf_count || 0}</p>
                 <p className="text-sm text-muted-foreground">عدد الرفوف</p>
               </div>
             </div>
@@ -335,12 +335,17 @@ export default function UnitDetails() {
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-background/40 rounded-lg border border-white/5">
-                <span className="text-muted-foreground font-medium">عدد الأدراج</span>
-                <span className="text-2xl font-bold font-mono">{internalCounter.drawers}</span>
+                <span className="text-muted-foreground font-medium">عدد الأدراج (تقريبي)</span>
+                {/* Calculate drawers based on parts named 'drawer_box' or similar if explicit count not available */}
+                <span className="text-2xl font-bold font-mono">
+                    {internalCounter.parts.filter(p => p.type === 'drawer' && p.name.includes('bottom')).length}
+                </span>
               </div>
               <div className="flex items-center justify-between p-4 bg-background/40 rounded-lg border border-white/5">
                 <span className="text-muted-foreground font-medium">عدد الرفوف</span>
-                <span className="text-2xl font-bold font-mono">{internalCounter.shelves}</span>
+                <span className="text-2xl font-bold font-mono">
+                    {internalCounter.parts.filter(p => p.type === 'shelf').reduce((acc, p) => acc + p.qty, 0)}
+                </span>
               </div>
             </div>
           </motion.div>
@@ -449,7 +454,7 @@ export default function UnitDetails() {
                     <TableCell className="py-4 px-6 font-mono text-muted-foreground">{part.height_cm}</TableCell>
                     <TableCell className="py-4 px-6">
                         <span className="inline-flex items-center justify-center min-w-[2rem] h-6 rounded bg-muted text-xs font-bold">
-                            {(part as any).qty || part.quantity || 1}
+                        {(part as any).qty || part.qty || 1}
                         </span>
                     </TableCell>
                     <TableCell className="py-4 px-6 font-mono font-bold text-foreground/80">
