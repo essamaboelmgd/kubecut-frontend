@@ -402,7 +402,7 @@ export default function UnitDetails() {
             </div>
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="hidden md:block overflow-x-auto">
           <Table className="w-full">
             <TableHeader className="bg-muted/40 text-xs uppercase tracking-wider">
               <TableRow className="hover:bg-transparent border-border/50">
@@ -475,6 +475,58 @@ export default function UnitDetails() {
               </TableRow>
             </TableFooter>
           </Table>
+        </div>
+
+        {/* Mobile Parts List (Card View) */}
+        <div className="md:hidden space-y-4 p-4">
+          {unit.parts?.map((part, i) => {
+            const partTranslations: Record<string, string> = {
+                'base': 'قاعدة',
+                'top': 'سقف',
+                'left_side': 'جانب أيسر',
+                'right_side': 'جانب أيمن',
+                'side_panel': 'جانب',
+                'back_panel': 'ظهر',
+                'shelf': 'رف',
+                'door': 'ضلفة',
+                'front_mirror': 'مراية أمامية',
+                'back_mirror': 'مراية خلفية',
+                'drawer_bottom': 'قاع درج',
+                'drawer_side': 'جانب درج',
+                'drawer_back': 'ظهر درج',
+                'drawer_front': 'وش درج',
+                'internal_base': 'قاعدة داخلية',
+                'internal_shelf': 'رف داخلي', 
+            };
+            return (
+              <div key={i} className="flex flex-col gap-2 rounded-xl bg-background/40 border border-white/5 p-4">
+                <div className="flex items-center justify-between">
+                    <span className="font-bold text-primary">{partTranslations[part.name] || partTranslations[part.name.toLowerCase()] || part.name}</span>
+                    <span className="inline-flex items-center justify-center min-w-[2rem] h-6 rounded bg-muted text-xs font-bold">
+                       ×{(part as any).qty || part.qty || 1}
+                    </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                   <div className="flex items-center justify-between bg-muted/20 rounded p-2">
+                      <span>العرض</span>
+                      <span className="font-mono text-foreground">{part.width_cm}</span>
+                   </div>
+                   <div className="flex items-center justify-between bg-muted/20 rounded p-2">
+                      <span>الارتفاع</span>
+                      <span className="font-mono text-foreground">{part.height_cm}</span>
+                   </div>
+                </div>
+                 <div className="flex items-center justify-between pt-2 border-t border-dashed border-white/10 mt-1">
+                    <span className="text-xs text-muted-foreground">المساحة</span>
+                    <span className="font-bold font-mono text-sm">{part.area_m2?.toFixed(3) || '0.000'} م²</span>
+                 </div>
+              </div>
+            );
+          })}
+           <div className="flex items-center justify-between rounded-xl bg-primary/10 border border-primary/20 p-4 mt-2">
+                <span className="font-bold">الإجمالي</span>
+                <span className="font-bold text-lg text-primary font-mono">{unit.total_area_m2.toFixed(2)} م²</span>
+           </div>
         </div>
       </motion.div>
 
