@@ -69,12 +69,12 @@ export default function DashboardLayout() {
     : 'مس';
 
   return (
-    <div className="flex min-h-screen font-cairo">
+    <div className="flex min-h-screen font-cairo overflow-x-hidden">
       {/* Sidebar */}
       <aside
         className={cn(
           "fixed inset-y-0 right-0 z-50 w-72 border-l border-white/10 bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-2xl transition-transform duration-300 lg:relative lg:translate-x-0 shadow-2xl",
-          isSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
+          isSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0 invisible lg:visible'
         )}
       >
         <div className="flex h-full flex-col">
