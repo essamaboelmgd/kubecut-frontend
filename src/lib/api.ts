@@ -24,6 +24,7 @@ export interface User {
       validity_days?: number;
       is_unlimited_units: boolean;
       is_unlimited_devices: boolean;
+      unlimited_expiry_date?: string;
   };
   created_at: string;
 }
@@ -382,9 +383,43 @@ export const authApi = {
     return handleResponse(response);
   },
   
+
+  
   me: async (): Promise<User> => {
     const response = await fetch(`${API_URL}/auth/me`, {
       headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  listUsers: async (): Promise<User[]> => {
+    const response = await fetch(`${API_URL}/auth/users`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  deleteUser: async (userId: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/auth/users/${userId}`, {
+      method: "DELETE",
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  updateUserRole: async (userId: string, role: UserRole): Promise<void> => {
+    const response = await fetch(`${API_URL}/auth/users/${userId}/role?role=${role}`, {
+      method: "PUT",
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  updateSubscription: async (userId: string, subscription: any): Promise<void> => {
+    const response = await fetch(`${API_URL}/auth/users/${userId}/subscription`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(subscription),
     });
     return handleResponse(response);
   },
