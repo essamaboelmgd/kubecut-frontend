@@ -7,17 +7,13 @@ import {
   Filter,
   Plus,
   ShoppingBag,
-  Loader2,
   Image as ImageIcon,
-  Upload,
   X,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -25,24 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogDescription
-} from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '../../contexts/CartContext';
-import { marketplaceApi, MarketplaceItem, MarketplaceItemCreate, API_URL } from '../../lib/api';
+import { marketplaceApi, MarketplaceItem, API_URL } from '../../lib/api';
 
 const statusLabels: Record<string, string> = {
   all: 'الكل',
@@ -211,20 +192,6 @@ export default function Store() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [items, setItems] = useState<MarketplaceItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-
-  // Form State
-  const [newProduct, setNewProduct] = useState<MarketplaceItemCreate>({
-    title: '',
-    description: '',
-    price: 0,
-    quantity: 1,
-    unit: 'قطعة',
-    images: [],
-    location: '',
-  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -267,78 +234,7 @@ export default function Store() {
     });
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
-    
-    setIsUploading(true);
-    const files = Array.from(e.target.files);
-    
-    try {
-      const uploadPromises = files.map(file => marketplaceApi.uploadImage(file));
-      const results = await Promise.all(uploadPromises);
-      const newUrls = results.map(r => r.url);
-      
-      setNewProduct(prev => ({
-        ...prev,
-        images: [...(prev.images || []), ...newUrls]
-      }));
-      
-      toast({
-        title: 'تم الرفع',
-        description: 'تم رفع الصور بنجاح',
-      });
-    } catch (error) {
-      toast({
-        title: 'خطأ',
-        description: 'فشل رفع الصور',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsUploading(false);
-      // Reset input
-      e.target.value = '';
-    }
-  };
 
-  const removeImage = (indexToRemove: number) => {
-    setNewProduct(prev => ({
-      ...prev,
-      images: prev.images?.filter((_, index) => index !== indexToRemove)
-    }));
-  };
-
-  const handleAddProduct = async () => {
-    try {
-      setIsAdding(true);
-      
-      await marketplaceApi.create(newProduct);
-      
-      toast({
-        title: 'تم بنجاح',
-        description: 'تم إضافة المنتج بنجاح',
-      });
-      
-      setIsDialogOpen(false);
-      setNewProduct({
-        title: '',
-        description: '',
-        price: 0,
-        quantity: 1,
-        unit: 'قطعة',
-        images: [],
-        location: '',
-      });
-      fetchItems();
-    } catch (error) {
-      toast({
-        title: 'خطأ',
-        description: 'فشل إضافة المنتج',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsAdding(false);
-    }
-  };
 
   const cartCount = getCartCount();
   const cartTotal = getCartTotal();
@@ -365,209 +261,65 @@ export default function Store() {
         )}
       </motion.div>
 
-      <Tabs defaultValue="browse" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="browse">تصفح المنتجات</TabsTrigger>
-          <TabsTrigger value="manage">إدارة المنتجات</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="browse" className="space-y-6">
-          {/* Filters */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            className="flex flex-col gap-4 sm:flex-row"
-          >
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="ابحث في المنتجات..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="h-12 pr-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-12 w-full sm:w-48">
-                <Filter className="ml-2 h-4 w-4" />
-                <SelectValue placeholder="الحالة" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(statusLabels).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </motion.div>
-
-          {/* Products Grid */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          >
-            {filteredItems.map((item) => (
-              <ProductCard
-                key={item.item_id}
-                item={item}
-                onAddToCart={handleAddToCart}
-                getImageUrl={getImageUrl}
-                statusLabels={statusLabels}
-              />
+      {/* Filters */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
+        className="flex flex-col gap-4 sm:flex-row"
+      >
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="ابحث في المنتجات..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-12 pr-10"
+          />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="h-12 w-full sm:w-48">
+            <Filter className="ml-2 h-4 w-4" />
+            <SelectValue placeholder="الحالة" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(statusLabels).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
             ))}
-          </motion.div>
+          </SelectContent>
+        </Select>
+      </motion.div>
 
-          {filteredItems.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-12"
-            >
-              <ShoppingBag className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">لا توجد منتجات مطابقة للبحث</p>
-            </motion.div>
-          )}
-        </TabsContent>
+      {/* Products Grid */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
+        {filteredItems.map((item) => (
+          <ProductCard
+            key={item.item_id}
+            item={item}
+            onAddToCart={handleAddToCart}
+            getImageUrl={getImageUrl}
+            statusLabels={statusLabels}
+          />
+        ))}
+      </motion.div>
 
-        <TabsContent value="manage" className="space-y-6">
-          <div className="glass-card p-6">
-            <h2 className="mb-4 text-lg font-semibold">إدارة المنتجات</h2>
-            <p className="text-muted-foreground mb-6">
-              يمكنك إضافة منتجات جديدة لعرضها في المتجر.
-            </p>
-            
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="hero">
-                  <Plus className="h-5 w-5 ml-2" />
-                  إضافة منتج جديد
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>إضافة منتج جديد</DialogTitle>
-                  <DialogDescription>
-                    أدخل تفاصيل المنتج الجديد لإضافته للمتجر
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto px-1">
-                  <div className="grid gap-2">
-                    <Label htmlFor="title">اسم المنتج</Label>
-                    <Input
-                      id="title"
-                      value={newProduct.title}
-                      onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
-                      placeholder="مثال: لوح كونتر أرو"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="description">الوصف</Label>
-                    <Textarea
-                      id="description"
-                      value={newProduct.description}
-                      onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                      placeholder="وصف تفصيلي للمنتج..."
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="price">السعر (ج.م)</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        value={newProduct.price}
-                        onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="quantity">الكمية المتاحة</Label>
-                      <Input
-                        id="quantity"
-                        type="number"
-                        value={newProduct.quantity}
-                        onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="unit">الوحدة</Label>
-                      <Input
-                        id="unit"
-                        value={newProduct.unit}
-                        onChange={(e) => setNewProduct({ ...newProduct, unit: e.target.value })}
-                        placeholder="مثال: قطعة، متر، لوح"
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="location">الموقع (اختياري)</Label>
-                      <Input
-                        id="location"
-                        value={newProduct.location}
-                        onChange={(e) => setNewProduct({ ...newProduct, location: e.target.value })}
-                        placeholder="المخزن الرئيسي"
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Image Upload Section */}
-                  <div className="grid gap-2">
-                    <Label>صور المنتج</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {newProduct.images?.map((url, index) => (
-                        <div key={index} className="relative aspect-square overflow-hidden rounded-md border border-border">
-                          <img 
-                            src={getImageUrl(url)} 
-                            alt={`Preview ${index}`} 
-                            className="h-full w-full object-cover"
-                          />
-                          <button
-                            onClick={() => removeImage(index)}
-                            className="absolute top-1 right-1 rounded-full bg-destructive p-0.5 text-white hover:bg-destructive/90"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                      <div className="relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-muted-foreground/50 transition-colors hover:bg-muted/50">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          className="absolute inset-0 cursor-pointer opacity-0"
-                          onChange={handleImageUpload}
-                          disabled={isUploading}
-                        />
-                         {isUploading ? (
-                          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                        ) : (
-                          <>
-                            <Upload className="mb-1 h-6 w-6 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">رفع صور</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    إلغاء
-                  </Button>
-                  <Button onClick={handleAddProduct} disabled={isAdding || !newProduct.title || !newProduct.price}>
-                    {isAdding && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-                    إضافة المنتج
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </TabsContent>
-      </Tabs>
+      {filteredItems.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center justify-center py-12"
+        >
+          <ShoppingBag className="h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">لا توجد منتجات مطابقة للبحث</p>
+        </motion.div>
+      )}
     </div>
   );
 }

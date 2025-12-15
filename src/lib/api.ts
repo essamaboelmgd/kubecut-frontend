@@ -356,6 +356,9 @@ export const handleResponse = async <T>(response: Response): Promise<T> => {
     const error = await response.json().catch(() => ({ detail: "An error occurred" }));
     throw new Error(error.detail || "Request failed");
   }
+  if (response.status === 204) {
+    return null as unknown as T;
+  }
   return response.json();
 };
 
