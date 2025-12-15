@@ -57,6 +57,7 @@ export interface Project {
   description: string;
   client_name: string;
   units: Unit[];
+  status?: 'active' | 'completed' | 'pending';
   created_at: string;
   updated_at?: string;
 }
