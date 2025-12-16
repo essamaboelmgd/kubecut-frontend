@@ -559,7 +559,7 @@ export interface Ad {
   title: string;
   image_url: string;
   link_url?: string;
-  location: 'dashboard_banner' | 'store_grid' | 'landing_page';
+  locations: ('dashboard_banner' | 'store_grid' | 'landing_page')[];
   is_active: boolean;
   priority: number;
   created_at: string;
@@ -587,6 +587,15 @@ export const adsApi = {
   createAd: async (data: any): Promise<Ad> => {
     const response = await fetch(`${API_URL}/ads/`, {
       method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  updateAd: async (id: string, data: any): Promise<Ad> => {
+    const response = await fetch(`${API_URL}/ads/${id}`, {
+      method: "PUT",
       headers: getHeaders(),
       body: JSON.stringify(data),
     });

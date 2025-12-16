@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import {
   Megaphone,
   Plus,
@@ -12,7 +11,8 @@ import {
   Check,
   LayoutDashboard,
   ShoppingBag,
-  Monitor
+  Monitor,
+  Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,13 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { adsApi, type Ad, marketplaceApi, API_URL } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,12 +45,19 @@ export default function Ads() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   
   // Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    link_url: string;
+    locations: string[];
+    image_url: string;
+    priority: number;
+  }>({
     title: '',
     link_url: '',
-    location: 'dashboard_banner',
+    locations: [],
     image_url: '',
     priority: 1
   });
@@ -120,11 +121,35 @@ export default function Ads() {
     }
   };
 
+  const handleOpenCreate = () => {
+      setEditId(null);
+      setFormData({
+        title: '',
+        link_url: '',
+        locations: [],
+        image_url: '',
+        priority: 1
+      });
+      setIsDialogOpen(true);
+  };
+
+  const handleEdit = (ad: Ad) => {
+      setEditId(ad.ad_id);
+      setFormData({
+          title: ad.title,
+          link_url: ad.link_url || '',
+          locations: ad.locations || [],
+          image_url: ad.image_url,
+          priority: ad.priority
+      });
+      setIsDialogOpen(true);
+  };
+
   const handleSubmit = async () => {
-    if (!formData.title || !formData.image_url) {
+    if (!formData.title || !formData.image_url || formData.locations.length === 0) {
       toast({
         title: 'تنبيه',
-        description: 'يرجى ملء البيانات المطلوبة (العنوان والصورة)',
+        description: 'يرجى ملء البيانات المطلوبة (العنوان، الصورة، ومكان واحد على الأقل)',
         variant: 'destructive',
       });
       return;
@@ -132,24 +157,26 @@ export default function Ads() {
 
     setIsSubmitting(true);
     try {
-      const newAd = await adsApi.createAd(formData);
-      setAds([newAd, ...ads]);
+      if (editId) {
+          const updatedAd = await adsApi.updateAd(editId, formData);
+          setAds(ads.map(ad => ad.ad_id === editId ? updatedAd : ad));
+          toast({
+            title: 'تم التحديث',
+            description: 'تم تحديث الإعلان بنجاح',
+          });
+      } else {
+          const newAd = await adsApi.createAd(formData);
+          setAds([newAd, ...ads]);
+          toast({
+            title: 'تم بنجاح',
+            description: 'تم إنشاء الإعلان الجديد',
+          });
+      }
       setIsDialogOpen(false);
-      setFormData({
-        title: '',
-        link_url: '',
-        location: 'dashboard_banner',
-        image_url: '',
-        priority: 1
-      });
-      toast({
-        title: 'تم بنجاح',
-        description: 'تم إنشاء الإعلان الجديد',
-      });
     } catch (error) {
       toast({
         title: 'خطأ',
-        description: 'فشل إنشاء الإعلان',
+        description: editId ? 'فشل تحديث الإعلان' : 'فشل إنشاء الإعلان',
         variant: 'destructive',
       });
     } finally {
@@ -192,11 +219,21 @@ export default function Ads() {
     }
   };
 
+  const handleLocationChange = (loc: string, checked: boolean) => {
+      setFormData(prev => {
+          if (checked) {
+              return { ...prev, locations: [...prev.locations, loc] };
+          } else {
+              return { ...prev, locations: prev.locations.filter(l => l !== loc) };
+          }
+      });
+  };
+
   const getLocationLabel = (loc: string) => {
       switch(loc) {
-          case 'dashboard_banner': return 'لوحة التحكم (بانر)';
-          case 'store_grid': return 'المتجر (Grid)';
-          case 'landing_page': return 'الصفحة الرئيسية (Landing)';
+          case 'dashboard_banner': return 'لوحة التحكم';
+          case 'store_grid': return 'المتجر';
+          case 'landing_page': return 'الرئيسية';
           default: return loc;
       }
   };
@@ -224,7 +261,7 @@ export default function Ads() {
              التحكم في البانرات والإعلانات المعروضة في المنصة
           </p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
+        <Button onClick={handleOpenCreate} className="gap-2">
           <Plus className="h-4 w-4" />
           إعلان جديد
         </Button>
@@ -235,7 +272,7 @@ export default function Ads() {
             <TableHeader className="bg-muted/40 text-xs uppercase tracking-wider">
               <TableRow className="hover:bg-transparent border-border/50">
                 <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">الإعلان</TableHead>
-                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">المكان</TableHead>
+                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">أماكن العرض</TableHead>
                 <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">الرابط</TableHead>
                 <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">الحالة</TableHead>
                 <TableHead className="py-4 px-6 text-left font-bold text-muted-foreground">إجراءات</TableHead>
@@ -257,9 +294,16 @@ export default function Ads() {
                         </div>
                     </TableCell>
                     <TableCell className="py-4 px-6">
-                         <Badge variant="outline" className="bg-primary/5">
-                             {getLocationLabel(ad.location)}
-                         </Badge>
+                         <div className="flex flex-wrap gap-1">
+                             {ad.locations && ad.locations.map(loc => (
+                                 <Badge key={loc} variant="outline" className="bg-primary/5 text-[10px]">
+                                     {getLocationLabel(loc)}
+                                 </Badge>
+                             ))}
+                             {(!ad.locations || ad.locations.length === 0) && (
+                                 <span className="text-muted-foreground text-xs">-</span>
+                             )}
+                         </div>
                     </TableCell>
                     <TableCell className="py-4 px-6 text-xs text-muted-foreground max-w-[200px] truncate">
                         {ad.link_url || '-'}
@@ -271,6 +315,15 @@ export default function Ads() {
                     </TableCell>
                     <TableCell className="py-4 px-6 text-left">
                         <div className="flex justify-end gap-2">
+                             <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleEdit(ad)}
+                                className="text-primary hover:bg-primary/10 hover:text-primary"
+                                title="تعديل"
+                            >
+                                <Pencil className="h-4 w-4" />
+                            </Button>
                             <Button 
                                 variant="ghost" 
                                 size="sm" 
@@ -291,13 +344,6 @@ export default function Ads() {
                     </TableCell>
                   </TableRow>
                 ))}
-                {ads.length === 0 && (
-                    <TableRow>
-                        <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                            لا توجد إعلانات حالياً
-                        </TableCell>
-                    </TableRow>
-                )}
             </TableBody>
          </Table>
       </div>
@@ -305,7 +351,7 @@ export default function Ads() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
            <DialogHeader>
-                <DialogTitle>إضافة إعلان جديد</DialogTitle>
+                <DialogTitle>{editId ? 'تعديل الإعلان' : 'إضافة إعلان جديد'}</DialogTitle>
            </DialogHeader>
            <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
@@ -318,24 +364,50 @@ export default function Ads() {
                 </div>
 
                 <div className="grid gap-2">
-                    <Label>مكان العرض</Label>
-                    <Select 
-                        value={formData.location} 
-                        onValueChange={(val) => setFormData({...formData, location: val})}
-                    >
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="dashboard_banner">لوحة التحكم (بانر علوي)</SelectItem>
-                            <SelectItem value="store_grid">المتجر (وسط المنتجات)</SelectItem>
-                            <SelectItem value="landing_page">الصفحة الرئيسية (خارجي)</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <Label className="mb-2 block">أماكن العرض</Label>
+                    <div className="grid gap-3 border p-4 rounded-lg bg-muted/20">
+                        <div className="flex items-center gap-2">
+                            <Checkbox 
+                                id="chk_dashboard" 
+                                checked={formData.locations.includes('dashboard_banner')}
+                                onCheckedChange={(checked) => handleLocationChange('dashboard_banner', checked as boolean)}
+                            />
+                            <Label htmlFor="chk_dashboard" className="cursor-pointer font-normal">لوحة التحكم (بانر علوي)</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox 
+                                id="chk_store" 
+                                checked={formData.locations.includes('store_grid')}
+                                onCheckedChange={(checked) => handleLocationChange('store_grid', checked as boolean)}
+                            />
+                            <Label htmlFor="chk_store" className="cursor-pointer font-normal">المتجر (وسط المنتجات)</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Checkbox 
+                                id="chk_landing" 
+                                checked={formData.locations.includes('landing_page')}
+                                onCheckedChange={(checked) => handleLocationChange('landing_page', checked as boolean)}
+                            />
+                            <Label htmlFor="chk_landing" className="cursor-pointer font-normal">الصفحة الرئيسية (الموقع التعريفي)</Label>
+                        </div>
+                    </div>
                 </div>
                 
                 <div className="grid gap-2">
                     <Label>الصورة</Label>
+                    {formData.image_url && (
+                        <div className="relative aspect-video rounded-lg overflow-hidden border border-border">
+                             <img src={getImageUrl(formData.image_url)} alt="Preview" className="w-full h-full object-cover" />
+                             <Button 
+                                variant="destructive" 
+                                size="icon" 
+                                className="absolute top-2 right-2 h-6 w-6"
+                                onClick={() => setFormData({...formData, image_url: ''})}
+                             >
+                                 <Trash2 className="h-3 w-3" />
+                             </Button>
+                        </div>
+                    )}
                     <div className="flex items-center gap-4">
                         <div className="flex-1">
                             <Input 
@@ -347,11 +419,6 @@ export default function Ads() {
                         </div>
                         {uploadingImage && <Loader2 className="h-4 w-4 animate-spin" />}
                     </div>
-                    {formData.image_url && (
-                        <div className="mt-2 text-xs text-green-500 flex items-center gap-1">
-                            <Check className="h-3 w-3" /> تم رفع الصورة
-                        </div>
-                    )}
                 </div>
 
                 <div className="grid gap-2">
@@ -368,8 +435,8 @@ export default function Ads() {
            <DialogFooter>
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>إلغاء</Button>
                 <Button onClick={handleSubmit} disabled={isSubmitting || uploadingImage}>
-                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Megaphone className="mr-2 h-4 w-4" />}
-                    إنشاء الإعلان
+                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (editId ? <Check className="mr-2 h-4 w-4" /> : <Megaphone className="mr-2 h-4 w-4" />)}
+                    {editId ? 'حفظ التعديلات' : 'إنشاء الإعلان'}
                 </Button>
            </DialogFooter>
         </DialogContent>
