@@ -25,6 +25,7 @@ import Users from "./pages/dashboard/Users";
 import AccountSettings from "./pages/dashboard/AccountSettings";
 import NotFound from "./pages/NotFound";
 import ProductManagement from "./pages/dashboard/ProductManagement";
+import Ads from "./pages/dashboard/Ads";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
                   <Route path="orders" element={<Orders />} />
                   <Route path="sales" element={<Sales />} />
                   <Route path="my-products" element={<ProductManagement />} />
+                  <Route path="ads-management" element={<Ads />} />
                   <Route path="users" element={<Users />} />
                   <Route path="account" element={<AccountSettings />} />
                 </Route>

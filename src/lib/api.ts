@@ -554,6 +554,62 @@ export const settingsApi = {
     }
 };
 
+export interface Ad {
+  ad_id: string;
+  title: string;
+  image_url: string;
+  link_url?: string;
+  location: 'dashboard_banner' | 'store_grid' | 'landing_page';
+  is_active: boolean;
+  priority: number;
+  created_at: string;
+}
+
+export const adsApi = {
+  getAds: async (location?: string): Promise<Ad[]> => {
+    const query = location ? `?location=${location}` : '';
+    const response = await fetch(`${API_URL}/ads/${query}`, {
+      method: "GET",
+      headers: {
+         'Content-Type': 'application/json',
+      }
+    });
+    return handleResponse(response);
+  },
+
+  getAllAdsAdmin: async (): Promise<Ad[]> => {
+    const response = await fetch(`${API_URL}/ads/admin`, {
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  createAd: async (data: any): Promise<Ad> => {
+    const response = await fetch(`${API_URL}/ads/`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  deleteAd: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/ads/${id}`, {
+      method: "DELETE",
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+
+  toggleAd: async (id: string): Promise<Ad> => {
+    const response = await fetch(`${API_URL}/ads/${id}/toggle`, {
+      method: "PUT",
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+};
+
 export const marketplaceApi = {
     getAll: async (search?: string, status?: string): Promise<MarketplaceItem[]> => {
         const queryParams = new URLSearchParams();

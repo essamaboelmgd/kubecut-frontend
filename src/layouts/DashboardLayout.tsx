@@ -15,6 +15,7 @@ import {
   Users,
   TrendingUp,
   Package,
+  Megaphone,
   LucideIcon
 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
@@ -51,6 +52,7 @@ const sidebarCategories: SidebarCategory[] = [
       { icon: LayoutDashboard, label: 'لوحة التحكم', href: '/dashboard' },
       { icon: FolderKanban, label: 'المشاريع', href: '/dashboard/projects' },
       { icon: Settings2, label: 'إعدادات التقطيع', href: '/dashboard/cutting-settings' },
+      { icon: Megaphone, label: 'إدارة الإعلانات', href: '/dashboard/ads-management', adminOnly: true },
     ]
   },
   {

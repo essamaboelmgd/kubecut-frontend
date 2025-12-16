@@ -12,8 +12,9 @@ import {
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { dashboardApi, type DashboardStats, type RecentProject, type TipOfTheDay } from '@/lib/api';
+import { dashboardApi, type DashboardStats, type RecentProject, type TipOfTheDay, adsApi, Ad } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { AdCarousel } from '@/components/ads/AdCarousel';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -21,20 +22,23 @@ export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
   const [tip, setTip] = useState<TipOfTheDay | null>(null);
+  const [ads, setAds] = useState<Ad[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsData, projectsData, tipData] = await Promise.all([
+        const [statsData, projectsData, tipData, adsData] = await Promise.all([
           dashboardApi.getStats(),
           dashboardApi.getRecentProjects(),
-          dashboardApi.getTipOfTheDay()
+          dashboardApi.getTipOfTheDay(),
+          adsApi.getAds('dashboard_banner')
         ]);
         
         setStats(statsData);
         setRecentProjects(projectsData);
         setTip(tipData);
+        setAds(adsData);
       } catch (error) {
         console.error(error);
         toast({
@@ -108,6 +112,17 @@ export default function Dashboard() {
           إليك نظرة عامة على نشاطك اليوم
         </p>
       </motion.div>
+
+      {/* Ads Banner */}
+      {ads.length > 0 && (
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.05, duration: 0.5 }}
+        >
+            <AdCarousel ads={ads} />
+        </motion.div>
+      )}
 
       {/* Stats */}
       <motion.div

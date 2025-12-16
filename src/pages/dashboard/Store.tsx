@@ -23,7 +23,9 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '../../contexts/CartContext';
-import { marketplaceApi, MarketplaceItem, API_URL } from '../../lib/api';
+import { marketplaceApi, MarketplaceItem, API_URL, adsApi, Ad } from '../../lib/api';
+import { SponsoredCard } from '@/components/ads/SponsoredCard';
+import React from 'react';
 
 const statusLabels: Record<string, string> = {
   all: 'الكل',
@@ -191,6 +193,7 @@ export default function Store() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [items, setItems] = useState<MarketplaceItem[]>([]);
+  const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -203,8 +206,12 @@ export default function Store() {
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const data = await marketplaceApi.getAll(search, statusFilter);
+      const [data, adsData] = await Promise.all([
+        marketplaceApi.getAll(search, statusFilter),
+        adsApi.getAds('store_grid')
+      ]);
       setItems(data);
+      setAds(adsData);
     } catch (error) {
       console.error(error);
       toast({
@@ -299,14 +306,19 @@ export default function Store() {
         transition={{ delay: 0.2, duration: 0.5 }}
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
       >
-        {filteredItems.map((item) => (
-          <ProductCard
-            key={item.item_id}
-            item={item}
-            onAddToCart={handleAddToCart}
-            getImageUrl={getImageUrl}
-            statusLabels={statusLabels}
-          />
+        {filteredItems.map((item, index) => (
+            <React.Fragment key={item.item_id}>
+                <ProductCard
+                    item={item}
+                    onAddToCart={handleAddToCart}
+                    getImageUrl={getImageUrl}
+                    statusLabels={statusLabels}
+                />
+                {/* Insert Ad every 6 items */}
+                {(index + 1) % 6 === 0 && ads.length > 0 && (
+                    <SponsoredCard ad={ads[Math.floor((index + 1) / 6) % ads.length]} />
+                )}
+            </React.Fragment>
         ))}
       </motion.div>
 
