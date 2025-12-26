@@ -291,6 +291,7 @@ export interface MarketplaceItem {
     item_id: string;
     seller_id?: string;
     seller_name?: string;
+    seller_phone?: string;
     buyer_id?: string;
     title: string;
     description: string;

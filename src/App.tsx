@@ -26,6 +26,7 @@ import AccountSettings from "./pages/dashboard/AccountSettings";
 import NotFound from "./pages/NotFound";
 import ProductManagement from "./pages/dashboard/ProductManagement";
 import Ads from "./pages/dashboard/Ads";
+import StoreItemDetails from "./pages/dashboard/StoreItemDetails";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
                   <Route path="projects/:id" element={<ProjectDetails />} />
                   <Route path="units/:id" element={<UnitDetails />} />
                   <Route path="store" element={<Store />} />
+                  <Route path="store/:id" element={<StoreItemDetails />} />
                   <Route path="cart" element={<Cart />} />
                   <Route path="checkout" element={<Checkout />} />
                   <Route path="orders" element={<Orders />} />

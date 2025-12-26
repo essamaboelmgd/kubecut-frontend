@@ -163,22 +163,19 @@ const ProductCard = ({
           </div>
           <Button 
             size="sm" 
-            onClick={() => onAddToCart(item)}
-            disabled={!isAvailable}
-            className={`rounded-xl px-4 transition-all duration-300 ${!isAvailable ? "opacity-50 cursor-not-allowed bg-muted text-muted-foreground" : "hover:scale-105 shadow-md shadow-primary/20"}`}
-            variant={isAvailable ? "default" : "secondary"}
+            onClick={(e) => {
+                e.stopPropagation();
+                // Navigate to details (passed from parent or use navigate inside)
+                // Since this component is inside Store, we can pass a handler or use hook if we move hook inside
+                // Easier: pass onDetailsClick prop
+                onAddToCart(item); // Reusing this prop name for now or refactoring? 
+                // Let's refactor the prop name in next step or just assume the parent handles it.
+                // Actually the parent IS Store, so let's check Store's handler.
+            }}
+            className={`rounded-xl px-4 transition-all duration-300 hover:scale-105 shadow-md shadow-primary/20`}
+            variant="default"
           >
-            {!isAvailable ? (
-                <>
-                  <X className="h-4 w-4 ml-1" />
-                  غير متاح
-                </>
-            ) : (
-                <>
-                  <Plus className="h-4 w-4 ml-1" />
-                  إضافة
-                </>
-            )}
+             تفاصيل / شراء
           </Button>
         </div>
       </div>
@@ -234,11 +231,7 @@ export default function Store() {
   const filteredItems = items;
 
   const handleAddToCart = (item: MarketplaceItem) => {
-    addToCart(item);
-    toast({
-      title: 'تمت الإضافة',
-      description: `تم إضافة "${item.title}" إلى السلة`,
-    });
+    navigate(`/dashboard/store/${item.item_id}`);
   };
 
 
