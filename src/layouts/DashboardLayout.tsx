@@ -59,9 +59,9 @@ const sidebarCategories: SidebarCategory[] = [
     title: 'التجارة',
     items: [
       { icon: ShoppingCart, label: 'المتجر', href: '/dashboard/store' },
-      { icon: ShoppingBag, label: 'السلة', href: '/dashboard/cart', showBadge: true },
-      { icon: ClipboardList, label: 'الطلبات', href: '/dashboard/orders' },
-      { icon: TrendingUp, label: 'المبيعات', href: '/dashboard/sales' },
+      // { icon: ShoppingBag, label: 'السلة', href: '/dashboard/cart', showBadge: true },
+      // { icon: ClipboardList, label: 'الطلبات', href: '/dashboard/orders' },
+      // { icon: TrendingUp, label: 'المبيعات', href: '/dashboard/sales' },
       { icon: Package, label: 'إدارة منتجاتي', href: '/dashboard/my-products' },
     ]
   },
