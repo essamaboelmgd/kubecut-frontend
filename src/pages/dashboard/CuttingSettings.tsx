@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, RefreshCw, Loader2, Settings2 } from 'lucide-react';
+import { Save, Loader2, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +15,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -37,6 +35,32 @@ const handleTypes = {
   regular: 'مقبض عادي',
   hidden_cl_chassis: 'مقبض مخفي (C-L) / شاسية',
   hidden_cl_drop: 'مقبض مخفي (C-L) / ساقط',
+};
+
+// Edge Banding Options
+const edgeBandingOptions = {
+  "-": "بدون",
+  "I": "I : شريط طول",
+  "L": "L : شريط ( طول + عرض )",
+  "LM-يمين": "L-M : شريط ( طول + عرض ) مفحار يمين",
+  "C": "C : شريط ( طول + 2 عرض )",
+  "U": "U : شريط ( 2 طول + عرض )",
+  "O": "O : شريط داير",
+  "\\": "\\ : شريط عرض",
+  "II": "II : شريط 2 طول",
+  "\\\\": "\\\\ : شريط 2 عرض",
+  "IM": "IM : شريط طول + مفحار عكس",
+  "CM": "CM : شريط ( طول + 2 عرض ) + مفحار عكس",
+  "UM-يمين": "UM-R : شريط ( 2 طول + عرض ) + مفحار يمين",
+  "IIM": "IIM : شريط 2 طول + مفحار مع الطول",
+  "\\M": "\\M : شريط عرض + مفحار عكس",
+  "\\\\M": "\\\\M : شريط 2 عرض + مفحار مع العرض",
+  "OM": "OM : شريط داير + مفحار مع الطول",
+  "DR": "DR : شريط طول + مفحار درج بلوم",
+  "LL": "LL : وحدة زاوية حرف L",
+  "LS": "LS : وحدة ركنة مشطوفة",
+  "LLM": "LLM : وحدة زاوية حرف L + مفحار",
+  "LSM": "LSM : وحدة ركنة مشطوفة + مفحار",
 };
 
 export default function CuttingSettings() {
@@ -65,11 +89,7 @@ export default function CuttingSettings() {
     }
   };
 
-  const calculateEdgeBandCost = () => {
-    // This function needs to be implemented or removed if not needed.
-    // For now, it's a placeholder if there was similar logic.
-    // Assuming backend handles calculations.
-  };
+
   
   const handleInputChange = (key: keyof SettingsModel, value: any) => {
     if (!settings) return;
@@ -164,6 +184,25 @@ export default function CuttingSettings() {
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(assemblyMethods).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">كود الشريط (للتخصيم 2مم)</Label>
+                <Select
+                  value={settings.edge_banding_type || "-"}
+                  onValueChange={(value) => handleInputChange('edge_banding_type', value)}
+                >
+                  <SelectTrigger className="h-11 bg-background/50 focus:ring-primary/20 transition-all">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {Object.entries(edgeBandingOptions).map(([key, label]) => (
                       <SelectItem key={key} value={key}>
                         {label}
                       </SelectItem>

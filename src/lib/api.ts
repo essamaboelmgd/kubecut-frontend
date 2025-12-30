@@ -259,6 +259,7 @@ export interface Unit extends UnitCalculateResponse {
 export interface SettingsModel {
     assembly_method: string;
     handle_type: string;
+    edge_banding_type: string;
     handle_profile_height: number;
     chassis_handle_drop: number;
     counter_thickness: number;
