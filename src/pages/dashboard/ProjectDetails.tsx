@@ -39,12 +39,12 @@ const unitCategories = [
   {
     label: 'وحدات أرضية',
     types: [
-      { value: 'ground_unit', label: 'أرضي ضلف' },
-      { value: 'sink_unit', label: 'وحدة حوض' },
-      { value: 'ground_fixed_unit', label: 'أرضي ثابت' },
-      { value: 'sink_fixed_unit', label: 'حوض ثابت' },
-      { value: 'drawers_unit', label: 'أدراج (مجرى جنب)' },
-      { value: 'drawers_bottom_rail_unit', label: 'أدراج (مجرى سفلي)' },
+      { value: 'ground', label: 'أرضي ضلف' },
+      { value: 'sink', label: 'وحدة حوض' },
+      { value: 'ground_fixed', label: 'أرضي ثابت' },
+      { value: 'sink_fixed', label: 'حوض ثابت' },
+      { value: 'drawers', label: 'أدراج (مجرى جنب)' },
+      { value: 'drawers_bottom_rail', label: 'أدراج (مجرى سفلي)' },
     ]
   },
   {

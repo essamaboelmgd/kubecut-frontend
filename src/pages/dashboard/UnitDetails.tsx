@@ -27,12 +27,12 @@ import {
 } from '@/components/ui/table';
 
 const unitTypeLabels: Record<string, string> = {
-  ground_unit: 'وحدة أرضية',
-  sink_unit: 'وحدة حوض',
-  ground_fixed_unit: 'أرضي ثابت',
-  sink_fixed_unit: 'حوض ثابت',
-  drawers_unit: 'أدراج (مجرى جنب)',
-  drawers_bottom_rail_unit: 'أدراج (مجرى سفلي)',
+  ground: 'وحدة أرضية',
+  sink: 'وحدة حوض',
+  ground_fixed: 'أرضي ثابت',
+  sink_fixed: 'حوض ثابت',
+  drawers: 'أدراج (مجرى جنب)',
+  drawers_bottom_rail: 'أدراج (مجرى سفلي)',
   tall_doors: 'دولاب ضلف',
   tall_doors_appliances: 'دولاب ضلف وأجهزة',
   tall_drawers_side_doors_top: 'دولاب درج جنب + ضلف',
@@ -257,7 +257,7 @@ export default function UnitDetails() {
       </motion.div>
 
       {/* Action Buttons */}
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.5 }}
@@ -299,7 +299,7 @@ export default function UnitDetails() {
           )}
           تفاصيل الشريط
         </Button>
-      </motion.div>
+      </motion.div> */}
 
       {/* Results Cards */}
       <div className="grid gap-6 lg:grid-cols-3">
