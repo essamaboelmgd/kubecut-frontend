@@ -85,7 +85,9 @@ export type UnitType =
   | "tall_drawers_bottom_appliances_doors_top" | "tall_drawers_bottom_appliances_doors_top_side_panel"
   | "two_small_20_one_large_side" | "two_small_20_one_large_bottom"
   | "one_small_16_two_large_side" | "one_small_16_two_large_bottom"
-  | "side_flush" | "wall_microwave" | "wall_microwave_side_panel" | "wardrobe_wooden_base";
+  | "side_flush" | "wall_microwave" | "wall_microwave_side_panel" | "wardrobe_wooden_base"
+  | "tall_wooden_base" | "tall_drawers_bottom_rail_top_doors"
+  | "three_turbo" | "drawer_built_in_oven" | "drawer_bottom_rail_built_in_oven";
 
 export type DoorType = "hinged" | "flip";
 

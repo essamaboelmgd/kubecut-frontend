@@ -39,64 +39,48 @@ const unitCategories = [
   {
     label: 'وحدات أرضية',
     types: [
-      { value: 'ground', label: 'أرضي' },
-      { value: 'ground_side_panel', label: 'أرضي (جنب عيرة)' },
-      { value: 'ground_fixed', label: 'أرضي ثابت' },
-      { value: 'ground_fixed_side_panel', label: 'أرضي ثابت (جنب عيرة)' },
-    ]
-  },
-  {
-    label: 'وحدات حوض',
-    types: [
-      { value: 'sink', label: 'حوض' },
-      { value: 'sink_side_panel', label: 'حوض (جنب عيرة)' },
-      { value: 'sink_fixed', label: 'حوض ثابت' },
-      { value: 'sink_fixed_side_panel', label: 'حوض ثابت (جنب عيرة)' },
-    ]
-  },
-  {
-    label: 'أدراج',
-    types: [
-      { value: 'drawers', label: 'أدراج' },
-      { value: 'drawers_side_panel', label: 'أدراج (جنب عيرة)' },
-      { value: 'drawers_bottom_rail', label: 'أدراج مجرة سفلية' },
-      { value: 'drawers_bottom_rail_side_panel', label: 'أدراج مجرة سفلية (جنب عيرة)' },
-    ]
-  },
-  {
-    label: 'ركنة أرضية',
-    types: [
-      { value: 'corner_90_ground', label: 'ركنة 90 أرضي' },
-      { value: 'corner_45_ground', label: 'ركنة 45 أرضي' },
-    ]
-  },
-  {
-    label: 'وحدات علوية',
-    types: [
-      { value: 'wall', label: 'علوي' },
-      { value: 'wall_side_panel', label: 'علوي (جنب عيرة)' },
-      { value: 'wall_fixed', label: 'علوي ثابت' },
-      { value: 'wall_fixed_side_panel', label: 'علوي ثابت (جنب عيرة)' },
-      { value: 'wall_flip_top_doors_bottom', label: 'علوي قلاب + ضلف' },
-    ]
-  },
-  {
-    label: 'ركنة علوية',
-    types: [
-      { value: 'corner_l_wall', label: 'ركنة L علوي' },
-      { value: 'corner_45_wall', label: 'ركنة 45 علوي' },
+      { value: 'ground_unit', label: 'أرضي ضلف' },
+      { value: 'sink_unit', label: 'وحدة حوض' },
+      { value: 'ground_fixed_unit', label: 'أرضي ثابت' },
+      { value: 'sink_fixed_unit', label: 'حوض ثابت' },
+      { value: 'drawers_unit', label: 'أدراج (مجرى جنب)' },
+      { value: 'drawers_bottom_rail_unit', label: 'أدراج (مجرى سفلي)' },
     ]
   },
   {
     label: 'دواليب (Tall Units)',
     types: [
       { value: 'tall_doors', label: 'دولاب ضلف' },
-      { value: 'tall_doors_side_panel', label: 'دولاب ضلف (جنب عيرة)' },
-      { value: 'tall_doors_appliances', label: 'دولاب أجهزة' },
-      { value: 'tall_doors_appliances_side_panel', label: 'دولاب أجهزة (جنب عيرة)' },
+      { value: 'tall_doors_appliances', label: 'دولاب ضلف وأجهزة' },
+      { value: 'tall_drawers_side_doors_top', label: 'دولاب درج جنب + ضلف' },
+      { value: 'tall_drawers_bottom_rail_top_doors', label: 'دولاب درج سفلي + ضلف' },
+      { value: 'tall_drawers_side_appliances_doors', label: 'دولاب درج جنب + أجهزة' },
+      { value: 'tall_drawers_bottom_appliances_doors_top', label: 'دولاب درج سفلي + أجهزة' },
+      { value: 'tall_wooden_base', label: 'بلاكار قاعدة خشبية' },
     ]
   },
-  // Add other categories as needed based on backend
+  {
+    label: 'وحدات علوية',
+    types: [
+      { value: 'wall', label: 'علوي ضلف' },
+      { value: 'wall_fixed', label: 'علوي ثابت' },
+      { value: 'wall_flip_top_doors_bottom', label: 'علوي قلاب + ضلف' },
+      { value: 'wall_microwave', label: 'علوي ميكرويف' },
+      { value: 'corner_l_wall', label: 'ركنة L علوي' },
+    ]
+  },
+  {
+    label: 'وحدات خاصة (Special)',
+    types: [
+      { value: 'three_turbo', label: 'وحدة 3 تربو' },
+      { value: 'drawer_built_in_oven', label: 'درج + فرن بيلت إن' },
+      { value: 'drawer_bottom_rail_built_in_oven', label: 'درج سفلي + فرن بيلت إن' },
+      { value: 'two_small_20_one_large_side', label: '2 صغير 20 + 1 كبير (جنب)' },
+      { value: 'two_small_20_one_large_bottom', label: '2 صغير 20 + 1 كبير (سفلي)' },
+      { value: 'one_small_16_two_large_side', label: '1 صغير 16 + 2 كبير (جنب)' },
+      { value: 'one_small_16_two_large_bottom', label: '1 صغير 16 + 2 كبير (سفلي)' },
+    ]
+  },
 ];
 
 // Map for quick label lookup
@@ -129,6 +113,7 @@ export default function ProjectDetails() {
     fixed_part_cm: 0,
     oven_height: 60,
     microwave_height: 38,
+    vent_height: 30, // Default vent height check
   });
 
   // Reset/Adjust defaults when type changes
@@ -163,9 +148,11 @@ export default function ProjectDetails() {
   };
 
   const isCorner = newUnit.type.includes('corner');
-  const isTall = newUnit.type.includes('tall');
-  const isAppliances = newUnit.type.includes('appliances') || newUnit.type.includes('microwave') || newUnit.type.includes('oven');
   const isFixed = newUnit.type.includes('fixed');
+  const isAppliances = newUnit.type.includes('appliances') || 
+                       newUnit.type.includes('microwave') || 
+                       newUnit.type.includes('oven') ||
+                       newUnit.type.includes('built_in_oven'); // Added checks
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -204,6 +191,7 @@ export default function ProjectDetails() {
         fixed_part_cm: isFixed ? Number(newUnit.fixed_part_cm) : 0,
         oven_height: isAppliances ? Number(newUnit.oven_height) : 0,
         microwave_height: isAppliances ? Number(newUnit.microwave_height) : 0,
+        vent_height: isAppliances ? Number(newUnit.vent_height) : 0,
       };
       
       const savedUnit = await unitsApi.create(unitData);
@@ -455,7 +443,7 @@ export default function ProjectDetails() {
                 {/* Appliances */}
                 {isAppliances && (
                    <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                      {newUnit.type.includes('oven') || newUnit.type.includes('appliances') ? (
+                      {(newUnit.type.includes('oven') || newUnit.type.includes('appliances') || newUnit.type.includes('built_in_oven')) && (
                          <div className="space-y-2">
                           <Label>ارتفاع الفرن (سم)</Label>
                           <Input
@@ -464,9 +452,9 @@ export default function ProjectDetails() {
                             onChange={(e) => setNewUnit({ ...newUnit, oven_height: Number(e.target.value) })}
                           />
                         </div>
-                      ) : null}
+                      )}
                       
-                      {newUnit.type.includes('microwave') || newUnit.type.includes('appliances') ? (
+                      {(newUnit.type.includes('microwave') || newUnit.type.includes('appliances')) && (
                          <div className="space-y-2">
                           <Label>ارتفاع الميكرويف (سم)</Label>
                           <Input
@@ -475,7 +463,18 @@ export default function ProjectDetails() {
                             onChange={(e) => setNewUnit({ ...newUnit, microwave_height: Number(e.target.value) })}
                           />
                         </div>
-                      ) : null}
+                      )}
+
+                      {(newUnit.type.includes('appliances')) && (
+                         <div className="space-y-2">
+                          <Label>ارتفاع الشفاط (سم)</Label>
+                          <Input
+                            type="number"
+                            value={newUnit.vent_height}
+                            onChange={(e) => setNewUnit({ ...newUnit, vent_height: Number(e.target.value) })}
+                          />
+                        </div>
+                      )}
                    </div>
                 )}
 
@@ -489,6 +488,30 @@ export default function ProjectDetails() {
                       onChange={(e) => setNewUnit({ ...newUnit, shelf_count: Number(e.target.value) })}
                     />
                   </div>
+
+                  {/* Door Count - Hide for pure drawer/special units */}
+                  {(!['drawers_unit', 'drawers_bottom_rail_unit', 'three_turbo', 'drawer_built_in_oven', 'drawer_bottom_rail_built_in_oven'].includes(newUnit.type) && !newUnit.type.startsWith('two_small') && !newUnit.type.startsWith('one_small')) && (
+                     <div className="space-y-2">
+                      <Label>عدد الضلف</Label>
+                      <Input
+                        type="number"
+                        value={newUnit.door_count}
+                        onChange={(e) => setNewUnit({ ...newUnit, door_count: Number(e.target.value) })}
+                      />
+                    </div>
+                  )}
+
+                  {/* Drawer Count - Show for units with variable drawers */}
+                  {(newUnit.type.includes('drawers')) && (
+                     <div className="space-y-2">
+                      <Label>عدد الأدراج</Label>
+                      <Input
+                        type="number"
+                        value={newUnit.drawer_count}
+                        onChange={(e) => setNewUnit({ ...newUnit, drawer_count: Number(e.target.value) })}
+                      />
+                    </div>
+                  )}
                 </div>
 
               </div>

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { unitsApi, type Unit, type CostEstimate, type InternalCounter, type EdgeBreakdown, type UnitPart } from '@/lib/api';
+import { unitsApi, type Unit, type CostEstimate, type InternalCounter, type EdgeBreakdown } from '@/lib/api';
 import {
   Table,
   TableBody,
@@ -27,10 +27,31 @@ import {
 } from '@/components/ui/table';
 
 const unitTypeLabels: Record<string, string> = {
-  ground: 'وحدة أرضية',
-  wall: 'وحدة حائطية',
-  double_door: 'وحدة بابين',
-  sink_ground: 'وحدة حوض',
+  ground_unit: 'وحدة أرضية',
+  sink_unit: 'وحدة حوض',
+  ground_fixed_unit: 'أرضي ثابت',
+  sink_fixed_unit: 'حوض ثابت',
+  drawers_unit: 'أدراج (مجرى جنب)',
+  drawers_bottom_rail_unit: 'أدراج (مجرى سفلي)',
+  tall_doors: 'دولاب ضلف',
+  tall_doors_appliances: 'دولاب ضلف وأجهزة',
+  tall_drawers_side_doors_top: 'دولاب درج جنب + ضلف',
+  tall_drawers_bottom_rail_top_doors: 'دولاب درج سفلي + ضلف',
+  tall_drawers_side_appliances_doors: 'دولاب درج جنب + أجهزة',
+  tall_drawers_bottom_appliances_doors_top: 'دولاب درج سفلي + أجهزة',
+  tall_wooden_base: 'بلاكار قاعدة خشبية',
+  wall: 'علوي ضلف',
+  wall_fixed: 'علوي ثابت',
+  wall_flip_top_doors_bottom: 'علوي قلاب + ضلف',
+  wall_microwave: 'علوي ميكرويف',
+  corner_l_wall: 'ركنة L علوي',
+  three_turbo: 'وحدة 3 تربو',
+  drawer_built_in_oven: 'درج + فرن بيلت إن',
+  drawer_bottom_rail_built_in_oven: 'درج سفلي + فرن بيلت إن',
+  two_small_20_one_large_side: '2 صغير 20 + 1 كبير (جنب)',
+  two_small_20_one_large_bottom: '2 صغير 20 + 1 كبير (سفلي)',
+  one_small_16_two_large_side: '1 صغير 16 + 2 كبير (جنب)',
+  one_small_16_two_large_bottom: '1 صغير 16 + 2 كبير (سفلي)',
 };
 
 export default function UnitDetails() {
