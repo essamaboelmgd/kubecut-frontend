@@ -11,7 +11,8 @@ import {
   Grid3X3,
   Scissors,
   RefreshCw,
-  Loader2
+  Loader2,
+  FileSpreadsheet
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -28,11 +29,17 @@ import {
 
 const unitTypeLabels: Record<string, string> = {
   ground: 'وحدة أرضية',
+  ground_unit: 'وحدة أرضية',
   sink: 'وحدة حوض',
+  sink_unit: 'وحدة حوض',
   ground_fixed: 'أرضي ثابت',
+  ground_fixed_unit: 'أرضي ثابت',
   sink_fixed: 'حوض ثابت',
+  sink_fixed_unit: 'حوض ثابت',
   drawers: 'أدراج (مجرى جنب)',
+  drawers_unit: 'أدراج (مجرى جنب)',
   drawers_bottom_rail: 'أدراج (مجرى سفلي)',
+  drawers_bottom_rail_unit: 'أدراج (مجرى سفلي)',
   tall_doors: 'دولاب ضلف',
   tall_doors_appliances: 'دولاب ضلف وأجهزة',
   tall_drawers_side_doors_top: 'دولاب درج جنب + ضلف',
@@ -67,6 +74,7 @@ export default function UnitDetails() {
   const [isLoadingCost, setIsLoadingCost] = useState(false);
   const [isLoadingCounter, setIsLoadingCounter] = useState(false);
   const [isLoadingEdge, setIsLoadingEdge] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     const fetchUnit = async () => {
@@ -159,6 +167,38 @@ export default function UnitDetails() {
       });
     } finally {
       setIsLoadingEdge(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (!unit) return;
+    setIsExporting(true);
+    try {
+      const unitId = (unit as any).unit_id || unit.id;
+      const blob = await unitsApi.exportToExcel(unitId!);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `unit_details_${unitId}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: 'تم التصدير',
+        description: 'تم تحميل ملف الإكسل بنجاح',
+      });
+    } catch {
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء تصدير الملف',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -257,7 +297,8 @@ export default function UnitDetails() {
       </motion.div>
 
       {/* Action Buttons */}
-      {/* <motion.div
+      {/* Action Buttons */}
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.5 }}
@@ -299,7 +340,20 @@ export default function UnitDetails() {
           )}
           تفاصيل الشريط
         </Button>
-      </motion.div> */}
+        <Button
+          variant="outline"
+          onClick={handleExportExcel}
+          disabled={isExporting}
+          className="bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
+        >
+          {isExporting ? (
+            <RefreshCw className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileSpreadsheet className="h-4 w-4" />
+          )}
+          تصدير إلى Excel
+        </Button>
+      </motion.div>
 
       {/* Results Cards */}
       <div className="grid gap-6 lg:grid-cols-3">

@@ -538,6 +538,15 @@ export const unitsApi = {
             headers: getHeaders(),
         });
         return handleResponse(response);
+    },
+    exportToExcel: async (unitId: string): Promise<Blob> => {
+        const response = await fetch(`${API_URL}/units/${unitId}/export-excel`, {
+            headers: getHeaders(),
+        });
+        if (!response.ok) {
+           throw new Error('Failed to export excel');
+        }
+        return response.blob();
     }
 };
 
