@@ -272,7 +272,7 @@ export default function CuttingSettings() {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">ارتفاع قطاع المقبض</Label>
                   <div className="relative">
@@ -449,41 +449,41 @@ export default function CuttingSettings() {
             </CardHeader>
             <CardContent className="pt-6">
                 <div className="rounded-md border border-border/40 overflow-hidden">
-                    <table className="w-full text-sm text-right">
-                        <thead className="bg-muted/50">
-                            <tr className="border-b border-border/40">
-                                <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-1/2">اسم الجزء</th>
-                                <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-1/2">رمز الشريط والمفحار</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border/40">
-                            {Object.entries(PART_LABELS).map(([key, label]) => (
-                                <tr key={key} className="hover:bg-muted/20 transition-colors">
-                                    <td className="p-4 align-middle font-medium">{label}</td>
-                                    <td className="p-4 align-middle">
-                                        <Select
-                                            value={settings?.part_edge_settings?.[key as keyof import('@/lib/api').PartEdgeSettings] || '-'}
-                                            onValueChange={(value) => handlePartEdgeChange(key as keyof import('@/lib/api').PartEdgeSettings, value)}
-                                        >
-                                            <SelectTrigger className="w-full bg-background/50">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="max-h-[300px]">
-                                                {Object.entries(edgeBandingOptions).map(([optKey, optLabel]) => (
-                                                    <SelectItem key={optKey} value={optKey}>
-                                                        <span className="flex items-center gap-2">
-                                                            <span className="font-mono font-bold bg-muted px-1.5 py-0.5 rounded text-xs min-w-[30px] text-center">{optKey}</span>
-                                                            <span className="text-muted-foreground text-xs truncate">{optLabel.split(' : ')[1] || optLabel}</span>
-                                                        </span>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="rounded-md border border-border/40 overflow-hidden">
+                    {/* Header - Hidden on mobile, shown on tablet/desktop */}
+                    <div className="hidden sm:grid sm:grid-cols-2 bg-muted/50 p-4 border-b border-border/40 font-medium text-muted-foreground">
+                        <div>اسم الجزء</div>
+                        <div>رمز الشريط والمفحار</div>
+                    </div>
+                    
+                    <div className="divide-y divide-border/40">
+                        {Object.entries(PART_LABELS).map(([key, label]) => (
+                            <div key={key} className="flex flex-col sm:grid sm:grid-cols-2 gap-2 sm:gap-4 p-4 hover:bg-muted/20 transition-colors sm:items-center">
+                                <div className="font-medium text-foreground">{label}</div>
+                                <div className="w-full">
+                                    <Select
+                                        value={settings?.part_edge_settings?.[key as keyof import('@/lib/api').PartEdgeSettings] || '-'}
+                                        onValueChange={(value) => handlePartEdgeChange(key as keyof import('@/lib/api').PartEdgeSettings, value)}
+                                    >
+                                        <SelectTrigger className="w-full bg-background/50 h-11 sm:h-10">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="max-h-[300px]">
+                                            {Object.entries(edgeBandingOptions).map(([optKey, optLabel]) => (
+                                                <SelectItem key={optKey} value={optKey}>
+                                                    <span className="flex items-center gap-2">
+                                                        <span className="font-mono font-bold bg-muted px-1.5 py-0.5 rounded text-xs min-w-[30px] text-center">{optKey}</span>
+                                                        <span className="text-muted-foreground text-xs truncate">{optLabel.split(' : ')[1] || optLabel}</span>
+                                                    </span>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
                 </div>
             </CardContent>
           </Card>
