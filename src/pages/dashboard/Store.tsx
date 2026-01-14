@@ -26,6 +26,34 @@ import { useCart } from '../../contexts/CartContext';
 import { marketplaceApi, MarketplaceItem, API_URL, adsApi, Ad } from '../../lib/api';
 import { SponsoredCard } from '@/components/ads/SponsoredCard';
 import React from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+    Pencil,
+    Trash2,
+    Upload,
+    Loader2
+} from 'lucide-react';
+import { MarketplaceItemCreate } from '../../lib/api';
 
 const statusLabels: Record<string, string> = {
   all: 'الكل',
@@ -38,12 +66,18 @@ const ProductCard = ({
   item, 
   onAddToCart, 
   getImageUrl, 
-  statusLabels 
+  statusLabels,
+  isAdmin,
+  onEdit,
+  onDelete
 }: { 
   item: MarketplaceItem; 
   onAddToCart: (item: MarketplaceItem) => void;
   getImageUrl: (path: string) => string;
   statusLabels: Record<string, string>;
+  isAdmin?: boolean;
+  onEdit?: (item: MarketplaceItem) => void;
+  onDelete?: (item: MarketplaceItem) => void;
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const hasMultipleImages = item.images && item.images.length > 1;
@@ -70,7 +104,7 @@ const ProductCard = ({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5 }}
       transition={{ duration: 0.3 }}
-      className="glass-card overflow-hidden group border-white/5 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5"
+      className="glass-card overflow-hidden group border-white/5 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 relative"
     >
       <div className="aspect-square overflow-hidden bg-muted/20 relative group-hover:bg-muted/30 transition-colors">
         {item.images && item.images.length > 0 ? (
@@ -98,7 +132,7 @@ const ProductCard = ({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/20 backdrop-blur-md border border-white/10 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-background/40"
+              className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/20 backdrop-blur-md border border-white/10 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-background/40 z-20"
               onClick={prevImage}
             >
               <ChevronRight className="h-4 w-4" />
@@ -106,7 +140,7 @@ const ProductCard = ({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/20 backdrop-blur-md border border-white/10 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-background/40"
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-background/20 backdrop-blur-md border border-white/10 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-background/40 z-20"
               onClick={nextImage}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -136,7 +170,7 @@ const ProductCard = ({
         )}
         
         {/* Unit Badge */}
-        <div className="absolute top-2 right-2 flex flex-col gap-2">
+        <div className="absolute top-2 right-2 flex flex-col gap-2 z-20">
             <span className="bg-background/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-medium border border-white/10 shadow-sm">
                 {item.unit}
             </span>
@@ -146,6 +180,28 @@ const ProductCard = ({
                 </span>
             )}
         </div>
+        
+        {/* Admin Controls overlay on top left */}
+        {isAdmin && (
+             <div className="absolute top-2 left-2 flex gap-1 z-30">
+                <Button 
+                    variant="secondary" 
+                    size="icon" 
+                    className="h-8 w-8 rounded-full bg-white/90 shadow-sm hover:bg-white text-foreground"
+                    onClick={(e) => { e.stopPropagation(); onEdit?.(item); }}
+                >
+                    <Pencil className="h-4 w-4" />
+                </Button>
+                <Button 
+                    variant="destructive" 
+                    size="icon" 
+                    className="h-8 w-8 rounded-full shadow-sm"
+                    onClick={(e) => { e.stopPropagation(); onDelete?.(item); }}
+                >
+                    <Trash2 className="h-4 w-4" />
+                </Button>
+             </div>
+        )}
       </div>
 
       <div className="p-5 space-y-4">
@@ -165,12 +221,7 @@ const ProductCard = ({
             size="sm" 
             onClick={(e) => {
                 e.stopPropagation();
-                // Navigate to details (passed from parent or use navigate inside)
-                // Since this component is inside Store, we can pass a handler or use hook if we move hook inside
-                // Easier: pass onDetailsClick prop
-                onAddToCart(item); // Reusing this prop name for now or refactoring? 
-                // Let's refactor the prop name in next step or just assume the parent handles it.
-                // Actually the parent IS Store, so let's check Store's handler.
+                onAddToCart(item);
             }}
             className={`rounded-xl px-4 transition-all duration-300 hover:scale-105 shadow-md shadow-primary/20`}
             variant="default"
@@ -196,6 +247,141 @@ export default function Store() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
+  // Management State
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [editingItem, setEditingItem] = useState<MarketplaceItem | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<MarketplaceItem | null>(null);
+
+  const [formData, setFormData] = useState<MarketplaceItemCreate>({
+    title: '',
+    description: '',
+    price: 0,
+    quantity: 1,
+    unit: 'قطعة',
+    images: [],
+    location: '',
+  });
+
+  const handleEditClick = (item: MarketplaceItem) => {
+      setEditingItem(item);
+      setFormData({
+        title: item.title,
+        description: item.description,
+        price: item.price,
+        quantity: item.quantity,
+        unit: item.unit,
+        images: item.images || [],
+        location: item.location || '',
+      });
+      setIsEditOpen(true);
+  };
+
+  const handleDeleteClick = (item: MarketplaceItem) => {
+      setItemToDelete(item);
+      setIsDeleteOpen(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    
+    setIsUploading(true);
+    const files = Array.from(e.target.files);
+    
+    // Validate file size (20MB)
+    const validFiles = files.filter(file => {
+      const isValidSize = file.size <= 20 * 1024 * 1024; // 20MB
+      /* if (!isValidSize) {
+        toast({
+          title: 'حجم الملف كبير',
+          description: `الصورة ${file.name} أكبر من 20 ميجابايت`,
+          variant: 'destructive',
+        });
+      } */
+      return isValidSize;
+    });
+
+    if (validFiles.length === 0) {
+      setIsUploading(false);
+      e.target.value = '';
+      return;
+    }
+
+    try {
+      const uploadPromises = validFiles.map(file => marketplaceApi.uploadImage(file));
+      const results = await Promise.all(uploadPromises);
+      const newUrls = results.map(r => r.url);
+      
+      setFormData(prev => ({
+        ...prev,
+        images: [...(prev.images || []), ...newUrls]
+      }));
+      
+      toast({
+        title: 'تم الرفع',
+        description: 'تم رفع الصور بنجاح',
+      });
+    } catch (error) {
+      toast({
+        title: 'خطأ',
+        description: 'فشل رفع الصور',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images?.filter((_, index) => index !== indexToRemove)
+    }));
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingItem) return;
+    try {
+      setIsSubmitting(true);
+      await marketplaceApi.update(editingItem.item_id, formData);
+      toast({ title: 'تم التحديث', description: 'تم تحديث بيانات المنتج بنجاح' });
+      setIsEditOpen(false);
+      fetchItems();
+    } catch (error) {
+      toast({
+        title: 'خطأ',
+        description: 'فشل تحديث المنتج',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+      if (!itemToDelete) return;
+      try {
+          await marketplaceApi.deleteItem(itemToDelete.item_id);
+          toast({ title: 'تم الحذف', description: 'تم حذف المنتج بنجاح' });
+          fetchItems();
+      } catch (error) {
+          toast({
+            title: 'خطأ',
+            description: 'فشل حذف المنتج',
+            variant: 'destructive',
+          });
+      } finally {
+          setIsDeleteOpen(false);
+          setItemToDelete(null);
+      }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -321,6 +507,9 @@ export default function Store() {
                     onAddToCart={handleAddToCart}
                     getImageUrl={getImageUrl}
                     statusLabels={statusLabels}
+                    isAdmin={isAdmin}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteClick}
                 />
                 {/* Insert Ad every 6 items */}
                 {(index + 1) % 6 === 0 && ads.length > 0 && (
@@ -380,6 +569,147 @@ export default function Store() {
             </Button>
         </div>
       )}
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>تعديل المنتج</DialogTitle>
+              <DialogDescription>
+                تعديل بيانات المنتج المعروض
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="title">اسم المنتج</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="مثال: لوح كونتر أرو"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="description">الوصف</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="وصف تفصيلي للمنتج..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="price">السعر (ج.م)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="quantity">الكمية المتاحة</Label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    value={formData.quantity}
+                    onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="unit">الوحدة</Label>
+                  <Input
+                    id="unit"
+                    value={formData.unit}
+                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                    placeholder="مثال: قطعة، متر، لوح"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="location">الموقع (اختياري)</Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    placeholder="المخزن الرئيسي"
+                  />
+                </div>
+              </div>
+              
+              {/* Image Upload Section */}
+              <div className="grid gap-2">
+                <Label className="flex items-center gap-1">
+                  صور المنتج
+                  <span className="text-destructive">*</span>
+                </Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {formData.images?.map((url, index) => (
+                    <div key={index} className="relative aspect-square overflow-hidden rounded-md border border-border group">
+                      <img 
+                        src={getImageUrl(url)} 
+                        alt={`Preview ${index}`} 
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        onClick={() => removeImage(index)}
+                        className="absolute top-1 right-1 rounded-full bg-destructive p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/90"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <div className="relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-muted-foreground/50 transition-colors hover:bg-muted/50">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="absolute inset-0 cursor-pointer opacity-0"
+                      onChange={handleImageUpload}
+                      disabled={isUploading}
+                    />
+                      {isUploading ? (
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    ) : (
+                      <>
+                        <Upload className="mb-1 h-6 w-6 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">رفع صور</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditOpen(false)}>إلغاء</Button>
+              <Button onClick={handleSaveEdit} disabled={isSubmitting || !formData.title || !formData.price || !formData.images?.length}>
+                {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                حفظ التعديلات
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Alert */}
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+                <AlertDialogDescription>
+                    سيتم حذف المنتج "{itemToDelete?.title}" نهائياً من المتجر. لا يمكن التراجع عن هذا الإجراء.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    نعم، احذف المنتج
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }
