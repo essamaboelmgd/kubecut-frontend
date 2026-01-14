@@ -11,7 +11,8 @@ import {
   Ruler,
   Settings2,
   Loader2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Printer
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,6 +35,8 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { projectsApi, unitsApi, type Project, type UnitCalculateRequest as CreateUnitData } from '../../lib/api';
+import { unitTypeLabels } from '@/lib/translations';
+import { ProjectPrintView } from '@/components/printing/ProjectPrintView';
 
 // Unit Categories and Types with Arabic Labels
 const unitCategories = [
@@ -83,14 +86,6 @@ const unitCategories = [
     ]
   },
 ];
-
-// Map for quick label lookup
-const unitTypeLabels: Record<string, string> = {};
-unitCategories.forEach(cat => {
-  cat.types.forEach(type => {
-    unitTypeLabels[type.value] = type.label;
-  });
-});
 
 export default function ProjectDetails() {
   const { id } = useParams();
@@ -274,7 +269,8 @@ export default function ProjectDetails() {
   }
 
   return (
-    <div className="space-y-8">
+    <>
+    <div className="space-y-8 print:hidden">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -302,6 +298,14 @@ export default function ProjectDetails() {
                     <FileSpreadsheet className="h-4 w-4 ml-2" />
                 )}
                 تصدير الكل
+            </Button>
+            <Button 
+                onClick={() => window.print()}
+                variant="outline"
+                className="hover:bg-primary/5 hover:text-primary hover:border-primary/20"
+            >
+                <Printer className="h-4 w-4 ml-2" />
+                طباعة
             </Button>
 
             <Button variant="outline" size="sm" className="hover:bg-primary/5 hover:text-primary hover:border-primary/20">
@@ -676,5 +680,9 @@ export default function ProjectDetails() {
         </div>
       </motion.div>
     </div>
+      <div className="hidden print:block absolute inset-0 bg-white z-50 p-8" dir="rtl">
+         <ProjectPrintView project={project} />
+      </div>
+    </>
   );
 }

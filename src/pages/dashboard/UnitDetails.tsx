@@ -12,13 +12,15 @@ import {
   Scissors,
   RefreshCw,
   Loader2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Printer
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { unitsApi, type Unit, type CostEstimate, type InternalCounter, type EdgeBreakdown } from '@/lib/api';
-import {
-  Table,
+import { partNameMap, unitTypeLabels, getEdgeMarks } from '@/lib/translations';
+import { UnitPrintView } from '@/components/printing/UnitPrintView';
+import {  Table,
   TableBody,
   TableCell,
   // TableFooter,
@@ -27,112 +29,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-const unitTypeLabels: Record<string, string> = {
-  ground: 'وحدة أرضية',
-  ground_unit: 'وحدة أرضية',
-  sink: 'وحدة حوض',
-  sink_unit: 'وحدة حوض',
-  ground_fixed: 'أرضي ثابت',
-  ground_fixed_unit: 'أرضي ثابت',
-  sink_fixed: 'حوض ثابت',
-  sink_fixed_unit: 'حوض ثابت',
-  drawers: 'أدراج (مجرى جنب)',
-  drawers_unit: 'أدراج (مجرى جنب)',
-  drawers_bottom_rail: 'أدراج (مجرى سفلي)',
-  drawers_bottom_rail_unit: 'أدراج (مجرى سفلي)',
-  tall_doors: 'دولاب ضلف',
-  tall_doors_appliances: 'دولاب ضلف وأجهزة',
-  tall_drawers_side_doors_top: 'دولاب درج جنب + ضلف',
-  tall_drawers_bottom_rail_top_doors: 'دولاب درج سفلي + ضلف',
-  tall_drawers_side_appliances_doors: 'دولاب درج جنب + أجهزة',
-  tall_drawers_bottom_appliances_doors_top: 'دولاب درج سفلي + أجهزة',
-  tall_wooden_base: 'بلاكار قاعدة خشبية',
-  wall: 'علوي ضلف',
-  wall_fixed: 'علوي ثابت',
-  wall_flip_top_doors_bottom: 'علوي قلاب + ضلف',
-  wall_microwave: 'علوي ميكرويف',
-  corner_l_wall: 'ركنة L علوي',
-  three_turbo: 'وحدة 3 تربو',
-  drawer_built_in_oven: 'درج + فرن بيلت إن',
-  drawer_bottom_rail_built_in_oven: 'درج سفلي + فرن بيلت إن',
-  two_small_20_one_large_side: '2 صغير 20 + 1 كبير (جنب)',
-  two_small_20_one_large_bottom: '2 صغير 20 + 1 كبير (سفلي)',
-  one_small_16_two_large_side: '1 صغير 16 + 2 كبير (جنب)',
-  one_small_16_two_large_bottom: '1 صغير 16 + 2 كبير (سفلي)',
-};
-
-// Helper to generate edge marks
-const getEdgeMarks = (code: string | undefined) => {
-    const marks = { top: "", bottom: "", left: "", right: "" };
-    if (!code || code === "-") return marks;
-    
-    const tape_mark = "-------"; 
-    const groove_mark = "م"; 
-    
-    if (code.includes("OM")) {
-        marks.top = tape_mark; marks.bottom = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
-    } else if (code.includes("O")) {
-        marks.top = tape_mark; marks.bottom = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
-    } else if (code.includes("UM-يمين")) {
-        marks.top = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
-    } else if (code.includes("UM-شمال")) {
-        marks.top = tape_mark; marks.right = tape_mark; marks.left = tape_mark;
-    } else if (code.includes("UM")) {
-        marks.top = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
-    } else if (code.includes("CM")) {
-        marks.left = tape_mark; marks.top = tape_mark; marks.bottom = tape_mark;
-    } else if (code.includes("C")) {
-         marks.left = tape_mark; marks.top = tape_mark; marks.bottom = tape_mark;
-    } else if (code.includes("LM-يمين")) {
-        marks.left = tape_mark; marks.top = tape_mark; marks.right = groove_mark;
-    } else if (code.includes("LM-شمال")) {
-         marks.right = tape_mark; marks.top = tape_mark; marks.left = groove_mark;
-    } else if (code.includes("LM")) {
-         marks.left = tape_mark; marks.top = tape_mark;
-    } else if (code.includes("L") && !code.includes("LL")) {
-         marks.left = tape_mark; marks.top = tape_mark;
-    } else if (code.includes("IIM")) {
-         marks.left = tape_mark; marks.right = groove_mark;
-    } else if (code.includes("II")) {
-         marks.left = tape_mark; marks.right = tape_mark;
-    } else if (code.includes("IM")) {
-         marks.left = tape_mark; marks.right = groove_mark;
-    } else if (code.includes("I")) {
-        marks.left = tape_mark;
-    } else if (code.includes("\\\\M")) {
-         marks.top = tape_mark; marks.bottom = tape_mark;
-    } else if (code.includes("\\\\")) {
-         marks.top = tape_mark; marks.bottom = tape_mark;
-    } else if (code.includes("\\M")) {
-         marks.top = tape_mark; marks.bottom = groove_mark;
-    } else if (code.includes("\\")) {
-         marks.top = tape_mark;
-    }
-    
-    return marks;
-};
-
-const partNameMap: Record<string, string> = {
-  'base': 'قاعدة',
-  'top': 'سقف',
-  'unit_top': 'سقف الوحدة',
-  'left_side': 'جانب أيسر',
-  'right_side': 'جانب أيمن',
-  'side_panel': 'جانب',
-  'back_panel': 'ظهر',
-  'shelf': 'رف',
-  'door': 'ضلفة',
-  'front_mirror': 'مراية أمامية',
-  'back_mirror': 'مراية خلفية',
-  'drawer_bottom': 'قاع درج',
-  'drawer_side': 'جانب درج',
-  'drawer_back': 'ظهر درج',
-  'drawer_front': 'وش درج',
-  'drawer_width': 'عرض الدرج',
-  'drawer_depth': 'عمق الدرج',
-  'internal_base': 'قاعدة داخلية',
-  'internal_shelf': 'رف داخلي',
-};
+// Local definitions replaced by imports from @/lib/translations
 
 export default function UnitDetails() {
   const { id } = useParams();
@@ -284,7 +181,8 @@ export default function UnitDetails() {
   }
 
   return (
-    <div className="space-y-8">
+    <>
+    <div className="space-y-8 print:hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -377,7 +275,7 @@ export default function UnitDetails() {
         transition={{ delay: 0.15, duration: 0.5 }}
         className="flex flex-wrap gap-3"
       >
-        <Button
+        {/* <Button
           variant="hero"
           onClick={handleCalculateCost}
           disabled={isLoadingCost}
@@ -412,7 +310,7 @@ export default function UnitDetails() {
             <Scissors className="h-4 w-4" />
           )}
           تفاصيل الشريط
-        </Button>
+        </Button> */}
         <Button
           variant="outline"
           onClick={handleExportExcel}
@@ -425,6 +323,14 @@ export default function UnitDetails() {
             <FileSpreadsheet className="h-4 w-4" />
           )}
           تصدير إلى Excel
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => window.print()}
+          className="bg-primary/5 hover:bg-primary/10 border-primary/20"
+        >
+          <Printer className="h-4 w-4" />
+          طباعة
         </Button>
       </motion.div>
 
@@ -700,5 +606,11 @@ export default function UnitDetails() {
         </div>
       </motion.div>
     </div>
+
+      {/* Hidden Print Section */}
+      <div className="hidden print:block absolute inset-0 bg-white z-50 p-8">
+        <UnitPrintView unit={unit} />
+      </div>
+    </>
   );
 }
