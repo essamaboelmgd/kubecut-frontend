@@ -26,6 +26,7 @@ export interface User {
       is_unlimited_devices: boolean;
       unlimited_expiry_date?: string;
   };
+  wallet_balance: number;
   created_at: string;
 }
 
@@ -858,4 +859,51 @@ export const cartApi = {
         });
         return handleResponse(response);
     }
+};
+
+export interface Transaction {
+  transaction_id: string;
+  user_id: string;
+  type: 'credit' | 'debit';
+  amount: number;
+  description: string;
+  date: string;
+  balance_after: number;
+}
+
+export interface TransactionHistoryResponse {
+  transactions: Transaction[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface WalletStats {
+  total_added: number;
+  month_consumption: number;
+}
+
+export const walletApi = {
+  getHistory: async (page: number = 1, limit: number = 10): Promise<TransactionHistoryResponse> => {
+    const response = await fetch(`${API_URL}/wallet/history?page=${page}&limit=${limit}`, {
+        headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  
+  getStats: async (): Promise<WalletStats> => {
+    const response = await fetch(`${API_URL}/wallet/stats`, {
+        headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  
+  topUp: async (amount: number, description: string): Promise<{message: string, new_balance: number}> => {
+    const response = await fetch(`${API_URL}/wallet/topup`, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({ amount, description }),
+    });
+    return handleResponse(response);
+  }
 };

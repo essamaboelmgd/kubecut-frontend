@@ -239,7 +239,7 @@ export default function DashboardLayout() {
             >
                 <Link to="/dashboard/wallet-history">
                     <Package className="h-4 w-4" />
-                    <span className="font-bold">المحفظة</span>
+                    <span className="font-bold">المحفظة: {user?.wallet_balance ?? 0}</span>
                 </Link>
             </Button>
             
