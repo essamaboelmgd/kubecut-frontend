@@ -14,6 +14,7 @@ import {
   Wallet,
   Package,
   Megaphone,
+  FileText,
   LucideIcon
 } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
@@ -67,6 +68,7 @@ const sidebarCategories: SidebarCategory[] = [
     title: 'الحساب',
     items: [
        { icon: Users, label: 'المستخدمين', href: '/dashboard/users', adminOnly: true },
+       { icon: FileText, label: 'طلبات الشحن', href: '/dashboard/token-requests', adminOnly: true },
        { icon: User, label: 'إعدادات الحساب', href: '/dashboard/account' },
     ]
   }
