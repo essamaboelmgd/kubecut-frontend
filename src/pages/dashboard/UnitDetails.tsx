@@ -543,6 +543,7 @@ export default function UnitDetails() {
                 <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">شمال</TableHead>
                 <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">اسفل</TableHead>
                 <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">يمين</TableHead>
+                <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">ملاحظات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-border/30 font-medium">
@@ -588,6 +589,7 @@ export default function UnitDetails() {
                     <TableCell className="py-4 px-2 font-mono text-xs">{marks.left}</TableCell>
                     <TableCell className="py-4 px-2 font-mono text-xs">{marks.bottom}</TableCell>
                     <TableCell className="py-4 px-2 font-mono text-xs">{marks.right}</TableCell>
+                    <TableCell className="py-4 px-2 text-xs text-muted-foreground">{(part as any).description || ""}</TableCell>
                   </TableRow>
                 );
               })}
@@ -662,6 +664,14 @@ export default function UnitDetails() {
                         <span className="font-mono h-4">{marks.right||"-"}</span>
                     </div>
                 </div>
+
+                {/* Description/Notes for Mobile */}
+                {(part as any).description && (
+                    <div className="mt-2 p-2 bg-yellow-500/5 border border-yellow-500/10 rounded text-xs text-yellow-600">
+                        <span className="font-bold ml-1">ملاحظات:</span>
+                        {(part as any).description}
+                    </div>
+                )}
               </div>
             );
           })}
