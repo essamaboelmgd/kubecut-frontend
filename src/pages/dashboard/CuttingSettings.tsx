@@ -374,7 +374,7 @@ export default function CuttingSettings() {
                <div className="space-y-2">
                   <Label className="text-sm font-medium">كود الضلف الأساسي</Label>
                   <Input
-                    value={getSafeValue(settings.basic_door_code)}
+                    value={settings.basic_door_code || ''}
                     onChange={(e) => handleInputChange('basic_door_code', e.target.value)}
                     className="h-11 bg-background/50 focus:bg-background transition-colors"
                     placeholder="مثال: Basic, ضلف أساسي"
@@ -383,7 +383,7 @@ export default function CuttingSettings() {
                <div className="space-y-2">
                   <Label className="text-sm font-medium">كود الضلف الإضافي</Label>
                   <Input
-                    value={getSafeValue(settings.additional_door_code)}
+                    value={settings.additional_door_code || ''}
                     onChange={(e) => handleInputChange('additional_door_code', e.target.value)}
                     className="h-11 bg-background/50 focus:bg-background transition-colors"
                     placeholder="مثال: Additional, ضلف إضافي"
