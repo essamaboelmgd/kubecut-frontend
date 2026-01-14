@@ -456,6 +456,15 @@ export const authApi = {
       return handleResponse(response);
   },
 
+  bulkUpdateSubscription: async (userIds: string[], subscription: any): Promise<boolean> => {
+      const response = await fetch(`${API_URL}/auth/users/bulk-subscription`, {
+          method: "PUT",
+          headers: getHeaders(),
+          body: JSON.stringify({ user_ids: userIds, subscription }),
+      });
+      return handleResponse(response);
+  },
+
   deleteUser: async (userId: string): Promise<void> => {
     const response = await fetch(`${API_URL}/auth/users/${userId}`, {
       method: "DELETE",

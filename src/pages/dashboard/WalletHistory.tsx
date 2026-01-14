@@ -7,14 +7,12 @@ import {
     Loader2, 
     Wallet, 
     History,
-    CreditCard,
     Zap,
     Crown
 } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
     Table,
     TableBody,
@@ -31,7 +29,7 @@ import { useState } from "react";
 
 const WalletHistory = () => {
     const { user, refetchUser } = useAuth();
-    const [page, setPage] = useState(1);
+    const [page] = useState(1);
     const queryClient = useQueryClient();
 
     // Fetch Stats
@@ -51,7 +49,7 @@ const WalletHistory = () => {
         mutationFn: async ({ amount, desc }: { amount: number, desc: string }) => {
             return walletApi.topUp(amount, desc);
         },
-        onSuccess: (data) => {
+        onSuccess: () => {
             toast.success("تم شحن الرصيد بنجاح");
             queryClient.invalidateQueries({ queryKey: ['walletStats'] });
             queryClient.invalidateQueries({ queryKey: ['walletHistory'] });

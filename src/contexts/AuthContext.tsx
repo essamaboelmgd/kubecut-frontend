@@ -7,6 +7,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (token: string, user: User) => void;
   logout: () => void;
+  refetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,6 +59,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         login,
         logout,
+        refetchUser: async () => {
+             const userData = await authApi.me();
+             setUser(userData);
+             localStorage.setItem('user', JSON.stringify(userData));
+        },
       }}
     >
       {children}

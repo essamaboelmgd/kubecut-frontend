@@ -2,21 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
-  Shield,
-  ShieldAlert,
   Loader2,
   Phone,
   MoreVertical,
   Settings,
   Trash2,
-  Smartphone,
   Zap,
-  CheckSquare,
-  Square,
   ChevronLeft,
   ChevronRight,
-  PlusCircle,
-  Coins
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,7 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -46,7 +38,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { authApi, type User, type UserRole, type UserWithStats } from '@/lib/api';
+import { authApi, type User, type UserWithStats } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -60,15 +52,21 @@ export default function Users() {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   
   // Selection
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   
   // Bulk Tokens Dialog
-  const [isBulkTokensOpen, setIsBulkTokensOpen] = useState(false);
-  const [tokensToAdd, setTokensToAdd] = useState(0);
-  const [isAddingTokens, setIsAddingTokens] = useState(false);
+  // Bulk Subscription State
+  const [isBulkSubOpen, setIsBulkSubOpen] = useState(false);
+  const [isUpdatingBulk, setIsUpdatingBulk] = useState(false);
+  const [bulkSubForm, setBulkSubForm] = useState({
+    max_units_per_month: 3,
+    max_devices: 1,
+    is_unlimited_units: false,
+    unlimited_duration: 'forever',
+    custom_months: 1
+  });
 
   // Subscription Dialog State
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -134,34 +132,52 @@ export default function Users() {
       }
   };
 
-  const handleBulkAddTokens = async () => {
-      if (tokensToAdd <= 0) return;
-      setIsAddingTokens(true);
-      try {
-          await authApi.bulkAddTokens(selectedUsers, tokensToAdd);
-          toast({
-              title: "تمت العملية بنجاح",
-              description: `تم إضافة ${tokensToAdd} توكن لـ ${selectedUsers.length} عميل`
-          });
-          setIsBulkTokensOpen(false);
-          setTokensToAdd(0);
-          setSelectedUsers([]);
-          fetchUsers();
-      } catch (error) {
-          toast({
-              title: "خطأ",
-              className: "destructive",
-              description: "فشل إضافة التوكنز"
-          });
-      } finally {
-          setIsAddingTokens(false);
+  const handleBulkUpdateSubscription = async () => {
+    if (selectedUsers.length === 0) return;
+    setIsUpdatingBulk(true);
+    
+    try {
+      let expiryDate = null;
+      
+      if (bulkSubForm.is_unlimited_units && bulkSubForm.unlimited_duration !== 'forever') {
+        const date = new Date();
+        const monthsToAdd = bulkSubForm.unlimited_duration === '1_month' ? 1 : bulkSubForm.custom_months;
+        date.setMonth(date.getMonth() + monthsToAdd);
+        expiryDate = date.toISOString();
       }
+
+      const payload = {
+        max_units_per_month: bulkSubForm.max_units_per_month,
+        max_devices: bulkSubForm.max_devices,
+        is_unlimited_units: bulkSubForm.is_unlimited_units,
+        is_unlimited_devices: false,
+        unlimited_expiry_date: expiryDate
+      };
+
+      await authApi.bulkUpdateSubscription(selectedUsers, payload);
+      
+      toast({
+        title: 'تم التحديث',
+        description: `تم تحديث اشتراكات ${selectedUsers.length} عميل بنجاح`,
+      });
+      
+      setIsBulkSubOpen(false);
+      setSelectedUsers([]);
+      fetchUsers();
+    } catch (error) {
+      toast({
+        title: 'خطأ',
+        description: 'فشل تحديث الاشتراكات',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdatingBulk(false);
+    }
   };
 
   const handleDeleteUser = async (userId: string) => {
     if (!window.confirm('هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن تراجع هذا الإجراء.')) return;
     
-    setIsDeleting(userId);
     try {
       await authApi.deleteUser(userId);
       toast({
@@ -175,32 +191,10 @@ export default function Users() {
         description: 'فشل حذف المستخدم',
         variant: 'destructive',
       });
-    } finally {
-      setIsDeleting(null);
     }
   };
 
-  const handleRoleChange = async (userId: string, currentRole: UserRole) => {
-    const newRole = currentRole === 'admin' ? 'user' : 'admin';
-    const action = newRole === 'admin' ? 'ترقية' : 'تخفيض';
-    
-    if (!window.confirm(`هل أنت متأكد من ${action} هذا المستخدم؟`)) return;
 
-    try {
-      await authApi.updateUserRole(userId, newRole);
-      toast({
-        title: 'تم التحديث',
-        description: `تم ${action} المستخدم بنجاح`,
-      });
-      fetchUsers();
-    } catch (error) {
-      toast({
-        title: 'خطأ',
-        description: 'فشل تحديث صلاحية المستخدم',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const openSubscriptionDialog = (user: User) => {
     setSelectedUser(user);
@@ -283,9 +277,9 @@ export default function Users() {
                 </p>
             </div>
             {selectedUsers.length > 0 && (
-                <Button onClick={() => setIsBulkTokensOpen(true)} className="gap-2 bg-amber-500 hover:bg-amber-600 text-black font-bold">
-                    <Coins className="h-4 w-4" />
-                    شحن توكنز ({selectedUsers.length})
+                <Button onClick={() => setIsBulkSubOpen(true)} className="gap-2 bg-amber-500 hover:bg-amber-600 text-black font-bold">
+                    <Settings className="h-4 w-4" />
+                    تعديل الاشتراكات ({selectedUsers.length})
                 </Button>
             )}
         </div>
@@ -652,33 +646,105 @@ export default function Users() {
             </DialogContent>
         </Dialog>
 
-        {/* Bulk Add Tokens Dialog */}
-        <Dialog open={isBulkTokensOpen} onOpenChange={setIsBulkTokensOpen}>
+        {/* Bulk Subscription Dialog */}
+        <Dialog open={isBulkSubOpen} onOpenChange={setIsBulkSubOpen}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>شحن توكنز (وحدات)</DialogTitle>
+                    <DialogTitle>تعديل اشتراكات العملاء المحددين</DialogTitle>
                     <DialogDescription>
-                        إضافة وحدات إضافية لـ {selectedUsers.length} عميل محدد
+                        تعديل حدود الوحدات والأجهزة لـ {selectedUsers.length} عميل محدد. 
+                        سيتم تطبيق هذه الإعدادات على جميع العملاء المحددين.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-6 py-4">
+                     {/* Units Limit */}
+                     <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="bulk_unlimited_units" className="flex flex-col gap-1">
+                                <span>عدد وحدات غير محدود</span>
+                                <span className="text-xs font-normal text-muted-foreground">تفعيل نظام الباقة المفتوحة</span>
+                            </Label>
+                            <Switch 
+                                id="bulk_unlimited_units" 
+                                checked={bulkSubForm.is_unlimited_units}
+                                onCheckedChange={(checked) => setBulkSubForm({...bulkSubForm, is_unlimited_units: checked})}
+                            />
+                        </div>
+                        
+                        <AnimatePresence>
+                            {bulkSubForm.is_unlimited_units ? (
+                                <motion.div 
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="pt-2 overflow-hidden space-y-3"
+                                >
+                                    <Label>مدة الصلاحية</Label>
+                                    <Select 
+                                        value={bulkSubForm.unlimited_duration} 
+                                        onValueChange={(val) => setBulkSubForm({...bulkSubForm, unlimited_duration: val})}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="اختر المدة" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="1_month">شهر واحد</SelectItem>
+                                            <SelectItem value="custom">عدد شهور محدد</SelectItem>
+                                            <SelectItem value="forever">مدى الحياة</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+
+                                    {bulkSubForm.unlimited_duration === 'custom' && (
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <Input 
+                                                type="number" 
+                                                min="1"
+                                                value={bulkSubForm.custom_months}
+                                                onChange={(e) => setBulkSubForm({...bulkSubForm, custom_months: parseInt(e.target.value) || 1})}
+                                                className="w-20"
+                                            />
+                                            <span className="text-sm text-muted-foreground">شهر</span>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="pt-2 space-y-2 overflow-hidden"
+                                >
+                                    <Label htmlFor="bulk_max_units">عدد الوحدات الشهرية</Label>
+                                    <Input 
+                                        id="bulk_max_units" 
+                                        type="number" 
+                                        value={bulkSubForm.max_units_per_month}
+                                        onChange={(e) => setBulkSubForm({...bulkSubForm, max_units_per_month: parseInt(e.target.value) || 0})}
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                     </div>
+
+                    <div className="h-[1px] bg-border" />
+
+                     {/* Devices Limit */}
                      <div className="space-y-3">
-                        <Label htmlFor="tokens_to_add">عدد التوكنز للإضافة</Label>
+                        <Label htmlFor="bulk_max_devices">عدد الأجهزة المسموح بها</Label>
                         <Input 
-                            id="tokens_to_add" 
+                            id="bulk_max_devices" 
                             type="number" 
                             min="1"
-                            value={tokensToAdd}
-                            onChange={(e) => setTokensToAdd(parseInt(e.target.value) || 0)}
-                            className="text-lg font-bold"
+                            value={bulkSubForm.max_devices}
+                            onChange={(e) => setBulkSubForm({...bulkSubForm, max_devices: parseInt(e.target.value) || 1})}
                         />
                      </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsBulkTokensOpen(false)}>إلغاء</Button>
-                    <Button onClick={handleBulkAddTokens} disabled={isAddingTokens || tokensToAdd <= 0} className="bg-amber-500 hover:bg-amber-600 text-black">
-                        {isAddingTokens && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-                        إضافة الرصيد
+                    <Button variant="outline" onClick={() => setIsBulkSubOpen(false)}>إلغاء</Button>
+                    <Button onClick={handleBulkUpdateSubscription} disabled={isUpdatingBulk} className="bg-amber-500 hover:bg-amber-600 text-black">
+                        {isUpdatingBulk && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                        حفظ التعديلات
                     </Button>
                 </DialogFooter>
             </DialogContent>
