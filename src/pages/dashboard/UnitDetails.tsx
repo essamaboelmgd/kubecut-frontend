@@ -41,9 +41,7 @@ export default function UnitDetails() {
   const [internalCounter, setInternalCounter] = useState<InternalCounter | null>(null);
   const [edgeBreakdown, setEdgeBreakdown] = useState<EdgeBreakdown | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingCost, setIsLoadingCost] = useState(false);
-  const [isLoadingCounter, setIsLoadingCounter] = useState(false);
-  const [isLoadingEdge, setIsLoadingEdge] = useState(false);
+
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
@@ -68,7 +66,6 @@ export default function UnitDetails() {
 
   const handleCalculateCost = async () => {
     if (!unit) return;
-    setIsLoadingCost(true);
     try {
       // Send unit dimensions for cost estimation
       const data = await unitsApi.estimate({
@@ -79,64 +76,44 @@ export default function UnitDetails() {
         shelf_count: unit.shelf_count || 0,
       });
       setCostEstimate(data);
-      toast({
-        title: 'تم الحساب',
-        description: 'تم حساب تكلفة المواد بنجاح',
-      });
     } catch {
       toast({
         title: 'خطأ',
         description: 'حدث خطأ أثناء حساب التكلفة',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoadingCost(false);
     }
   };
 
   const handleCalculateCounter = async () => {
     if (!unit) return;
-    setIsLoadingCounter(true);
     try {
       // Get the unit_id from the unit object (backend returns unit_id)
       const unitId = (unit as any).unit_id || unit.id;
       const data = await unitsApi.calculateInternalCounter(unitId);
       setInternalCounter(data);
-      toast({
-        title: 'تم الحساب',
-        description: 'تم حساب الأدراج والرفوف',
-      });
     } catch {
       toast({
         title: 'خطأ',
         description: 'حدث خطأ أثناء الحساب',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoadingCounter(false);
     }
   };
 
   const handleGetEdgeBreakdown = async () => {
     if (!unit) return;
-    setIsLoadingEdge(true);
     try {
       // Get the unit_id from the unit object (backend returns unit_id)
       const unitId = (unit as any).unit_id || unit.id;
       const data = await unitsApi.getEdgeBreakdown(unitId);
       setEdgeBreakdown(data);
-      toast({
-        title: 'تم التحميل',
-        description: 'تم تحميل تفاصيل الشريط',
-      });
     } catch {
       toast({
         title: 'خطأ',
         description: 'حدث خطأ أثناء تحميل التفاصيل',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoadingEdge(false);
     }
   };
 
@@ -171,6 +148,15 @@ export default function UnitDetails() {
       setIsExporting(false);
     }
   };
+
+  useEffect(() => {
+    if (unit) {
+      handleCalculateCost();
+      handleCalculateCounter();
+      handleGetEdgeBreakdown();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unit]);
 
   if (isLoading || !unit) {
     return (
@@ -219,7 +205,7 @@ export default function UnitDetails() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.5 }}
       >
-        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="glass-card p-4 sm:p-5">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
@@ -335,7 +321,7 @@ export default function UnitDetails() {
       </motion.div>
 
       {/* Results Cards */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {/* Cost Estimate */}
         {costEstimate && (
           <motion.div
