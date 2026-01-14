@@ -29,6 +29,19 @@ export interface User {
   created_at: string;
 }
 
+export interface UserWithStats extends User {
+    units_used_all_time: number;
+    units_used_this_month: number;
+}
+
+export interface UserListResponse {
+    users: UserWithStats[];
+    total: number;
+    page: number;
+    limit: number;
+    total_consumed_tokens: number;
+}
+
 export interface Token {
   access_token: string;
   token_type: string;
@@ -424,11 +437,22 @@ export const authApi = {
     return handleResponse(response);
   },
 
-  listUsers: async (): Promise<User[]> => {
-    const response = await fetch(`${API_URL}/auth/users`, {
+  listUsers: async (page: number = 1, limit: number = 10, search?: string): Promise<UserListResponse> => {
+    let url = `${API_URL}/auth/users?page=${page}&limit=${limit}`;
+    if (search) url += `&search=${search}`;
+    const response = await fetch(url, {
       headers: getHeaders(),
     });
     return handleResponse(response);
+  },
+
+  bulkAddTokens: async (userIds: string[], tokens: number): Promise<boolean> => {
+      const response = await fetch(`${API_URL}/auth/users/bulk-tokens`, {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ user_ids: userIds, tokens }),
+      });
+      return handleResponse(response);
   },
 
   deleteUser: async (userId: string): Promise<void> => {

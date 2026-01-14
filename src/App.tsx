@@ -28,6 +28,8 @@ import ProductManagement from "./pages/dashboard/ProductManagement";
 import Ads from "./pages/dashboard/Ads";
 import StoreItemDetails from "./pages/dashboard/StoreItemDetails";
 
+import WalletHistory from "./pages/dashboard/WalletHistory";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -60,6 +62,7 @@ const App = () => (
                   <Route path="ads-management" element={<Ads />} />
                   <Route path="users" element={<Users />} />
                   <Route path="account" element={<AccountSettings />} />
+                  <Route path="wallet-history" element={<WalletHistory />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

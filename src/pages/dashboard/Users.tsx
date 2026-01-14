@@ -10,7 +10,13 @@ import {
   Settings,
   Trash2,
   Smartphone,
-  Zap
+  Zap,
+  CheckSquare,
+  Square,
+  ChevronLeft,
+  ChevronRight,
+  PlusCircle,
+  Coins
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -40,18 +46,30 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { authApi, type User, type UserRole } from '@/lib/api';
+import { authApi, type User, type UserRole, type UserWithStats } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function Users() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserWithStats[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   
+  // Selection
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  
+  // Bulk Tokens Dialog
+  const [isBulkTokensOpen, setIsBulkTokensOpen] = useState(false);
+  const [tokensToAdd, setTokensToAdd] = useState(0);
+  const [isAddingTokens, setIsAddingTokens] = useState(false);
+
   // Subscription Dialog State
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isSubDialogOpen, setIsSubDialogOpen] = useState(false);
@@ -69,9 +87,12 @@ export default function Users() {
   const navigate = useNavigate();
 
   const fetchUsers = async () => {
+    setIsLoading(true);
     try {
-      const data = await authApi.listUsers();
-      setUsers(data);
+      const data = await authApi.listUsers(page, 10, search);
+      setUsers(data.users);
+      setTotalUsers(data.total);
+      setTotalPages(Math.ceil(data.total / 10)); // assuming limit 10
     } catch (error) {
       toast({
         title: 'خطأ',
@@ -90,9 +111,52 @@ export default function Users() {
     }
 
     if (currentUser?.role === 'admin') {
-      fetchUsers();
+        const timeoutId = setTimeout(() => {
+            fetchUsers();
+        }, 300); // Debounce search
+        return () => clearTimeout(timeoutId);
     }
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate, page, search]);
+
+  const handleSelectAll = (checked: boolean) => {
+      if (checked) {
+          setSelectedUsers(users.map(u => u.user_id));
+      } else {
+          setSelectedUsers([]);
+      }
+  };
+
+  const handleSelectUser = (userId: string, checked: boolean) => {
+      if (checked) {
+          setSelectedUsers(prev => [...prev, userId]);
+      } else {
+          setSelectedUsers(prev => prev.filter(id => id !== userId));
+      }
+  };
+
+  const handleBulkAddTokens = async () => {
+      if (tokensToAdd <= 0) return;
+      setIsAddingTokens(true);
+      try {
+          await authApi.bulkAddTokens(selectedUsers, tokensToAdd);
+          toast({
+              title: "تمت العملية بنجاح",
+              description: `تم إضافة ${tokensToAdd} توكن لـ ${selectedUsers.length} عميل`
+          });
+          setIsBulkTokensOpen(false);
+          setTokensToAdd(0);
+          setSelectedUsers([]);
+          fetchUsers();
+      } catch (error) {
+          toast({
+              title: "خطأ",
+              className: "destructive",
+              description: "فشل إضافة التوكنز"
+          });
+      } finally {
+          setIsAddingTokens(false);
+      }
+  };
 
   const handleDeleteUser = async (userId: string) => {
     if (!window.confirm('هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن تراجع هذا الإجراء.')) return;
@@ -104,7 +168,7 @@ export default function Users() {
         title: 'تم الحذف',
         description: 'تم حذف المستخدم بنجاح',
       });
-      setUsers(users.filter(u => u.user_id !== userId));
+      fetchUsers();
     } catch (error) {
       toast({
         title: 'خطأ',
@@ -128,8 +192,7 @@ export default function Users() {
         title: 'تم التحديث',
         description: `تم ${action} المستخدم بنجاح`,
       });
-      // Improve optimistic update or refetch
-      setUsers(users.map(u => u.user_id === userId ? { ...u, role: newRole } : u));
+      fetchUsers();
     } catch (error) {
       toast({
         title: 'خطأ',
@@ -147,8 +210,6 @@ export default function Users() {
     let months = 1;
 
     if (user.subscription.unlimited_expiry_date) {
-      // Logic to check if it's 1 month or custom could be added here, 
-      // but simpler to just default to custom if date exists
       duration = 'custom'; 
     } else {
         duration = 'forever';
@@ -193,21 +254,7 @@ export default function Users() {
         description: 'تم تحديث بيانات الاشتراك بنجاح',
       });
       
-      // Refresh local state
-      setUsers(users.map(u => {
-        if (u.user_id === selectedUser.user_id) {
-            return {
-                ...u,
-                subscription: {
-                    ...u.subscription,
-                    ...payload,
-                    unlimited_expiry_date: expiryDate || undefined
-                }
-            };
-        }
-        return u;
-      }));
-      
+      fetchUsers();
       setIsSubDialogOpen(false);
     } catch (error) {
        console.error(error);
@@ -221,20 +268,6 @@ export default function Users() {
     }
   };
 
-  const filteredUsers = users.filter(
-    (u) =>
-      u.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-      u.phone?.includes(search)
-  );
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <motion.div
@@ -242,10 +275,20 @@ export default function Users() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-2xl font-bold md:text-3xl">إدارة المستخدمين</h1>
-        <p className="mt-1 text-muted-foreground">
-          عرض وإدارة جميع مستخدمي النظام وصلاحياتهم
-        </p>
+        <div className="flex justify-between items-center">
+            <div>
+                <h1 className="text-2xl font-bold md:text-3xl">إدارة العملاء</h1>
+                <p className="mt-1 text-muted-foreground">
+                إجمالي عدد العملاء: <span className="font-bold text-primary text-lg">{totalUsers}</span>
+                </p>
+            </div>
+            {selectedUsers.length > 0 && (
+                <Button onClick={() => setIsBulkTokensOpen(true)} className="gap-2 bg-amber-500 hover:bg-amber-600 text-black font-bold">
+                    <Coins className="h-4 w-4" />
+                    شحن توكنز ({selectedUsers.length})
+                </Button>
+            )}
+        </div>
       </motion.div>
 
       {/* Search */}
@@ -264,28 +307,45 @@ export default function Users() {
         />
       </motion.div>
 
-      {/* Grid for Mobile / Table for Desktop */}
+      {/* Desktop Table View */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
-        {/* Desktop Table View */}
         <div className="hidden md:block glass-card overflow-hidden ring-1 ring-white/10">
           <Table>
             <TableHeader className="bg-muted/40 text-xs uppercase tracking-wider">
               <TableRow className="hover:bg-transparent border-border/50">
-                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">الاسم</TableHead>
+                <TableHead className="w-[50px]">
+                    <Checkbox 
+                        checked={selectedUsers.length === users.length && users.length > 0}
+                        onCheckedChange={handleSelectAll}
+                    />
+                </TableHead>
+                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">العميل</TableHead>
                 <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">رقم الهاتف</TableHead>
-                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">الدور</TableHead>
-                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">الاشتراك</TableHead>
+                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">مستهلك التوكنز</TableHead>
+                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">الرصيد</TableHead>
                 <TableHead className="py-4 px-6 text-left font-bold text-muted-foreground">إجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-border/30 font-medium">
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((u) => (
+              {isLoading ? (
+                  <TableRow>
+                      <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                      </TableCell>
+                  </TableRow>
+              ) : users.length > 0 ? (
+                users.map((u) => (
                   <TableRow key={u.user_id} className="hover:bg-primary/5 transition-colors border-border/30">
+                    <TableCell>
+                        <Checkbox 
+                            checked={selectedUsers.includes(u.user_id)}
+                            onCheckedChange={(checked) => handleSelectUser(u.user_id, !!checked)}
+                        />
+                    </TableCell>
                     <TableCell className="py-4 px-6 font-medium">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
@@ -306,25 +366,19 @@ export default function Users() {
                       </div>
                     </TableCell>
                     <TableCell className="py-4 px-6">
-                      <Badge variant={u.role === 'admin' ? 'destructive' : 'secondary'} className={`gap-1 px-2.5 py-1 ${u.role === 'admin' ? 'shadow-sm shadow-destructive/20' : ''}`}>
-                        {u.role === 'admin' ? <ShieldAlert className="h-3 w-3" /> : <Shield className="h-3 w-3" />}
-                        {u.role === 'admin' ? 'مسؤول' : 'مستخدم'}
-                      </Badge>
+                        <div className="flex flex-col">
+                            <span className="font-bold text-lg">{u.units_used_all_time} <span className="text-xs font-normal text-muted-foreground">وحدة</span></span>
+                            <span className="text-xs text-muted-foreground">الشهر الحالي: {u.units_used_this_month}</span>
+                        </div>
                     </TableCell>
                     <TableCell className="py-4 px-6">
-                        <div className="flex flex-col text-sm">
-                            <div className="flex items-center gap-1">
-                                <Zap className="h-3 w-3 text-amber-500" />
-                                {u.subscription.is_unlimited_units ? (
-                                    <span className="text-amber-500 font-bold">غير محدود</span>
-                                ) : (
-                                    <span>{u.subscription.max_units_per_month} وحدة/شهر</span>
-                                )}
-                            </div>
-                           <div className="flex items-center gap-1 text-muted-foreground text-xs mt-1">
-                                <Smartphone className="h-3 w-3" />
-                                <span>{u.subscription.max_devices} أجهزة</span>
-                           </div>
+                        <div className="flex items-center gap-1">
+                            <Zap className="h-4 w-4 text-amber-500" />
+                            {u.subscription.is_unlimited_units ? (
+                                <span className="text-amber-500 font-bold">غير محدود</span>
+                            ) : (
+                                <span className="font-mono font-bold text-lg">{u.subscription.max_units_per_month}</span>
+                            )}
                         </div>
                     </TableCell>
                     <TableCell className="py-4 px-6 text-left">
@@ -338,10 +392,6 @@ export default function Users() {
                             <DropdownMenuItem onClick={() => openSubscriptionDialog(u)}>
                                 <Settings className="ml-2 h-4 w-4" />
                                 إدارة الاشتراك
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleRoleChange(u.user_id, u.role)}>
-                                {u.role === 'admin' ? <Shield className="ml-2 h-4 w-4" /> : <ShieldAlert className="ml-2 h-4 w-4" />}
-                                {u.role === 'admin' ? 'تخفيض لمستخدم' : 'ترقية لمسؤول'}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
@@ -358,38 +408,67 @@ export default function Users() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                     <p>لا توجد نتائج مطابقة للبحث</p>
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between p-4 border-t border-border/30">
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setPage(page - 1)}
+                        disabled={page === 1}
+                    >
+                        <ChevronRight className="h-4 w-4 ml-2" />
+                        السابق
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                        صفحة {page} من {totalPages}
+                    </span>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setPage(page + 1)}
+                        disabled={page === totalPages}
+                    >
+                        التالي
+                        <ChevronLeft className="h-4 w-4 mr-2" />
+                    </Button>
+                </div>
+            )}
         </div>
 
         {/* Mobile Cards View */}
         <div className="grid gap-4 md:hidden">
-            {filteredUsers.length > 0 ? (
-                filteredUsers.map((u) => (
+            {users.length > 0 ? (
+                users.map((u) => (
                     <motion.div 
                         key={u.user_id}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="glass-card p-4 space-y-4"
+                        className={`glass-card p-4 space-y-4 ${selectedUsers.includes(u.user_id) ? 'ring-1 ring-primary' : ''}`}
                     >
                         <div className="flex items-start justify-between">
-                             <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
-                                {u.full_name?.charAt(0).toUpperCase() || 'U'}
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold">{u.full_name}</h3>
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <Badge variant={u.role === 'admin' ? 'destructive' : 'secondary'} className="text-[10px] px-1.5 py-0 h-5">
-                                            {u.role === 'admin' ? 'مسؤول' : 'مستخدم'}
-                                        </Badge>
-                                        <span>•</span>
-                                        <span dir="ltr">{u.phone}</span>
+                            <div className="flex items-center gap-3">
+                                <Checkbox 
+                                    checked={selectedUsers.includes(u.user_id)}
+                                    onCheckedChange={(checked) => handleSelectUser(u.user_id, !!checked)}
+                                />
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
+                                    {u.full_name?.charAt(0).toUpperCase() || 'U'}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">{u.full_name}</h3>
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                            <span dir="ltr">{u.phone}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -403,9 +482,6 @@ export default function Users() {
                                     <DropdownMenuItem onClick={() => openSubscriptionDialog(u)}>
                                         <Settings className="ml-2 h-4 w-4" />
                                         إدارة الاشتراك
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleRoleChange(u.user_id, u.role)}>
-                                        {u.role === 'admin' ? 'تخفيض لمستخدم' : 'ترقية لمسؤول'}
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem 
@@ -421,21 +497,21 @@ export default function Users() {
 
                         <div className="grid grid-cols-2 gap-2 text-sm p-3 bg-muted/20 rounded-lg">
                             <div className="flex flex-col gap-1">
-                                <span className="text-xs text-muted-foreground">الوحدات</span>
+                                <span className="text-xs text-muted-foreground">استهلاك التوكنز</span>
+                                <div className="flex items-center gap-1 font-medium">
+                                    <span className="font-bold">{u.units_used_all_time}</span>
+                                    <span className="text-xs">وحدة</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-xs text-muted-foreground">الرصيد</span>
                                 <div className="flex items-center gap-1 font-medium">
                                     <Zap className="h-3.5 w-3.5 text-amber-500" />
                                     {u.subscription.is_unlimited_units ? (
                                         <span className="text-amber-500">غير محدود</span>
                                     ) : (
-                                        <span>{u.subscription.max_units_per_month} / شهر</span>
+                                        <span>{u.subscription.max_units_per_month}</span>
                                     )}
-                                </div>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                                <span className="text-xs text-muted-foreground">الأجهزة</span>
-                                <div className="flex items-center gap-1 font-medium">
-                                    <Smartphone className="h-3.5 w-3.5" />
-                                    <span>{u.subscription.max_devices} حد أقصى</span>
                                 </div>
                             </div>
                         </div>
@@ -444,6 +520,30 @@ export default function Users() {
             ) : (
                  <div className="text-center py-12 text-muted-foreground">
                     <p>لا توجد نتائج</p>
+                </div>
+            )}
+             {/* Mobile Pagination */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between p-4">
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setPage(page - 1)}
+                        disabled={page === 1}
+                    >
+                        السابق
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                        {page} / {totalPages}
+                    </span>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setPage(page + 1)}
+                        disabled={page === totalPages}
+                    >
+                        التالي
+                    </Button>
                 </div>
             )}
         </div>
@@ -547,6 +647,38 @@ export default function Users() {
                     <Button onClick={handleSaveSubscription} disabled={isUpdatingSub}>
                         {isUpdatingSub && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
                         حفظ التعديلات
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        {/* Bulk Add Tokens Dialog */}
+        <Dialog open={isBulkTokensOpen} onOpenChange={setIsBulkTokensOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>شحن توكنز (وحدات)</DialogTitle>
+                    <DialogDescription>
+                        إضافة وحدات إضافية لـ {selectedUsers.length} عميل محدد
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-6 py-4">
+                     <div className="space-y-3">
+                        <Label htmlFor="tokens_to_add">عدد التوكنز للإضافة</Label>
+                        <Input 
+                            id="tokens_to_add" 
+                            type="number" 
+                            min="1"
+                            value={tokensToAdd}
+                            onChange={(e) => setTokensToAdd(parseInt(e.target.value) || 0)}
+                            className="text-lg font-bold"
+                        />
+                     </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsBulkTokensOpen(false)}>إلغاء</Button>
+                    <Button onClick={handleBulkAddTokens} disabled={isAddingTokens || tokensToAdd <= 0} className="bg-amber-500 hover:bg-amber-600 text-black">
+                        {isAddingTokens && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                        إضافة الرصيد
                     </Button>
                 </DialogFooter>
             </DialogContent>

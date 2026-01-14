@@ -231,6 +231,29 @@ export default function DashboardLayout() {
           <div className="flex-1" />
 
           <div className="flex items-center gap-3">
+            {/* Wallet Widget */}
+            <Button 
+                variant="outline" 
+                className="gap-2 hidden md:flex border-amber-500/20 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+                asChild
+            >
+                <Link to="/dashboard/wallet-history">
+                    <Package className="h-4 w-4" />
+                    <span className="font-bold">المحفظة</span>
+                </Link>
+            </Button>
+            
+            <Button 
+                variant="ghost" 
+                size="icon"
+                className="md:hidden text-amber-600 dark:text-amber-400"
+                asChild
+            >
+                <Link to="/dashboard/wallet-history">
+                    <Package className="h-5 w-5" />
+                </Link>
+            </Button>
+
             <ThemeToggle />
 
             <DropdownMenu>
