@@ -446,6 +446,7 @@ export default function UnitDetails() {
           <Table className="w-full text-center">
             <TableHeader className="bg-muted/40 text-xs uppercase tracking-wider">
               <TableRow className="hover:bg-transparent border-border/50">
+                <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground w-[50px]">م</TableHead>
                 <TableHead className="py-4 px-2 text-right font-bold text-muted-foreground w-[15%]">القطعة</TableHead>
                 <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">العرض</TableHead>
                 <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">الارتفاع</TableHead>
@@ -470,6 +471,7 @@ export default function UnitDetails() {
                     key={i}
                     className="hover:bg-primary/5 transition-colors border-border/30"
                   >
+                    <TableCell className="py-4 px-2 text-center font-mono text-muted-foreground">{i + 1}</TableCell>
                     <TableCell className="py-4 px-4 font-semibold text-primary text-right">{displayName}</TableCell>
                     <TableCell className="py-4 px-2 font-mono text-muted-foreground">{part.width_cm}</TableCell>
                     <TableCell className="py-4 px-2 font-mono text-muted-foreground">{part.height_cm}</TableCell>

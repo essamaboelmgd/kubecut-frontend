@@ -752,7 +752,7 @@ export default function ProjectDetails() {
                       </div>
                       <div>
                         <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">
-                            {unitTypeLabels[unit.type] || unit.type}
+                            {index + 1}. {unitTypeLabels[unit.type] || unit.type}
                         </h4>
                         <span className="text-xs text-muted-foreground font-mono">
                             {unit.width_cm} × {unit.height_cm} × {unit.depth_cm}

@@ -30,6 +30,7 @@ export const UnitPrintView = ({ unit, showTitle = true }: UnitPrintViewProps) =>
             <table className="w-full text-center border-collapse text-sm">
               <thead>
                 <tr className="bg-gray-100 border-b border-black">
+                  <th className="border border-black p-1 w-[40px]">م</th>
                   <th className="border border-black p-1">القطعة</th>
                   <th className="border border-black p-1">العرض</th>
                   <th className="border border-black p-1">الارتفاع</th>
@@ -42,6 +43,7 @@ export const UnitPrintView = ({ unit, showTitle = true }: UnitPrintViewProps) =>
                   const displayName = partNameMap[part.name] || partNameMap[part.name.toLowerCase()] || part.name;
                   return (
                     <tr key={i} className="border-b border-black">
+                      <td className="border border-black p-1">{i + 1}</td>
                       <td className="border border-black p-1 font-bold">{displayName}</td>
                       <td className="border border-black p-1">{part.width_cm}</td>
                       <td className="border border-black p-1">{part.height_cm}</td>
