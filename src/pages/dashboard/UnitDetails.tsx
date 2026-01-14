@@ -112,6 +112,28 @@ const getEdgeMarks = (code: string | undefined) => {
     return marks;
 };
 
+const partNameMap: Record<string, string> = {
+  'base': 'قاعدة',
+  'top': 'سقف',
+  'unit_top': 'سقف الوحدة',
+  'left_side': 'جانب أيسر',
+  'right_side': 'جانب أيمن',
+  'side_panel': 'جانب',
+  'back_panel': 'ظهر',
+  'shelf': 'رف',
+  'door': 'ضلفة',
+  'front_mirror': 'مراية أمامية',
+  'back_mirror': 'مراية خلفية',
+  'drawer_bottom': 'قاع درج',
+  'drawer_side': 'جانب درج',
+  'drawer_back': 'ظهر درج',
+  'drawer_front': 'وش درج',
+  'drawer_width': 'عرض الدرج',
+  'drawer_depth': 'عمق الدرج',
+  'internal_base': 'قاعدة داخلية',
+  'internal_shelf': 'رف داخلي',
+};
+
 export default function UnitDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -548,33 +570,15 @@ export default function UnitDetails() {
             </TableHeader>
             <TableBody className="divide-y divide-border/30 font-medium">
               {unit.parts?.map((part, i) => {
-                const partTranslations: Record<string, string> = {
-                  'base': 'قاعدة',
-                  'top': 'سقف',
-                  'left_side': 'جانب أيسر',
-                  'right_side': 'جانب أيمن',
-                  'side_panel': 'جانب',
-                  'back_panel': 'ظهر',
-                  'shelf': 'رف',
-                  'door': 'ضلفة',
-                  'front_mirror': 'مراية أمامية',
-                  'back_mirror': 'مراية خلفية',
-                  'drawer_bottom': 'قاع درج',
-                  'drawer_side': 'جانب درج',
-                  'drawer_back': 'ظهر درج',
-                  'drawer_front': 'وش درج',
-                  'internal_base': 'قاعدة داخلية',
-                  'internal_shelf': 'رف داخلي', 
-                };
-                
                 const marks = getEdgeMarks((part as any).edge_code || "-");
+                const displayName = partNameMap[part.name] || partNameMap[part.name.toLowerCase()] || part.name;
 
                 return (
                   <TableRow
                     key={i}
                     className="hover:bg-primary/5 transition-colors border-border/30"
                   >
-                    <TableCell className="py-4 px-4 font-semibold text-primary text-right">{partTranslations[part.name] || partTranslations[part.name.toLowerCase()] || part.name}</TableCell>
+                    <TableCell className="py-4 px-4 font-semibold text-primary text-right">{displayName}</TableCell>
                     <TableCell className="py-4 px-2 font-mono text-muted-foreground">{part.width_cm}</TableCell>
                     <TableCell className="py-4 px-2 font-mono text-muted-foreground">{part.height_cm}</TableCell>
                     <TableCell className="py-4 px-2">
@@ -601,30 +605,13 @@ export default function UnitDetails() {
         {/* Mobile Parts List (Card View) */}
         <div className="md:hidden space-y-4 p-4">
           {unit.parts?.map((part, i) => {
-            const partTranslations: Record<string, string> = {
-                'base': 'قاعدة',
-                'top': 'سقف',
-                'left_side': 'جانب أيسر',
-                'right_side': 'جانب أيمن',
-                'side_panel': 'جانب',
-                'back_panel': 'ظهر',
-                'shelf': 'رف',
-                'door': 'ضلفة',
-                'front_mirror': 'مراية أمامية',
-                'back_mirror': 'مراية خلفية',
-                'drawer_bottom': 'قاع درج',
-                'drawer_side': 'جانب درج',
-                'drawer_back': 'ظهر درج',
-                'drawer_front': 'وش درج',
-                'internal_base': 'قاعدة داخلية',
-                'internal_shelf': 'رف داخلي', 
-            };
             const marks = getEdgeMarks((part as any).edge_code || "-");
+            const displayName = partNameMap[part.name] || partNameMap[part.name.toLowerCase()] || part.name;
             
             return (
               <div key={i} className="flex flex-col gap-2 rounded-xl bg-background/40 border border-white/5 p-4">
                 <div className="flex items-center justify-between">
-                    <span className="font-bold text-primary">{partTranslations[part.name] || partTranslations[part.name.toLowerCase()] || part.name}</span>
+                    <span className="font-bold text-primary">{displayName}</span>
                     <span className="inline-flex items-center justify-center min-w-[2rem] h-6 rounded bg-muted text-xs font-bold">
                        ×{(part as any).qty || part.qty || 1}
                     </span>

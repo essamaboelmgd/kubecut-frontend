@@ -192,22 +192,37 @@ export default function Store() {
   const [items, setItems] = useState<MarketplaceItem[]>([]);
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const timer = setTimeout(() => {
         fetchItems();
     }, 500); // Debounce search
     return () => clearTimeout(timer);
-  }, [search, statusFilter]);
+  }, [search, statusFilter, currentPage]);
+
+  const handleSearchChange = (val: string) => {
+      setSearch(val);
+      setCurrentPage(1);
+  };
+
+  const handleStatusChange = (val: string) => {
+      setStatusFilter(val);
+      setCurrentPage(1);
+  };
 
   const fetchItems = async () => {
     try {
       setLoading(true);
       const [data, adsData] = await Promise.all([
-        marketplaceApi.getAll(search, statusFilter),
+        marketplaceApi.getAll(search, statusFilter, currentPage),
         adsApi.getAds('store_grid')
       ]);
-      setItems(data);
+      setItems(data.items);
+      setTotalPages(data.total_pages);
       setAds(adsData);
     } catch (error) {
       console.error(error);
@@ -273,11 +288,11 @@ export default function Store() {
           <Input
             placeholder="ابحث في المنتجات..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="h-12 pr-10"
           />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={handleStatusChange}>
           <SelectTrigger className="h-12 w-full sm:w-48">
             <Filter className="ml-2 h-4 w-4" />
             <SelectValue placeholder="الحالة" />
@@ -324,6 +339,46 @@ export default function Store() {
           <ShoppingBag className="h-12 w-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground">لا توجد منتجات مطابقة للبحث</p>
         </motion.div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-8 pb-8">
+            <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1 || loading}
+                className="h-10 w-10"
+            >
+                <ChevronRight className="h-4 w-4" />
+            </Button>
+            
+            <div className="flex items-center gap-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="icon"
+                        onClick={() => setCurrentPage(page)}
+                        disabled={loading}
+                        className={`h-10 w-10 ${currentPage === page ? 'bg-primary text-primary-foreground' : ''}`}
+                    >
+                        {page}
+                    </Button>
+                ))}
+            </div>
+
+            <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages || loading}
+                 className="h-10 w-10"
+            >
+                <ChevronLeft className="h-4 w-4" />
+            </Button>
+        </div>
       )}
     </div>
   );

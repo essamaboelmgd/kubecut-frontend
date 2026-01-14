@@ -127,6 +127,16 @@ export default function CuttingSettings() {
     setSettings({ ...settings, [key]: value });
   };
 
+  const handleNumericChange = (key: keyof SettingsModel, value: string) => {
+    if (!settings) return;
+    // If empty or invalid number, default to 0. Enforce non-negative.
+    let numValue = value === '' ? 0 : parseFloat(value);
+    if (isNaN(numValue)) numValue = 0;
+    if (numValue < 0) numValue = 0;
+    
+    setSettings({ ...settings, [key]: numValue });
+  };
+
   const handlePartEdgeChange = (partKey: keyof import('@/lib/api').PartEdgeSettings, value: string) => {
     if (!settings) return;
     setSettings({
@@ -147,15 +157,22 @@ export default function CuttingSettings() {
         title: 'تم الحفظ',
         description: 'تم تحديث الإعدادات بنجاح',
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error(error);
+      const msg = error.response?.data?.detail || error.message || 'فشل حفظ الإعدادات';
       toast({
         title: 'خطأ',
-        description: 'فشل حفظ الإعدادات',
+        description: typeof msg === 'string' ? msg : 'فشل حفظ الإعدادات',
         variant: 'destructive',
       });
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Helper to safely display numeric values (avoid NaN)
+  const getSafeValue = (val: any) => {
+      return (val === undefined || val === null || isNaN(val)) ? '' : val;
   };
 
   if (isLoading) {
@@ -261,9 +278,12 @@ export default function CuttingSettings() {
                   <div className="relative">
                      <Input
                         type="number"
-                        value={settings.handle_profile_height}
-                        onChange={(e) => handleInputChange('handle_profile_height', parseFloat(e.target.value))}
+                        min="0"
+                        step="0.1"
+                        value={getSafeValue(settings.handle_profile_height)}
+                        onChange={(e) => handleNumericChange('handle_profile_height', e.target.value)}
                         className="h-11 pr-3 bg-background/50"
+                        placeholder="0"
                     />
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">سم</span>
                   </div>
@@ -273,9 +293,12 @@ export default function CuttingSettings() {
                   <div className="relative">
                     <Input
                         type="number"
-                        value={settings.chassis_handle_drop}
-                        onChange={(e) => handleInputChange('chassis_handle_drop', parseFloat(e.target.value))}
+                         min="0"
+                         step="0.1"
+                        value={getSafeValue(settings.chassis_handle_drop)}
+                        onChange={(e) => handleNumericChange('chassis_handle_drop', e.target.value)}
                         className="h-11 pr-3 bg-background/50"
+                         placeholder="0"
                     />
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">سم</span>
                   </div>
@@ -319,9 +342,12 @@ export default function CuttingSettings() {
                     <div className="relative group">
                         <Input
                         type="number"
-                        value={(settings as any)[item.key]}
-                        onChange={(e) => handleInputChange(item.key as keyof SettingsModel, parseFloat(e.target.value))}
+                         min="0"
+                         step="0.1"
+                        value={getSafeValue((settings as any)[item.key])}
+                        onChange={(e) => handleNumericChange(item.key as keyof SettingsModel, e.target.value)}
                         className="h-11 pr-3 bg-background/50 focus:bg-background transition-colors"
+                         placeholder="0"
                         />
                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">سم</span>
                     </div>
@@ -356,9 +382,12 @@ export default function CuttingSettings() {
                     <div className="relative group">
                         <Input
                         type="number"
-                        value={(settings as any)[item.key]}
-                        onChange={(e) => handleInputChange(item.key as keyof SettingsModel, parseFloat(e.target.value))}
+                         min="0"
+                         step="0.1"
+                        value={getSafeValue((settings as any)[item.key])}
+                        onChange={(e) => handleNumericChange(item.key as keyof SettingsModel, e.target.value)}
                         className="h-11 pr-3 bg-background/50 focus:bg-background transition-colors"
+                         placeholder="0"
                         />
                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">سم</span>
                     </div>

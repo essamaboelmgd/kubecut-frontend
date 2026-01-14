@@ -323,6 +323,14 @@ export interface MarketplaceItem {
     updated_at?: string;
 }
 
+export interface MarketplaceListResponse {
+    items: MarketplaceItem[];
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
+}
+
 export interface MarketplaceItemCreate {
     title: string;
     description: string;
@@ -657,10 +665,12 @@ export const adsApi = {
 };
 
 export const marketplaceApi = {
-    getAll: async (search?: string, status?: string): Promise<MarketplaceItem[]> => {
+    getAll: async (search?: string, status?: string, page: number = 1, limit: number = 30): Promise<MarketplaceListResponse> => {
         const queryParams = new URLSearchParams();
         if (search) queryParams.append('q', search);
         if (status && status !== 'all') queryParams.append('status', status);
+        queryParams.append('page', page.toString());
+        queryParams.append('limit', limit.toString());
         
         const response = await fetch(`${API_URL}/marketplace/items?${queryParams.toString()}`, {
             headers: getHeaders(),

@@ -116,6 +116,9 @@ export default function ProjectDetails() {
     oven_height: 60,
     microwave_height: 38,
     vent_height: 30, // Default vent height check
+    drawer_height_cm: 20,
+    flip_door_height: 40,
+    bottom_door_height: 70,
   });
 
   // Reset/Adjust defaults when type changes
@@ -126,13 +129,16 @@ export default function ProjectDetails() {
     if (type.includes('wall')) {
       defaults.height_cm = 70;
       defaults.depth_cm = 32;
+      defaults.flip_door_height = 35; // Shared defaults
     } else if (type.includes('tall')) {
       defaults.height_cm = 220;
       defaults.depth_cm = 58;
+      defaults.bottom_door_height = 70; // Standard bottom door
     } else {
       // Ground/Sink/Corner Ground
       defaults.height_cm = 85;
       defaults.depth_cm = 56;
+      defaults.drawer_height_cm = 20;
     }
 
     if (type.includes('corner')) {
@@ -154,7 +160,10 @@ export default function ProjectDetails() {
   const isAppliances = newUnit.type.includes('appliances') || 
                        newUnit.type.includes('microwave') || 
                        newUnit.type.includes('oven') ||
-                       newUnit.type.includes('built_in_oven'); // Added checks
+                       newUnit.type.includes('built_in_oven'); 
+  const isFlip = newUnit.type.includes('flip');
+  const isTall = newUnit.type.includes('tall');
+  const isDrawer = newUnit.type.includes('drawer') || newUnit.type.includes('turbo');
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -194,6 +203,11 @@ export default function ProjectDetails() {
         oven_height: isAppliances ? Number(newUnit.oven_height) : 0,
         microwave_height: isAppliances ? Number(newUnit.microwave_height) : 0,
         vent_height: isAppliances ? Number(newUnit.vent_height) : 0,
+        drawer_height_cm: Number(newUnit.drawer_height_cm),
+        flip_door_height: isFlip ? Number(newUnit.flip_door_height) : 0,
+        bottom_door_height: isTall ? Number(newUnit.bottom_door_height) : 0,
+        drawer_count: Number(newUnit.drawer_count),
+        door_count: Number(newUnit.door_count),
       };
       
       const savedUnit = await unitsApi.create(unitData);
@@ -481,6 +495,39 @@ export default function ProjectDetails() {
                         value={newUnit.fixed_part_cm}
                         onChange={(e) => setNewUnit({ ...newUnit, fixed_part_cm: Number(e.target.value) })}
                       />
+                    </div>
+                  )}
+
+                  {isFlip && (
+                    <div className="space-y-2">
+                       <Label>ارتفاع القلاب (سم)</Label>
+                       <Input
+                         type="number"
+                         value={newUnit.flip_door_height}
+                         onChange={(e) => setNewUnit({ ...newUnit, flip_door_height: Number(e.target.value) })}
+                       />
+                    </div>
+                  )}
+
+                   {isTall && (
+                    <div className="space-y-2">
+                       <Label>ارتفاع الضلفة السفلية (سم)</Label>
+                       <Input
+                         type="number"
+                         value={newUnit.bottom_door_height}
+                         onChange={(e) => setNewUnit({ ...newUnit, bottom_door_height: Number(e.target.value) })}
+                       />
+                    </div>
+                  )}
+
+                   {isDrawer && (
+                    <div className="space-y-2">
+                       <Label>ارتفاع الدرج (سم)</Label>
+                       <Input
+                         type="number"
+                         value={newUnit.drawer_height_cm}
+                         onChange={(e) => setNewUnit({ ...newUnit, drawer_height_cm: Number(e.target.value) })}
+                       />
                     </div>
                   )}
                 </div>

@@ -257,8 +257,27 @@ export default function ProductManagement() {
     setIsUploading(true);
     const files = Array.from(e.target.files);
     
+    // Validate file size (20MB)
+    const validFiles = files.filter(file => {
+      const isValidSize = file.size <= 20 * 1024 * 1024; // 20MB
+      if (!isValidSize) {
+        toast({
+          title: 'حجم الملف كبير',
+          description: `الصورة ${file.name} أكبر من 20 ميجابايت`,
+          variant: 'destructive',
+        });
+      }
+      return isValidSize;
+    });
+
+    if (validFiles.length === 0) {
+      setIsUploading(false);
+      e.target.value = '';
+      return;
+    }
+
     try {
-      const uploadPromises = files.map(file => marketplaceApi.uploadImage(file));
+      const uploadPromises = validFiles.map(file => marketplaceApi.uploadImage(file));
       const results = await Promise.all(uploadPromises);
       const newUrls = results.map(r => r.url);
       
@@ -468,7 +487,10 @@ export default function ProductManagement() {
               
               {/* Image Upload Section */}
               <div className="grid gap-2">
-                <Label>صور المنتج</Label>
+                <Label className="flex items-center gap-1">
+                  صور المنتج
+                  <span className="text-destructive">*</span>
+                </Label>
                 <div className="grid grid-cols-3 gap-2">
                   {formData.images?.map((url, index) => (
                     <div key={index} className="relative aspect-square overflow-hidden rounded-md border border-border group">
@@ -508,7 +530,7 @@ export default function ProductManagement() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>إلغاء</Button>
-              <Button onClick={handleSubmit} disabled={isSubmitting || !formData.title || !formData.price}>
+              <Button onClick={handleSubmit} disabled={isSubmitting || !formData.title || !formData.price || !formData.images?.length}>
                 {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
                 {editingItem ? 'حفظ التعديلات' : 'إضافة المنتج'}
               </Button>
