@@ -92,7 +92,7 @@ const getEdgeMarks = (code: string | undefined) => {
     } else if (code.includes("L") && !code.includes("LL")) {
          marks.left = tape_mark; marks.top = tape_mark;
     } else if (code.includes("IIM")) {
-         marks.left = tape_mark; marks.right = tape_mark; marks.top = groove_mark;
+         marks.left = tape_mark; marks.right = groove_mark;
     } else if (code.includes("II")) {
          marks.left = tape_mark; marks.right = tape_mark;
     } else if (code.includes("IM")) {
