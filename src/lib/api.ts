@@ -255,11 +255,26 @@ export interface Unit extends UnitCalculateResponse {
 }
 
 
+export interface PartEdgeSettings {
+    base_lower: string;
+    base_upper: string;
+    front_mirror: string;
+    back_mirror: string;
+    sides_ground: string;
+    sides_upper: string;
+    doors: string;
+    exposed_panel: string;
+    shelf: string;
+    drawer_width: string;
+    drawer_depth: string;
+}
+
 // Settings
 export interface SettingsModel {
     assembly_method: string;
     handle_type: string;
     edge_banding_type: string;
+    part_edge_settings: PartEdgeSettings;
     handle_profile_height: number;
     chassis_handle_drop: number;
     counter_thickness: number;
@@ -478,6 +493,15 @@ export const projectsApi = {
           headers: getHeaders(),
       });
       return handleResponse(response);
+  },
+  exportProjectToExcel: async (projectId: string): Promise<Blob> => {
+      const response = await fetch(`${API_URL}/projects/${projectId}/export-excel`, {
+          headers: getHeaders(),
+      });
+      if (!response.ok) {
+          throw new Error('Failed to export project');
+      }
+      return response.blob();
   }
 };
 

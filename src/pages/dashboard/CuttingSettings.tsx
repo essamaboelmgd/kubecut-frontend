@@ -63,6 +63,21 @@ const edgeBandingOptions = {
   "LSM": "LSM : وحدة ركنة مشطوفة + مفحار",
 };
 
+// Part Labels
+const PART_LABELS: Record<keyof import('@/lib/api').PartEdgeSettings, string> = {
+  base_lower: "قاعدة الوحدة السفلية",
+  base_upper: "قاعدة و برنيطة العلوية",
+  front_mirror: "مرايه امامية",
+  back_mirror: "مرايه خلفية",
+  sides_ground: "جانبين ارضي",
+  sides_upper: "جانبين علوي",
+  doors: "ضلف",
+  exposed_panel: "الجنب العيرة",
+  shelf: "رف",
+  drawer_width: "عرض الدرج",
+  drawer_depth: "عمق الدرج",
+};
+
 export default function CuttingSettings() {
   const [settings, setSettings] = useState<SettingsModel | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,6 +92,22 @@ export default function CuttingSettings() {
     try {
       setIsLoading(true);
       const data = await settingsApi.get();
+      // Initialize part_edge_settings if missing
+      if (!data.part_edge_settings) {
+        data.part_edge_settings = {
+          base_lower: '-',
+          base_upper: '-',
+          front_mirror: '-',
+          back_mirror: '-',
+          sides_ground: '-',
+          sides_upper: '-',
+          doors: '-',
+          exposed_panel: '-',
+          shelf: '-',
+          drawer_width: '-',
+          drawer_depth: '-',
+        };
+      }
       setSettings(data);
     } catch (error) {
       toast({
@@ -94,6 +125,17 @@ export default function CuttingSettings() {
   const handleInputChange = (key: keyof SettingsModel, value: any) => {
     if (!settings) return;
     setSettings({ ...settings, [key]: value });
+  };
+
+  const handlePartEdgeChange = (partKey: keyof import('@/lib/api').PartEdgeSettings, value: string) => {
+    if (!settings) return;
+    setSettings({
+      ...settings,
+      part_edge_settings: {
+        ...settings.part_edge_settings,
+        [partKey]: value
+      }
+    });
   };
 
   const handleSave = async () => {
@@ -192,24 +234,7 @@ export default function CuttingSettings() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">كود الشريط (للتخصيم 2مم)</Label>
-                <Select
-                  value={settings.edge_banding_type || "-"}
-                  onValueChange={(value) => handleInputChange('edge_banding_type', value)}
-                >
-                  <SelectTrigger className="h-11 bg-background/50 focus:ring-primary/20 transition-all">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    {Object.entries(edgeBandingOptions).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+
 
               <div className="space-y-2">
                 <Label className="text-sm font-medium">نوع المقبض</Label>
@@ -339,6 +364,62 @@ export default function CuttingSettings() {
                     </div>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Part Edge Settings */}
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.4, duration: 0.5 }}
+           className="md:col-span-2"
+        >
+          <Card className="glass-card border-white/5">
+            <CardHeader className="pb-4 border-b border-border/40">
+                <CardTitle className="text-lg font-bold">لصق الشريط والمفحار</CardTitle>
+                <CardDescription>
+                تحديد نوع الشريط والمفحار لكل جزء من الوحدة
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+                <div className="rounded-md border border-border/40 overflow-hidden">
+                    <table className="w-full text-sm text-right">
+                        <thead className="bg-muted/50">
+                            <tr className="border-b border-border/40">
+                                <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-1/2">اسم الجزء</th>
+                                <th className="h-12 px-4 align-middle font-medium text-muted-foreground w-1/2">رمز الشريط والمفحار</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/40">
+                            {Object.entries(PART_LABELS).map(([key, label]) => (
+                                <tr key={key} className="hover:bg-muted/20 transition-colors">
+                                    <td className="p-4 align-middle font-medium">{label}</td>
+                                    <td className="p-4 align-middle">
+                                        <Select
+                                            value={settings?.part_edge_settings?.[key as keyof import('@/lib/api').PartEdgeSettings] || '-'}
+                                            onValueChange={(value) => handlePartEdgeChange(key as keyof import('@/lib/api').PartEdgeSettings, value)}
+                                        >
+                                            <SelectTrigger className="w-full bg-background/50">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="max-h-[300px]">
+                                                {Object.entries(edgeBandingOptions).map(([optKey, optLabel]) => (
+                                                    <SelectItem key={optKey} value={optKey}>
+                                                        <span className="flex items-center gap-2">
+                                                            <span className="font-mono font-bold bg-muted px-1.5 py-0.5 rounded text-xs min-w-[30px] text-center">{optKey}</span>
+                                                            <span className="text-muted-foreground text-xs truncate">{optLabel.split(' : ')[1] || optLabel}</span>
+                                                        </span>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </CardContent>
           </Card>
         </motion.div>

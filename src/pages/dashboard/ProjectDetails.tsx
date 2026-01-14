@@ -10,7 +10,8 @@ import {
   Calculator,
   Ruler,
   Settings2,
-  Loader2
+  Loader2,
+  FileSpreadsheet
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -97,6 +98,7 @@ export default function ProjectDetails() {
   const { toast } = useToast();
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   const [isAddUnitOpen, setIsAddUnitOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -219,6 +221,36 @@ export default function ProjectDetails() {
     }
   };
 
+  const handleExportProject = async () => {
+    if (!project) return;
+    setIsExporting(true);
+    try {
+      const blob = await projectsApi.exportProjectToExcel(project.project_id);
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `project_${project.name}_units.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: 'تم التصدير',
+        description: 'تم تحميل ملف الإكسل بنجاح',
+      });
+    } catch {
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء تصدير المشروع',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (isLoading || !project) {
     return (
       <div className="flex justify-center py-12">
@@ -245,6 +277,19 @@ export default function ProjectDetails() {
             </Button>
             
             <div className="flex gap-2">
+            <Button 
+                onClick={handleExportProject} 
+                disabled={isExporting}
+                className="bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
+            >
+                {isExporting ? (
+                    <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                ) : (
+                    <FileSpreadsheet className="h-4 w-4 ml-2" />
+                )}
+                تصدير الكل
+            </Button>
+
             <Button variant="outline" size="sm" className="hover:bg-primary/5 hover:text-primary hover:border-primary/20">
                 <Edit2 className="h-4 w-4 ml-2" />
                 تعديل

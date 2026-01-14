@@ -21,7 +21,7 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
+  // TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -59,6 +59,57 @@ const unitTypeLabels: Record<string, string> = {
   two_small_20_one_large_bottom: '2 صغير 20 + 1 كبير (سفلي)',
   one_small_16_two_large_side: '1 صغير 16 + 2 كبير (جنب)',
   one_small_16_two_large_bottom: '1 صغير 16 + 2 كبير (سفلي)',
+};
+
+// Helper to generate edge marks
+const getEdgeMarks = (code: string | undefined) => {
+    const marks = { top: "", bottom: "", left: "", right: "" };
+    if (!code || code === "-") return marks;
+    
+    const tape_mark = "-------"; 
+    const groove_mark = "م"; 
+    
+    if (code.includes("OM")) {
+        marks.top = tape_mark; marks.bottom = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
+    } else if (code.includes("O")) {
+        marks.top = tape_mark; marks.bottom = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
+    } else if (code.includes("UM-يمين")) {
+        marks.top = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
+    } else if (code.includes("UM-شمال")) {
+        marks.top = tape_mark; marks.right = tape_mark; marks.left = tape_mark;
+    } else if (code.includes("UM")) {
+        marks.top = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
+    } else if (code.includes("CM")) {
+        marks.left = tape_mark; marks.top = tape_mark; marks.bottom = tape_mark;
+    } else if (code.includes("C")) {
+         marks.left = tape_mark; marks.top = tape_mark; marks.bottom = tape_mark;
+    } else if (code.includes("LM-يمين")) {
+        marks.left = tape_mark; marks.top = tape_mark; marks.right = groove_mark;
+    } else if (code.includes("LM-شمال")) {
+         marks.right = tape_mark; marks.top = tape_mark; marks.left = groove_mark;
+    } else if (code.includes("LM")) {
+         marks.left = tape_mark; marks.top = tape_mark;
+    } else if (code.includes("L") && !code.includes("LL")) {
+         marks.left = tape_mark; marks.top = tape_mark;
+    } else if (code.includes("IIM")) {
+         marks.left = tape_mark; marks.right = tape_mark; marks.top = groove_mark;
+    } else if (code.includes("II")) {
+         marks.left = tape_mark; marks.right = tape_mark;
+    } else if (code.includes("IM")) {
+         marks.left = tape_mark; marks.right = groove_mark;
+    } else if (code.includes("I")) {
+        marks.left = tape_mark;
+    } else if (code.includes("\\\\M")) {
+         marks.top = tape_mark; marks.bottom = tape_mark;
+    } else if (code.includes("\\\\")) {
+         marks.top = tape_mark; marks.bottom = tape_mark;
+    } else if (code.includes("\\M")) {
+         marks.top = tape_mark; marks.bottom = groove_mark;
+    } else if (code.includes("\\")) {
+         marks.top = tape_mark;
+    }
+    
+    return marks;
 };
 
 export default function UnitDetails() {
@@ -478,24 +529,20 @@ export default function UnitDetails() {
           </div>
         </div>
         <div className="hidden md:block overflow-x-auto">
-          <Table className="w-full">
+          <Table className="w-full text-center">
             <TableHeader className="bg-muted/40 text-xs uppercase tracking-wider">
               <TableRow className="hover:bg-transparent border-border/50">
-                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">
-                  القطعة
-                </TableHead>
-                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">
-                  العرض (سم)
-                </TableHead>
-                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">
-                  الارتفاع (سم)
-                </TableHead>
-                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">
-                  الكمية
-                </TableHead>
-                <TableHead className="py-4 px-6 text-right font-bold text-muted-foreground">
-                  المساحة (م²)
-                </TableHead>
+                <TableHead className="py-4 px-2 text-right font-bold text-muted-foreground w-[15%]">القطعة</TableHead>
+                <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">العرض</TableHead>
+                <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">الارتفاع</TableHead>
+                <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">الكمية</TableHead>
+                
+                {/* New Columns */}
+                <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground bg-yellow-500/10 text-yellow-600">الرمز</TableHead>
+                <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">اعلي</TableHead>
+                <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">شمال</TableHead>
+                <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">اسفل</TableHead>
+                <TableHead className="py-4 px-2 text-center font-bold text-muted-foreground">يمين</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-border/30 font-medium">
@@ -519,36 +566,33 @@ export default function UnitDetails() {
                   'internal_shelf': 'رف داخلي', 
                 };
                 
+                const marks = getEdgeMarks((part as any).edge_code || "-");
+
                 return (
                   <TableRow
                     key={i}
                     className="hover:bg-primary/5 transition-colors border-border/30"
                   >
-                    <TableCell className="py-4 px-6 font-semibold text-primary">{partTranslations[part.name] || partTranslations[part.name.toLowerCase()] || part.name}</TableCell>
-                    <TableCell className="py-4 px-6 font-mono text-muted-foreground">{part.width_cm}</TableCell>
-                    <TableCell className="py-4 px-6 font-mono text-muted-foreground">{part.height_cm}</TableCell>
-                    <TableCell className="py-4 px-6">
+                    <TableCell className="py-4 px-4 font-semibold text-primary text-right">{partTranslations[part.name] || partTranslations[part.name.toLowerCase()] || part.name}</TableCell>
+                    <TableCell className="py-4 px-2 font-mono text-muted-foreground">{part.width_cm}</TableCell>
+                    <TableCell className="py-4 px-2 font-mono text-muted-foreground">{part.height_cm}</TableCell>
+                    <TableCell className="py-4 px-2">
                         <span className="inline-flex items-center justify-center min-w-[2rem] h-6 rounded bg-muted text-xs font-bold">
                         {(part as any).qty || part.qty || 1}
                         </span>
                     </TableCell>
-                    <TableCell className="py-4 px-6 font-mono font-bold text-foreground/80">
-                      {part.area_m2?.toFixed(3) || '0.000'}
-                    </TableCell>
+                    
+                    {/* New Cells */}
+                    <TableCell className="py-4 px-2 font-mono font-bold bg-yellow-500/5 text-yellow-600">{(part as any).edge_code || "-"}</TableCell>
+                    <TableCell className="py-4 px-2 font-mono text-xs">{marks.top}</TableCell>
+                    <TableCell className="py-4 px-2 font-mono text-xs">{marks.left}</TableCell>
+                    <TableCell className="py-4 px-2 font-mono text-xs">{marks.bottom}</TableCell>
+                    <TableCell className="py-4 px-2 font-mono text-xs">{marks.right}</TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
-            <TableFooter className="bg-primary/5 border-t border-primary/10">
-              <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={4} className="py-4 px-6 font-bold text-lg">
-                  الإجمالي
-                </TableCell>
-                <TableCell className="py-4 px-6 font-bold text-xl text-primary font-mono">
-                  {unit.total_area_m2.toFixed(2)} م²
-                </TableCell>
-              </TableRow>
-            </TableFooter>
+            {/* Footer Removed (Area total shown in card above, removed from table for space) */}
           </Table>
         </div>
 
@@ -573,6 +617,8 @@ export default function UnitDetails() {
                 'internal_base': 'قاعدة داخلية',
                 'internal_shelf': 'رف داخلي', 
             };
+            const marks = getEdgeMarks((part as any).edge_code || "-");
+            
             return (
               <div key={i} className="flex flex-col gap-2 rounded-xl bg-background/40 border border-white/5 p-4">
                 <div className="flex items-center justify-between">
@@ -581,7 +627,12 @@ export default function UnitDetails() {
                        ×{(part as any).qty || part.qty || 1}
                     </span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center justify-between">
+                     <span className="text-xs text-muted-foreground">الرمز</span>
+                     <span className="font-bold font-mono text-yellow-600 bg-yellow-500/10 px-2 py-0.5 rounded">{(part as any).edge_code || "-"}</span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground my-1">
                    <div className="flex items-center justify-between bg-muted/20 rounded p-2">
                       <span>العرض</span>
                       <span className="font-mono text-foreground">{part.width_cm}</span>
@@ -591,10 +642,26 @@ export default function UnitDetails() {
                       <span className="font-mono text-foreground">{part.height_cm}</span>
                    </div>
                 </div>
-                 <div className="flex items-center justify-between pt-2 border-t border-dashed border-white/10 mt-1">
-                    <span className="text-xs text-muted-foreground">المساحة</span>
-                    <span className="font-bold font-mono text-sm">{part.area_m2?.toFixed(3) || '0.000'} م²</span>
-                 </div>
+                
+                {/* Edge Distribution Grid */}
+                <div className="grid grid-cols-4 gap-1 text-center text-xs mt-1 bg-muted/10 p-2 rounded border border-white/5">
+                    <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-muted-foreground">اعلي</span>
+                        <span className="font-mono h-4">{marks.top||"-"}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-muted-foreground">شمال</span>
+                        <span className="font-mono h-4">{marks.left||"-"}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-muted-foreground">اسفل</span>
+                        <span className="font-mono h-4">{marks.bottom||"-"}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <span className="text-[10px] text-muted-foreground">يمين</span>
+                        <span className="font-mono h-4">{marks.right||"-"}</span>
+                    </div>
+                </div>
               </div>
             );
           })}
