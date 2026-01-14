@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   Users,
+  Wallet,
   Package,
   Megaphone,
   LucideIcon
@@ -229,27 +230,25 @@ export default function DashboardLayout() {
 
           <div className="flex items-center gap-3">
             {/* Wallet Widget */}
-            <Button 
-                variant="outline" 
-                className="gap-2 hidden md:flex border-amber-500/20 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
-                asChild
-            >
-                <Link to="/dashboard/wallet-history">
-                    <Package className="h-4 w-4" />
-                    <span className="font-bold">المحفظة: {user?.wallet_balance ?? 0}</span>
-                </Link>
-            </Button>
+            <Link to="/dashboard/wallet-history">
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20 hover:border-amber-500/50 transition-all cursor-pointer group">
+                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500/20 group-hover:bg-amber-500/30 transition-colors">
+                        <Wallet className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                     </div>
+                     <div className="flex flex-col items-start pr-1">
+                        <span className="text-[10px] text-muted-foreground leading-none">الرصيد</span>
+                        <span className="text-sm font-bold text-amber-600 dark:text-amber-400 leading-none mt-0.5">
+                            {user?.wallet_balance ?? 0} توكن
+                        </span>
+                     </div>
+                </div>
+            </Link>
             
-            <Button 
-                variant="ghost" 
-                size="icon"
-                className="md:hidden text-amber-600 dark:text-amber-400"
-                asChild
-            >
-                <Link to="/dashboard/wallet-history">
-                    <Package className="h-5 w-5" />
-                </Link>
-            </Button>
+            <Link to="/dashboard/wallet-history" className="md:hidden">
+                 <div className="flex items-center justify-center w-9 h-9 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    <Wallet className="h-5 w-5" />
+                 </div>
+            </Link>
 
             <ThemeToggle />
 

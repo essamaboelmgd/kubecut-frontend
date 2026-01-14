@@ -27,8 +27,8 @@ import NotFound from "./pages/NotFound";
 import ProductManagement from "./pages/dashboard/ProductManagement";
 import Ads from "./pages/dashboard/Ads";
 import StoreItemDetails from "./pages/dashboard/StoreItemDetails";
-
 import WalletHistory from "./pages/dashboard/WalletHistory";
+import TokenRequests from "./pages/dashboard/TokenRequests";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +63,7 @@ const App = () => (
                   <Route path="users" element={<Users />} />
                   <Route path="account" element={<AccountSettings />} />
                   <Route path="wallet-history" element={<WalletHistory />} />
+                  <Route path="token-requests" element={<TokenRequests />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

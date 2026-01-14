@@ -914,5 +914,56 @@ export const walletApi = {
       body: JSON.stringify({ amount, description }),
     });
     return handleResponse(response);
-  }
+  },
+
+  requestTopup: async (amount: number, notes?: string): Promise<{ message: string, request_id: string }> => {
+        const response = await fetch(`${API_URL}/wallet/request-topup`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify({ amount, notes }),
+        });
+        return handleResponse(response);
+    },
+
+    // Admin methods
+    getRequests: async (status?: string, page = 1, limit = 10): Promise<{ requests: TokenRequest[], total: number, page: number, limit: number }> => {
+         const params = new URLSearchParams({ 
+             page: page.toString(), 
+             limit: limit.toString() 
+         });
+         if (status) params.append('status', status);
+         
+         const response = await fetch(`${API_URL}/wallet/requests?${params}`, {
+             headers: getHeaders(),
+         });
+         return handleResponse(response);
+    },
+
+    approveRequest: async (requestId: string): Promise<void> => {
+        const response = await fetch(`${API_URL}/wallet/requests/${requestId}/approve`, {
+            method: "POST",
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    },
+
+    rejectRequest: async (requestId: string): Promise<void> => {
+        const response = await fetch(`${API_URL}/wallet/requests/${requestId}/reject`, {
+            method: "POST",
+            headers: getHeaders(),
+        });
+        return handleResponse(response);
+    }
 };
+
+export interface TokenRequest {
+    id: string;
+    user_id: string;
+    amount: number;
+    price: number;
+    status: 'pending' | 'approved' | 'rejected';
+    created_at: string;
+    user_name?: string;
+    user_phone?: string;
+    notes?: string;
+}
