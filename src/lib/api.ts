@@ -126,6 +126,7 @@ export interface UnitCalculateRequest {
   drawer_height_cm?: number;
   fixed_part_cm?: number;
   options?: Record<string, any>;
+  door_code_type?: 'basic' | 'additional';
 }
 
 export interface UnitCalculateResponse {
@@ -162,6 +163,7 @@ export interface UnitEstimateRequest {
     drawer_height_cm?: number;
     fixed_part_cm?: number;
     options?: Record<string, any>;
+    door_code_type?: 'basic' | 'additional';
 }
 
 export interface UnitEstimateResponse {
@@ -252,6 +254,7 @@ export interface Unit extends UnitCalculateResponse {
     created_by?: string;
     created_at?: string;
     updated_at?: string;
+    door_code_type?: 'basic' | 'additional';
 }
 
 
@@ -288,6 +291,8 @@ export interface SettingsModel {
     ground_door_height_deduction_no_edge: number;
     edge_banding_waste_per_size: number;
     materials?: Record<string, MaterialInfo>;
+    basic_door_code?: string;
+    additional_door_code?: string;
 }
 
 export interface MaterialInfo {

@@ -357,6 +357,42 @@ export default function CuttingSettings() {
           </Card>
         </motion.div>
 
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.3, duration: 0.5 }}
+           className="md:col-span-2"
+        >
+          <Card className="glass-card border-white/5">
+            <CardHeader className="pb-4 border-b border-border/40">
+                <CardTitle className="text-lg font-bold">أكواد الضلف</CardTitle>
+                <CardDescription>
+                تخصيص الرمز المستخدم للضلف في تقارير القص
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-6 sm:grid-cols-2 pt-6">
+               <div className="space-y-2">
+                  <Label className="text-sm font-medium">كود الضلف الأساسي</Label>
+                  <Input
+                    value={getSafeValue(settings.basic_door_code)}
+                    onChange={(e) => handleInputChange('basic_door_code', e.target.value)}
+                    className="h-11 bg-background/50 focus:bg-background transition-colors"
+                    placeholder="مثال: Basic, ضلف أساسي"
+                  />
+               </div>
+               <div className="space-y-2">
+                  <Label className="text-sm font-medium">كود الضلف الإضافي</Label>
+                  <Input
+                    value={getSafeValue(settings.additional_door_code)}
+                    onChange={(e) => handleInputChange('additional_door_code', e.target.value)}
+                    className="h-11 bg-background/50 focus:bg-background transition-colors"
+                    placeholder="مثال: Additional, ضلف إضافي"
+                  />
+               </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Router Settings */}
         <motion.div
            initial={{ opacity: 0, y: 20 }}

@@ -114,6 +114,7 @@ export default function ProjectDetails() {
     drawer_height_cm: 20,
     flip_door_height: 40,
     bottom_door_height: 70,
+    door_code_type: 'basic',
   });
 
   // Reset/Adjust defaults when type changes
@@ -203,6 +204,7 @@ export default function ProjectDetails() {
         bottom_door_height: isTall ? Number(newUnit.bottom_door_height) : 0,
         drawer_count: Number(newUnit.drawer_count),
         door_count: Number(newUnit.door_count),
+        door_code_type: newUnit.door_code_type as 'basic' | 'additional',
       };
       
       const savedUnit = await unitsApi.create(unitData);
@@ -608,6 +610,25 @@ export default function ProjectDetails() {
                       />
                     </div>
                   )}
+                </div>
+
+                {/* Door Code Type Selection */}
+                <div className="border-t pt-4">
+                     <div className="space-y-2">
+                      <Label>نوع كود الضلفة</Label>
+                      <Select
+                        value={newUnit.door_code_type}
+                        onValueChange={(value) => setNewUnit({ ...newUnit, door_code_type: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر نوع كود الضلفة" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="basic">كود أساسي (Basic)</SelectItem>
+                          <SelectItem value="additional">كود إضافي (Additional)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                 </div>
 
               </div>
