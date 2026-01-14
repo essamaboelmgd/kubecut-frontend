@@ -21,7 +21,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -232,6 +243,67 @@ export default function ProjectDetails() {
     }
   };
 
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', client_name: '', description: '' });
+
+  const handleEditClick = () => {
+    if (!project) return;
+    setEditForm({
+      name: project.name,
+      client_name: project.client_name,
+      description: project.description
+    });
+    setIsEditOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!project) return;
+    setIsSubmitting(true);
+    try {
+      const updatedProject = await projectsApi.update(project.project_id, editForm);
+      setProject(updatedProject);
+      setIsEditOpen(false);
+      toast({
+        title: 'تم التحديث',
+        description: 'تم تحديث بيانات المشروع بنجاح',
+      });
+    } catch (error: any) {
+        toast({
+            title: 'خطأ',
+            description: error.message || 'فشل تحديث المشروع',
+            variant: 'destructive',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setIsDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+      if (!project) return;
+      setIsSubmitting(true);
+      try {
+          await projectsApi.delete(project.project_id);
+          toast({
+              title: 'تم الحذف',
+              description: 'تم حذف المشروع بنجاح',
+          });
+          navigate('/dashboard/projects');
+      } catch (error: any) {
+          toast({
+              title: 'خطأ',
+              description: error.message || 'فشل حذف المشروع',
+              variant: 'destructive',
+          });
+          setIsSubmitting(false); // Only stop loading if failed, otherwise we navigate
+          setIsDeleteOpen(false);
+      }
+  };
+
   const handleExportProject = async () => {
     if (!project) return;
     setIsExporting(true);
@@ -310,11 +382,21 @@ export default function ProjectDetails() {
                 طباعة
             </Button>
 
-            <Button variant="outline" size="sm" className="hover:bg-primary/5 hover:text-primary hover:border-primary/20">
+            <Button 
+                variant="outline" 
+                size="sm" 
+                className="hover:bg-primary/5 hover:text-primary hover:border-primary/20"
+                onClick={handleEditClick}
+            >
                 <Edit2 className="h-4 w-4 ml-2" />
                 تعديل
             </Button>
-            <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 hover:border-destructive/20">
+            <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-destructive hover:bg-destructive/10 hover:border-destructive/20"
+                onClick={handleDeleteClick}
+            >
                 <Trash2 className="h-4 w-4 ml-2" />
                 حذف
             </Button>
@@ -628,7 +710,7 @@ export default function ProjectDetails() {
                           <SelectItem value="additional">كود إضافي (Additional)</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
+    </div>
                 </div>
 
               </div>
@@ -701,6 +783,74 @@ export default function ProjectDetails() {
         </div>
       </motion.div>
     </div>
+
+        {/* Edit Dialog */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>تعديل بيانات المشروع</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  اسم المشروع
+                </Label>
+                <Input
+                  id="name"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="client" className="text-right">
+                  اسم العميل
+                </Label>
+                <Input
+                  id="client"
+                  value={editForm.client_name}
+                  onChange={(e) => setEditForm({ ...editForm, client_name: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="desc" className="text-right">
+                  الوصف
+                </Label>
+                <Input
+                  id="desc"
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button disabled={isSubmitting} onClick={handleSaveEdit}>
+                {isSubmitting ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : "حفظ التغييرات"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Alert Dialog */}
+        <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>هل أنت متأكد تماماً؟</AlertDialogTitle>
+              <AlertDialogDescription>
+                لا يمكن التراجع عن هذا الإجراء. سيتم حذف مشروع "{project.name}" وجميع الوحدات المرتبطة به نهائياً.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isSubmitting}>إلغاء</AlertDialogCancel>
+              <AlertDialogAction onClick={(e) => { e.preventDefault(); handleConfirmDelete(); }} className="bg-destructive hover:bg-destructive/90" disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "نعم، احذف المشروع"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
       <div className="hidden print:block absolute inset-0 bg-white z-50 p-8" dir="rtl">
          <ProjectPrintView project={project} />
       </div>
