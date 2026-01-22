@@ -66,12 +66,12 @@ const unitCategories = [
     label: 'دواليب (Tall Units)',
     types: [
       { value: 'tall_doors', label: 'دولاب ضلف' },
-      { value: 'tall_doors_appliances', label: 'دولاب ضلف وأجهزة' },
-      { value: 'tall_drawers_side_doors_top', label: 'دولاب درج جنب + ضلف' },
-      { value: 'tall_drawers_bottom_rail_top_doors', label: 'دولاب درج سفلي + ضلف' },
-      { value: 'tall_drawers_side_appliances_doors', label: 'دولاب درج جنب + أجهزة' },
-      { value: 'tall_drawers_bottom_appliances_doors_top', label: 'دولاب درج سفلي + أجهزة' },
-      { value: 'tall_wooden_base', label: 'بلاكار قاعدة خشبية' },
+      { value: 'tall_doors_appliances', label: 'دولاب ضلف + اجهزة' },
+      { value: 'tall_drawers_side_doors_top', label: 'دولاب ادراج + ادراج' },
+      { value: 'tall_drawers_bottom_rail_top_doors', label: 'دولاب ادراج م سفلية + ضلف علوية' },
+      { value: 'tall_drawers_side_appliances_doors', label: 'دولاب ادراج جانبية + اجهزة + ضلف علوية' },
+      { value: 'tall_drawers_bottom_appliances_doors_top', label: 'دولاب ادراج م سفلية + اجهزة + ضلف علوية' },
+      { value: 'tall_wooden_base', label: 'دولاب ضلف' },
     ]
   },
   {
