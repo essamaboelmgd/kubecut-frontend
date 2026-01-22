@@ -54,12 +54,12 @@ const unitCategories = [
   {
     label: 'وحدات أرضية',
     types: [
-      { value: 'ground', label: 'أرضي ضلف' },
+      { value: 'ground', label: 'خزانة سفلية' },
       { value: 'sink', label: 'وحدة حوض' },
-      { value: 'ground_fixed', label: 'أرضي ثابت' },
+      { value: 'ground_fixed', label: 'ارضي ثابت' },
       { value: 'sink_fixed', label: 'حوض ثابت' },
-      { value: 'drawers', label: 'أدراج (مجرى جنب)' },
-      { value: 'drawers_bottom_rail', label: 'أدراج (مجرى سفلي)' },
+      { value: 'drawers', label: 'ادراج' },
+      { value: 'drawers_bottom_rail', label: 'ادراج م سفلية' },
     ]
   },
   {
