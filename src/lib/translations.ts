@@ -23,6 +23,7 @@ export const partNameMap: Record<string, string> = {
   'intermediate_shelf': 'رف اضافي',
   'appliance_shelf': 'ارفف اجهزه',
   'vent_panel': 'هوايه',
+  'vent': 'هوايه',
   'side_1': 'الجنب 1',
   'side_2': 'الجنب 2',
   'internal_base': 'قاعدة داخلية',
