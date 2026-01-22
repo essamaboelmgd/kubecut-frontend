@@ -36,7 +36,7 @@ export const unitTypeLabels: Record<string, string> = {
   drawers_bottom_rail_unit: 'ادراج م سفلية',
   tall_doors: 'دولاب ضلف',
   tall_doors_appliances: 'دولاب ضلف + اجهزة',
-  tall_drawers_side_doors_top: 'دولاب ادراج + ادراج',
+  tall_drawers_side_doors_top: 'دولاب ادراج م جانبية + ضلف علوية',
   tall_drawers_bottom_rail_top_doors: 'دولاب ادراج م سفلية + ضلف علوية',
   tall_drawers_side_appliances_doors: 'دولاب ادراج جانبية + اجهزة + ضلف علوية',
   tall_drawers_bottom_appliances_doors_top: 'دولاب ادراج م سفلية + اجهزة + ضلف علوية',

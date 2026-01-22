@@ -67,7 +67,7 @@ const unitCategories = [
     types: [
       { value: 'tall_doors', label: 'دولاب ضلف' },
       { value: 'tall_doors_appliances', label: 'دولاب ضلف + اجهزة' },
-      { value: 'tall_drawers_side_doors_top', label: 'دولاب ادراج + ادراج' },
+      { value: 'tall_drawers_side_doors_top', label: 'دولاب ادراج م جانبية + ضلف علوية' },
       { value: 'tall_drawers_bottom_rail_top_doors', label: 'دولاب ادراج م سفلية + ضلف علوية' },
       { value: 'tall_drawers_side_appliances_doors', label: 'دولاب ادراج جانبية + اجهزة + ضلف علوية' },
       { value: 'tall_drawers_bottom_appliances_doors_top', label: 'دولاب ادراج م سفلية + اجهزة + ضلف علوية' },
