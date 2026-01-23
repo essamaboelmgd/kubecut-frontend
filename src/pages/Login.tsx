@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -15,13 +15,19 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!phone || !password) {
       toast({
         title: 'خطأ',
@@ -40,11 +46,11 @@ export default function Login() {
         device_id: 'web-client', // or generate a UUID if needed, but static for now is okay for web
         device_name: navigator.userAgent
       });
-      
+
       // Fetch real user data
       setToken(response.access_token); // Set token temporarily for the next request
       const userData = await authApi.me();
-      
+
       login(response.access_token, userData);
 
       toast({

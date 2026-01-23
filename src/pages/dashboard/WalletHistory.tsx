@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-    Coins, 
-    Calendar, 
-    ArrowUpRight, 
-    ArrowDownLeft, 
-    Loader2, 
-    Wallet, 
+import {
+    Coins,
+    Calendar,
+    ArrowUpRight,
+    ArrowDownLeft,
+    Loader2,
+    Wallet,
     History,
     Zap,
     Crown,
@@ -29,12 +29,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
 } from "@/components/ui/dialog";
 import { walletApi, Transaction } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -79,13 +79,13 @@ const WalletHistory = () => {
 
     const handleRequestTokens = (amount: number) => {
         if (confirm(`هل تود طلب شراء ${amount} توكن بسعر ${amount * 5} جنيه؟`)) {
-            requestMutation.mutate({ 
-                amount, 
+            requestMutation.mutate({
+                amount,
                 notes: `شراء باقة ${amount} توكن`
             });
         }
     };
-    
+
     // Copy Request ID
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -97,9 +97,9 @@ const WalletHistory = () => {
     }
 
     const packages = [
-        { amount: 10, label: "باقة المبتدئين", icon: Coins, color: "blue", popular: false },
-        { amount: 50, label: "باقة المحترفين", icon: Zap, color: "indigo", popular: true },
-        { amount: 100, label: "باقة الشركات", icon: Crown, color: "amber", popular: false },
+        { amount: 0, label: "باقة المبتدئين", icon: Coins, color: "blue", popular: false },
+        { amount: 0, label: "باقة المحترفين", icon: Zap, color: "indigo", popular: true },
+        { amount: 0, label: "باقة الشركات", icon: Crown, color: "amber", popular: false },
     ];
 
     return (
@@ -143,7 +143,7 @@ const WalletHistory = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">
-                             {stats?.total_added ?? 0}
+                            {stats?.total_added ?? 0}
                         </div>
                     </CardContent>
                 </Card>
@@ -151,27 +151,27 @@ const WalletHistory = () => {
 
             {/* Usage Info Section */}
             <div className="bg-muted/30 border border-dashed rounded-lg p-6 my-8">
-                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <Info className="w-5 h-5 text-amber-500" />
                     فيما تستخدم التوكنز؟
-                 </h3>
-                 <div className="grid gap-4 md:grid-cols-3 text-center">
+                </h3>
+                <div className="grid gap-4 md:grid-cols-3 text-center">
                     <div className="p-4 bg-background rounded-md border flex flex-col items-center gap-3">
                         <LayoutTemplate className="w-8 h-8 text-blue-500" />
                         <span className="font-bold">حساب تفصيل</span>
                         <p className="text-sm text-muted-foreground">يتم خصم 1 توكن لكل وحدة في المشروع عند إجراء عملية حساب التفصيل (Cutting Optimization).</p>
                     </div>
-                     <div className="p-4 bg-background rounded-md border flex flex-col items-center gap-3">
+                    <div className="p-4 bg-background rounded-md border flex flex-col items-center gap-3">
                         <History className="w-8 h-8 text-indigo-500" />
                         <span className="font-bold">حفظ المشاريع</span>
                         <p className="text-sm text-muted-foreground">التوكنز تمكنك من حفظ عدد غير محدود من المشاريع والوصول إليها لاحقاً.</p>
                     </div>
-                     <div className="p-4 bg-background rounded-md border flex flex-col items-center gap-3">
+                    <div className="p-4 bg-background rounded-md border flex flex-col items-center gap-3">
                         <Zap className="w-8 h-8 text-amber-500" />
                         <span className="font-bold">مميزات حصرية</span>
                         <p className="text-sm text-muted-foreground">استمتع بمميزات متقدمة ودعم فني متميز مع باقات التوكنز.</p>
                     </div>
-                 </div>
+                </div>
             </div>
 
             {/* Token Packages */}
@@ -199,8 +199,8 @@ const WalletHistory = () => {
                                 <p className="text-xs text-muted-foreground">5 جنيه / توكن</p>
                             </CardContent>
                             <CardFooter>
-                                <Button 
-                                    className="w-full font-bold gap-2" 
+                                <Button
+                                    className="w-full font-bold gap-2"
                                     variant={pkg.popular ? "default" : "outline"}
                                     onClick={() => handleRequestTokens(pkg.amount)}
                                     disabled={requestMutation.isPending}
@@ -226,7 +226,7 @@ const WalletHistory = () => {
                 </CardHeader>
                 <CardContent>
                     {historyLoading ? (
-                         <div className="flex justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+                        <div className="flex justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
                     ) : (
                         <Table>
                             <TableHeader>
@@ -289,9 +289,9 @@ const WalletHistory = () => {
                             الخطوة التالية: يرجى التواصل معنا عبر واتساب لإتمام عملية الدفع وتفعيل الرصيد.
                         </DialogDescription>
                     </DialogHeader>
-                    
+
                     <div className="p-4 bg-muted rounded-lg space-y-3">
-                         <div className="flex justify-between text-sm">
+                        <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">رقم الطلب:</span>
                             <div className="flex items-center gap-2 font-mono font-bold">
                                 <span>{lastRequestId.slice(-6)}</span>
@@ -299,20 +299,20 @@ const WalletHistory = () => {
                                     <Copy className="w-3 h-3" />
                                 </Button>
                             </div>
-                         </div>
-                         <div className="flex justify-between text-sm">
+                        </div>
+                        <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">المبلغ المطلوب:</span>
                             <span className="font-bold">{lastRequestAmount * 5} ج.م</span>
-                         </div>
+                        </div>
                     </div>
 
                     <DialogFooter className="flex-col gap-2 sm:justify-center">
                         <Button className="w-full gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white" asChild>
-                            <a 
-                                href={`https://wa.me/201024739491?text=${encodeURIComponent(`مرحباً، أرغب في تأكيد طلب شراء توكنز رقم #${lastRequestId.slice(-6)} بقيمة ${lastRequestAmount * 5} جنيه`)}`} 
-                                target="_blank" 
+                            <a
+                                href={`https://wa.me/201024739491?text=${encodeURIComponent(`مرحباً، أرغب في تأكيد طلب شراء توكنز رقم #${lastRequestId.slice(-6)} بقيمة ${lastRequestAmount * 5} جنيه`)}`}
+                                target="_blank"
                                 rel="noreferrer"
-                            > 
+                            >
                                 <MessageCircle className="w-4 h-4" />
                                 تأكيد الطلب عبر واتساب
                             </a>
