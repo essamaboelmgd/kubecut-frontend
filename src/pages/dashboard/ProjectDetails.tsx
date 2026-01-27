@@ -250,8 +250,33 @@ export default function ProjectDetails() {
 
       if (editingUnitId) {
         // Update Mode
-        await unitsApi.update(editingUnitId, unitData);
-        toast({ title: 'تم التحديث', description: 'تم تحديث الوحدة بنجاح' });
+        const oldUnit = project.units.find(u => u.id === editingUnitId || (u as any).unit_id === editingUnitId);
+        const updatedUnit = await unitsApi.update(editingUnitId, unitData);
+
+        const oldCost = (oldUnit as any)?.price_estimate || (oldUnit as any)?.total_cost || 0;
+        const newCost = updatedUnit.total_cost;
+
+        const oldArea = oldUnit?.total_area_m2 || 0;
+        const newArea = updatedUnit.total_area_m2;
+
+        const oldEdge = oldUnit?.total_edge_band_m || 0;
+        const newEdge = updatedUnit.total_edge_band_m;
+
+        // Check for meaningful changes (Cost, Area, Edge)
+        const hasEffectiveChanges =
+          Math.abs(oldCost - newCost) > 0.01 ||
+          Math.abs(oldArea - newArea) > 0.001 ||
+          Math.abs(oldEdge - newEdge) > 0.001;
+
+        if (hasEffectiveChanges) {
+          toast({ title: 'تم التحديث', description: 'تم تحديث الوحدة وإعادة الحساب بنجاح' });
+        } else {
+          toast({
+            title: 'لم يتغير شيء',
+            description: 'تم الفحص. النتائج متطابقة تماماً (لم تتأثر بالتغييرات)',
+            variant: "default"
+          });
+        }
       } else {
         // Create Mode
         const savedUnit = await unitsApi.create(unitData);
