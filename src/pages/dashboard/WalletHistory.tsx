@@ -196,7 +196,7 @@ const WalletHistory = () => {
                                 <div className="text-3xl font-bold mb-1">
                                     {pkg.amount * 5} <span className="text-sm font-normal text-muted-foreground">ج.م</span>
                                 </div>
-                                <p className="text-xs text-muted-foreground">5 جنيه / توكن</p>
+                                <p className="text-xs text-muted-foreground">0 جنيه / توكن</p>
                             </CardContent>
                             <CardFooter>
                                 <Button
