@@ -45,9 +45,10 @@ import {
   SelectLabel
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { projectsApi, unitsApi, type Project, type UnitCalculateRequest as CreateUnitData } from '../../lib/api';
+import { projectsApi, unitsApi, settingsApi, type Project, type UnitCalculateRequest as CreateUnitData, type SettingsModel } from '../../lib/api';
 import { unitTypeLabels } from '@/lib/translations';
 import { ProjectPrintView } from '@/components/printing/ProjectPrintView';
+import { UnitSettingsOverride } from '@/components/units/UnitSettingsOverride';
 
 // Unit Categories and Types with Arabic Labels
 const unitCategories = [
@@ -107,6 +108,25 @@ export default function ProjectDetails() {
   const [isExporting, setIsExporting] = useState(false);
   const [isAddUnitOpen, setIsAddUnitOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Custom unit settings
+  const [customSettings, setCustomSettings] = useState<Partial<SettingsModel>>({});
+  const [defaultSettings, setDefaultSettings] = useState<SettingsModel | undefined>(undefined);
+
+  // Load default settings
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const data = await settingsApi.get();
+        setDefaultSettings(data);
+      } catch (error) {
+        console.error("Failed to load settings", error);
+      }
+    };
+    if (isAddUnitOpen) {
+      loadSettings();
+    }
+  }, [isAddUnitOpen]);
 
   const [newUnit, setNewUnit] = useState({
     type: 'ground',
@@ -216,6 +236,7 @@ export default function ProjectDetails() {
         drawer_count: Number(newUnit.drawer_count),
         door_count: Number(newUnit.door_count),
         door_code_type: newUnit.door_code_type as 'basic' | 'additional',
+        settings_override: Object.keys(customSettings).length > 0 ? customSettings : undefined,
       };
 
       const savedUnit = await unitsApi.create(unitData);
@@ -226,7 +247,10 @@ export default function ProjectDetails() {
       const updatedProject = await projectsApi.getById(project.project_id);
       setProject(updatedProject);
 
+      setProject(updatedProject);
+
       setIsAddUnitOpen(false);
+      setCustomSettings({}); // Reset custom settings
       toast({
         title: 'تم إضافة الوحدة',
         description: 'تم إضافة الوحدة بنجاح',
@@ -714,6 +738,18 @@ export default function ProjectDetails() {
                   </div>
 
                 </div>
+
+                {/* Custom Settings Override */}
+                {defaultSettings && (
+                  <div className="border-t pt-4">
+                    <UnitSettingsOverride
+                      settings={customSettings}
+                      onSettingsChange={setCustomSettings}
+                      defaultSettings={defaultSettings}
+                    />
+                  </div>
+                )}
+
                 <div className="flex gap-3">
                   <Button variant="outline" className="flex-1" onClick={() => setIsAddUnitOpen(false)} disabled={isSubmitting}>
                     إلغاء
