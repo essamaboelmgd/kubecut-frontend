@@ -44,6 +44,7 @@ import {
   SelectGroup,
   SelectLabel
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { projectsApi, unitsApi, settingsApi, type Project, type UnitCalculateRequest as CreateUnitData, type SettingsModel } from '../../lib/api';
 import { unitTypeLabels } from '@/lib/translations';
@@ -110,8 +111,16 @@ export default function ProjectDetails() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Custom unit settings
+  const [isCustomSettingsEnabled, setIsCustomSettingsEnabled] = useState(false);
   const [customSettings, setCustomSettings] = useState<Partial<SettingsModel>>({});
   const [defaultSettings, setDefaultSettings] = useState<SettingsModel | undefined>(undefined);
+
+  // Reset settings when disabled
+  useEffect(() => {
+    if (!isCustomSettingsEnabled) {
+      setCustomSettings({});
+    }
+  }, [isCustomSettingsEnabled]);
 
   // Load default settings
   useEffect(() => {
@@ -236,7 +245,7 @@ export default function ProjectDetails() {
         drawer_count: Number(newUnit.drawer_count),
         door_count: Number(newUnit.door_count),
         door_code_type: newUnit.door_code_type as 'basic' | 'additional',
-        settings_override: Object.keys(customSettings).length > 0 ? customSettings : undefined,
+        settings_override: isCustomSettingsEnabled && Object.keys(customSettings).length > 0 ? customSettings : undefined,
       };
 
       const savedUnit = await unitsApi.create(unitData);
@@ -250,6 +259,7 @@ export default function ProjectDetails() {
       setProject(updatedProject);
 
       setIsAddUnitOpen(false);
+      setIsCustomSettingsEnabled(false);
       setCustomSettings({}); // Reset custom settings
       toast({
         title: 'تم إضافة الوحدة',
@@ -739,14 +749,30 @@ export default function ProjectDetails() {
 
                 </div>
 
-                {/* Custom Settings Override */}
+                {/* Custom Settings Switch */}
                 {defaultSettings && (
-                  <div className="border-t pt-4">
-                    <UnitSettingsOverride
-                      settings={customSettings}
-                      onSettingsChange={setCustomSettings}
-                      defaultSettings={defaultSettings}
-                    />
+                  <div className="border-t pt-4 space-y-4">
+                    <div className="flex items-center justify-between bg-muted/20 p-3 rounded-lg border border-border/50">
+                      <div className="space-y-0.5">
+                        <Label className="text-base font-medium">إعدادات مخصصة لهذه الوحدة</Label>
+                        <p className="text-xs text-muted-foreground">
+                          تفعيل لتعديل إعدادات التقطيع لهذه الوحدة فقط
+                        </p>
+                      </div>
+                      <Switch
+                        checked={isCustomSettingsEnabled}
+                        onCheckedChange={setIsCustomSettingsEnabled}
+                      />
+                    </div>
+
+                    {isCustomSettingsEnabled && (
+                      <UnitSettingsOverride
+                        settings={customSettings}
+                        onSettingsChange={setCustomSettings}
+                        defaultSettings={defaultSettings}
+                        className="border-primary/20 bg-primary/5"
+                      />
+                    )}
                   </div>
                 )}
 
