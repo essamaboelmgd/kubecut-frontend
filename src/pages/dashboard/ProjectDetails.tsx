@@ -9,7 +9,7 @@ import {
   Layers,
   Calculator,
   Ruler,
-  Settings2,
+
   Loader2,
   FileSpreadsheet,
   Printer
@@ -248,28 +248,31 @@ export default function ProjectDetails() {
         settings_override: isCustomSettingsEnabled && Object.keys(customSettings).length > 0 ? customSettings : undefined,
       };
 
-      const savedUnit = await unitsApi.create(unitData);
-
-      const unitId = (savedUnit as any).unit_id || savedUnit.unit_id;
-      await projectsApi.addUnitToProject(project.project_id, unitId);
+      if (editingUnitId) {
+        // Update Mode
+        await unitsApi.update(editingUnitId, unitData);
+        toast({ title: 'تم التحديث', description: 'تم تحديث الوحدة بنجاح' });
+      } else {
+        // Create Mode
+        const savedUnit = await unitsApi.create(unitData);
+        const unitId = (savedUnit as any).unit_id || savedUnit.unit_id;
+        await projectsApi.addUnitToProject(project.project_id, unitId);
+        toast({ title: 'تم الإضافة', description: 'تم إضافة الوحدة بنجاح' });
+      }
 
       const updatedProject = await projectsApi.getById(project.project_id);
       setProject(updatedProject);
 
-      setProject(updatedProject);
-
       setIsAddUnitOpen(false);
       setIsCustomSettingsEnabled(false);
-      setCustomSettings({}); // Reset custom settings
-      toast({
-        title: 'تم إضافة الوحدة',
-        description: 'تم إضافة الوحدة بنجاح',
-      });
+      setCustomSettings({});
+      setEditingUnitId(null);
+
     } catch (error: any) {
-      console.error('Error adding unit:', error);
+      console.error('Error saving unit:', error);
       toast({
         title: 'خطأ',
-        description: error.message || 'فشل إضافة الوحدة',
+        description: error.message || 'فشل حفظ الوحدة',
         variant: 'destructive',
       });
     } finally {
@@ -280,6 +283,11 @@ export default function ProjectDetails() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', client_name: '', description: '' });
+
+  // Unit Actions
+  const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
+  const [unitToDelete, setUnitToDelete] = useState<string | null>(null);
+  const [isDeleteUnitOpen, setIsDeleteUnitOpen] = useState(false);
 
   const handleEditClick = () => {
     if (!project) return;
@@ -336,6 +344,74 @@ export default function ProjectDetails() {
       setIsSubmitting(false); // Only stop loading if failed, otherwise we navigate
       setIsDeleteOpen(false);
     }
+  };
+
+  const handleDeleteUnitClick = (e: React.MouseEvent, unitId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setUnitToDelete(unitId);
+    setIsDeleteUnitOpen(true);
+  };
+
+  const handleUnitDeleteConfirm = async () => {
+    if (!unitToDelete || !project) return;
+    setIsSubmitting(true);
+    try {
+      // Remove from project first
+      await projectsApi.removeUnitFromProject(project.project_id, unitToDelete);
+
+      // Try to delete unit document (optional but cleaner)
+      try {
+        await unitsApi.delete(unitToDelete);
+      } catch (e) { console.warn("Could not delete unit doc", e); }
+
+      const updated = await projectsApi.getById(project.project_id);
+      setProject(updated);
+
+      toast({ title: 'تم الحذف', description: 'تم حذف الوحدة بنجاح' });
+    } catch (error: any) {
+      toast({ title: 'خطأ', description: 'فشل حذف الوحدة', variant: 'destructive' });
+    } finally {
+      setIsSubmitting(false);
+      setIsDeleteUnitOpen(false);
+      setUnitToDelete(null);
+    }
+  };
+
+  const handleEditUnitClick = (e: React.MouseEvent, unit: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setNewUnit({
+      type: unit.type,
+      width_cm: unit.width_cm || '',
+      height_cm: unit.height_cm || '',
+      depth_cm: unit.depth_cm || '',
+      shelf_count: unit.shelf_count || 0,
+      width_2_cm: unit.width_2_cm || '',
+      depth_2_cm: unit.depth_2_cm || '',
+      fixed_part_cm: unit.fixed_part_cm || '',
+      oven_height: unit.oven_height || '',
+      microwave_height: unit.microwave_height || '',
+      vent_height: unit.vent_height || '',
+      drawer_height_cm: unit.drawer_height_cm || '',
+      flip_door_height: unit.flip_door_height || '',
+      bottom_door_height: unit.bottom_door_height || '',
+      drawer_count: unit.drawer_count || 0,
+      door_count: unit.door_count || 0,
+      door_code_type: unit.door_code_type || 'basic',
+    });
+
+    if (unit.settings_override) {
+      setCustomSettings(unit.settings_override);
+      setIsCustomSettingsEnabled(true);
+    } else {
+      setCustomSettings({});
+      setIsCustomSettingsEnabled(false);
+    }
+
+    setEditingUnitId(unit.id || unit.unit_id);
+    setIsAddUnitOpen(true);
   };
 
   const handleExportProject = async () => {
@@ -784,10 +860,10 @@ export default function ProjectDetails() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                        جاري الإنشاء...
+                        {editingUnitId ? 'جاري التحديث...' : 'جاري الإنشاء...'}
                       </>
                     ) : (
-                      'إنشاء الوحدة'
+                      editingUnitId ? 'تحديث الوحدة' : 'إنشاء الوحدة'
                     )}
                   </Button>
                 </div>
@@ -821,9 +897,24 @@ export default function ProjectDetails() {
                         </span>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Settings2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                        onClick={(e) => handleEditUnitClick(e, unit)}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => handleDeleteUnitClick(e, unit.id || (unit as any).unit_id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50">
@@ -908,6 +999,27 @@ export default function ProjectDetails() {
             <AlertDialogCancel disabled={isSubmitting}>إلغاء</AlertDialogCancel>
             <AlertDialogAction onClick={(e) => { e.preventDefault(); handleConfirmDelete(); }} className="bg-destructive hover:bg-destructive/90" disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "نعم، احذف المشروع"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isDeleteUnitOpen} onOpenChange={setIsDeleteUnitOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف الوحدة</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من حذف هذه الوحدة؟ لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting} onClick={() => setIsDeleteUnitOpen(false)}>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleUnitDeleteConfirm(); }}
+              className="bg-destructive hover:bg-destructive/90"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "حذف الوحدة"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

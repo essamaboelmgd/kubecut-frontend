@@ -598,6 +598,21 @@ export const unitsApi = {
     });
     return handleResponse(response);
   },
+  delete: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/units/${id}`, {
+      method: "DELETE",
+      headers: getHeaders(),
+    });
+    return handleResponse(response);
+  },
+  update: async (id: string, data: UnitCalculateRequest): Promise<UnitCalculateResponse> => {
+    const response = await fetch(`${API_URL}/units/${id}`, {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
   getEdgeBreakdown: async (unitId: string, edgeType?: string): Promise<EdgeBreakdownResponse> => {
     const url = new URL(`${API_URL}/units/${unitId}/edge-breakdown`);
     if (edgeType) url.searchParams.append('edge_type', edgeType);
@@ -607,13 +622,7 @@ export const unitsApi = {
     });
     return handleResponse(response);
   },
-  delete: async (projectId: string, unitId: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/projects/${projectId}/units/${unitId}`, {
-      method: "DELETE",
-      headers: getHeaders(),
-    });
-    return handleResponse(response);
-  },
+
   exportToExcel: async (unitId: string): Promise<Blob> => {
     const response = await fetch(`${API_URL}/units/${unitId}/export-excel`, {
       headers: getHeaders(),
