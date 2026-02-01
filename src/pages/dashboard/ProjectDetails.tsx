@@ -62,6 +62,7 @@ const unitCategories = [
       { value: 'sink_fixed', label: 'حوض ثابت' },
       { value: 'drawers', label: 'ادراج' },
       { value: 'drawers_bottom_rail', label: 'ادراج م سفلية' },
+      { value: 'corner_l_ground', label: 'ركنة L ارضي' },
     ]
   },
   {
@@ -181,8 +182,14 @@ export default function ProjectDetails() {
     if (type.includes('corner')) {
       defaults.width_cm = 90;
       defaults.width_2_cm = 90; // Default for 90 degree corner
+      defaults.width_2_cm = 90; // Default for 90 degree corner
       if (type.includes('corner_45')) {
         defaults.width_cm = 105; // Common for 45 corner
+      }
+      if (type === 'corner_l_ground') {
+        defaults.height_cm = 70;
+        defaults.depth_cm = 40;
+        defaults.depth_2_cm = 30;
       }
     } else {
       defaults.width_cm = 60;
