@@ -96,6 +96,7 @@ const unitCategories = [
       { value: 'two_small_20_one_large_bottom', label: '2 صغير 20 + 1 كبير (سفلي)' },
       { value: 'one_small_16_two_large_side', label: '1 صغير 16 + 2 كبير (جنب)' },
       { value: 'one_small_16_two_large_bottom', label: '1 صغير 16 + 2 كبير (سفلي)' },
+      { value: 'side_flush', label: 'جنب لطش' },
     ]
   },
 ];
@@ -197,6 +198,7 @@ export default function ProjectDetails() {
     newUnit.type.includes('microwave') ||
     newUnit.type.includes('oven') ||
     newUnit.type.includes('built_in_oven');
+  const isSideFlush = newUnit.type === 'side_flush';
   const isFlip = newUnit.type.includes('flip');
   const isTall = newUnit.type.includes('tall');
   const isDrawer = newUnit.type.includes('drawer') || newUnit.type.includes('turbo');
@@ -690,14 +692,16 @@ export default function ProjectDetails() {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>{isCorner ? 'العمق 1 (سم)' : 'العمق (سم)'}</Label>
-                      <Input
-                        type="number"
-                        value={newUnit.depth_cm}
-                        onChange={(e) => setNewUnit({ ...newUnit, depth_cm: Number(e.target.value) })}
-                      />
-                    </div>
+                    {!isSideFlush && (
+                      <div className="space-y-2">
+                        <Label>{isCorner ? 'العمق 1 (سم)' : 'العمق (سم)'}</Label>
+                        <Input
+                          type="number"
+                          value={newUnit.depth_cm}
+                          onChange={(e) => setNewUnit({ ...newUnit, depth_cm: Number(e.target.value) })}
+                        />
+                      </div>
+                    )}
 
                     {isCorner && (
                       <div className="space-y-2">
@@ -795,19 +799,21 @@ export default function ProjectDetails() {
 
                   {/* Basic Options */}
                   <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                    <div className="space-y-2">
-                      <Label>عدد الرفوف</Label>
-                      <Input
-                        type="number"
-                        value={newUnit.shelf_count}
-                        onChange={(e) => setNewUnit({ ...newUnit, shelf_count: Number(e.target.value) })}
-                      />
-                    </div>
+                    {!isSideFlush && (
+                      <div className="space-y-2">
+                        <Label>عدد الرفوف</Label>
+                        <Input
+                          type="number"
+                          value={newUnit.shelf_count}
+                          onChange={(e) => setNewUnit({ ...newUnit, shelf_count: Number(e.target.value) })}
+                        />
+                      </div>
+                    )}
 
                     {/* Door Count - Hide for pure drawer/special units */}
                     {(!['drawers_unit', 'drawers_bottom_rail_unit', 'three_turbo', 'drawer_built_in_oven', 'drawer_bottom_rail_built_in_oven'].includes(newUnit.type) && !newUnit.type.startsWith('two_small') && !newUnit.type.startsWith('one_small')) && (
                       <div className="space-y-2">
-                        <Label>عدد الضلف</Label>
+                        <Label>{isSideFlush ? 'العدد' : 'عدد الضلف'}</Label>
                         <Input
                           type="number"
                           value={newUnit.door_count}
