@@ -228,28 +228,67 @@ const WalletHistory = () => {
                     {historyLoading ? (
                         <div className="flex justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="text-right">نوع العملية</TableHead>
-                                    <TableHead className="text-right">التفاصيل</TableHead>
-                                    <TableHead className="text-right">التاريخ</TableHead>
-                                    <TableHead className="text-right">القيمة</TableHead>
-                                    <TableHead className="text-right">الرصيد بعد</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
+                        <>
+                            {/* Desktop Table View */}
+                            <div className="hidden md:block">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="text-right">نوع العملية</TableHead>
+                                            <TableHead className="text-right">التفاصيل</TableHead>
+                                            <TableHead className="text-right">التاريخ</TableHead>
+                                            <TableHead className="text-right">القيمة</TableHead>
+                                            <TableHead className="text-right">الرصيد بعد</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {historyData?.transactions.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                                                    لا توجد عمليات مسجلة
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            historyData?.transactions.map((tx: Transaction) => (
+                                                <TableRow key={tx.transaction_id}>
+                                                    <TableCell className="font-medium">
+                                                        <div className="flex items-center gap-2">
+                                                            {tx.type === 'credit' ? (
+                                                                <ArrowDownLeft className="h-4 w-4 text-green-500" />
+                                                            ) : (
+                                                                <ArrowUpRight className="h-4 w-4 text-red-500" />
+                                                            )}
+                                                            {tx.type === 'credit' ? 'إضافة رصيد' : 'خصم رصيد'}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>{tx.description}</TableCell>
+                                                    <TableCell className="text-muted-foreground text-sm" dir="ltr">
+                                                        {format(new Date(tx.date), 'd MMMM yyyy, hh:mm a', { locale: ar })}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant={tx.type === 'credit' ? "default" : "destructive"} className={tx.type === 'credit' ? "bg-green-500 hover:bg-green-600" : ""}>
+                                                            {tx.type === 'credit' ? '+' : '-'}{Math.abs(tx.amount)}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="font-bold">{tx.balance_after}</TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            {/* Mobile Cards View */}
+                            <div className="md:hidden space-y-4">
                                 {historyData?.transactions.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                            لا توجد عمليات مسجلة
-                                        </TableCell>
-                                    </TableRow>
+                                    <div className="text-center py-8 text-muted-foreground border rounded-lg bg-muted/20">
+                                        لا توجد عمليات مسجلة
+                                    </div>
                                 ) : (
                                     historyData?.transactions.map((tx: Transaction) => (
-                                        <TableRow key={tx.transaction_id}>
-                                            <TableCell className="font-medium">
-                                                <div className="flex items-center gap-2">
+                                        <div key={tx.transaction_id} className="bg-card border rounded-lg p-4 shadow-sm space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2 font-medium">
                                                     {tx.type === 'credit' ? (
                                                         <ArrowDownLeft className="h-4 w-4 text-green-500" />
                                                     ) : (
@@ -257,22 +296,29 @@ const WalletHistory = () => {
                                                     )}
                                                     {tx.type === 'credit' ? 'إضافة رصيد' : 'خصم رصيد'}
                                                 </div>
-                                            </TableCell>
-                                            <TableCell>{tx.description}</TableCell>
-                                            <TableCell className="text-muted-foreground text-sm" dir="ltr">
-                                                {format(new Date(tx.date), 'd MMMM yyyy, hh:mm a', { locale: ar })}
-                                            </TableCell>
-                                            <TableCell>
                                                 <Badge variant={tx.type === 'credit' ? "default" : "destructive"} className={tx.type === 'credit' ? "bg-green-500 hover:bg-green-600" : ""}>
                                                     {tx.type === 'credit' ? '+' : '-'}{Math.abs(tx.amount)}
                                                 </Badge>
-                                            </TableCell>
-                                            <TableCell className="font-bold">{tx.balance_after}</TableCell>
-                                        </TableRow>
+                                            </div>
+
+                                            <div className="text-sm text-foreground/90 font-medium border-r-2 border-primary/20 pr-3">
+                                                {tx.description}
+                                            </div>
+
+                                            <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t mt-2">
+                                                <div dir="ltr">
+                                                    {format(new Date(tx.date), 'd MMM yyyy, hh:mm a', { locale: ar })}
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span>الرصيد بعد:</span>
+                                                    <span className="font-bold text-foreground">{tx.balance_after}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     ))
                                 )}
-                            </TableBody>
-                        </Table>
+                            </div>
+                        </>
                     )}
                 </CardContent>
             </Card>
