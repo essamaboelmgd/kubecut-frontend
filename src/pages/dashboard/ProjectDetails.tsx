@@ -157,6 +157,7 @@ export default function ProjectDetails() {
     flip_door_height: 40,
     bottom_door_height: 70,
     door_code_type: 'basic',
+    chassis_code_type: 'basic',
     is_glass_doors: false,
     is_glass_shelves: false,
   });
@@ -200,6 +201,7 @@ export default function ProjectDetails() {
 
     defaults.is_glass_doors = false;
     defaults.is_glass_shelves = false;
+    defaults.chassis_code_type = 'basic';
 
     setNewUnit(defaults);
   };
@@ -258,8 +260,8 @@ export default function ProjectDetails() {
         bottom_door_height: isTall ? Number(newUnit.bottom_door_height) : 0,
         drawer_count: Number(newUnit.drawer_count),
         door_count: Number(newUnit.door_count),
-        // door_count: Number(newUnit.door_count),
         door_code_type: newUnit.door_code_type as 'basic' | 'additional',
+        chassis_code_type: newUnit.chassis_code_type as 'basic' | 'additional_1' | 'additional_2',
         is_glass_doors: Boolean(newUnit.is_glass_doors),
         is_glass_shelves: Boolean(newUnit.is_glass_shelves),
         settings_override: isCustomSettingsEnabled && Object.keys(customSettings).length > 0 ? customSettings : undefined,
@@ -442,6 +444,7 @@ export default function ProjectDetails() {
       drawer_count: unit.drawer_count || 0,
       door_count: unit.door_count || 0,
       door_code_type: unit.door_code_type || 'basic',
+      chassis_code_type: unit.chassis_code_type || 'basic',
       is_glass_doors: unit.is_glass_doors || false,
       is_glass_shelves: unit.is_glass_shelves || false,
     });
@@ -854,20 +857,39 @@ export default function ProjectDetails() {
 
                   {/* Door Code Type Selection */}
                   <div className="border-t pt-4">
-                    <div className="space-y-2">
-                      <Label>نوع كود الضلفة</Label>
-                      <Select
-                        value={newUnit.door_code_type}
-                        onValueChange={(value) => setNewUnit({ ...newUnit, door_code_type: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر نوع كود الضلفة" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="basic">كود أساسي (Basic)</SelectItem>
-                          <SelectItem value="additional">كود إضافي (Additional)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>نوع كود الضلفة</Label>
+                        <Select
+                          value={newUnit.door_code_type}
+                          onValueChange={(value) => setNewUnit({ ...newUnit, door_code_type: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر نوع كود الضلفة" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="basic">كود أساسي (Basic)</SelectItem>
+                            <SelectItem value="additional">كود إضافي (Additional)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>نوع كود الشاسيه</Label>
+                        <Select
+                          value={newUnit.chassis_code_type}
+                          onValueChange={(value) => setNewUnit({ ...newUnit, chassis_code_type: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر نوع كود الشاسيه" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="basic">كود أساسي (Basic)</SelectItem>
+                            <SelectItem value="additional_1">كود إضافي 1 (Add 1)</SelectItem>
+                            <SelectItem value="additional_2">كود إضافي 2 (Add 2)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
 

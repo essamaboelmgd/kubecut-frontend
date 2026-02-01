@@ -403,29 +403,61 @@ export default function CuttingSettings() {
         >
           <Card className="glass-card border-white/5">
             <CardHeader className="pb-4 border-b border-border/40">
-              <CardTitle className="text-lg font-bold">أكواد الضلف</CardTitle>
+              <CardTitle className="text-lg font-bold">أكواد الضلف والشاسيه</CardTitle>
               <CardDescription>
-                تخصيص الرمز المستخدم للضلف في تقارير القص
+                تخصيص الرموز المستخدمة للضلف والشاسيه في تقارير القص
               </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-6 sm:grid-cols-2 pt-6">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">كود الضلف الأساسي</Label>
-                <Input
-                  value={settings.basic_door_code || ''}
-                  onChange={(e) => handleInputChange('basic_door_code', e.target.value)}
-                  className="h-11 bg-background/50 focus:bg-background transition-colors"
-                  placeholder="مثال: Basic, ضلف أساسي"
-                />
+            <CardContent className="space-y-6 pt-6">
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">كود الضلف الأساسي</Label>
+                  <Input
+                    value={settings.basic_door_code || ''}
+                    onChange={(e) => handleInputChange('basic_door_code', e.target.value)}
+                    className="h-11 bg-background/50 focus:bg-background transition-colors"
+                    placeholder="مثال: Basic, ضلف أساسي"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">كود الضلف الإضافي</Label>
+                  <Input
+                    value={settings.additional_door_code || ''}
+                    onChange={(e) => handleInputChange('additional_door_code', e.target.value)}
+                    className="h-11 bg-background/50 focus:bg-background transition-colors"
+                    placeholder="مثال: Additional, ضلف إضافي"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">كود الضلف الإضافي</Label>
-                <Input
-                  value={settings.additional_door_code || ''}
-                  onChange={(e) => handleInputChange('additional_door_code', e.target.value)}
-                  className="h-11 bg-background/50 focus:bg-background transition-colors"
-                  placeholder="مثال: Additional, ضلف إضافي"
-                />
+
+              <div className="grid gap-6 sm:grid-cols-3 border-t border-border/40 pt-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">كود شاسيه أساسي</Label>
+                  <Input
+                    value={settings.basic_chassis_code || ''}
+                    onChange={(e) => handleInputChange('basic_chassis_code', e.target.value)}
+                    className="h-11 bg-background/50 focus:bg-background transition-colors"
+                    placeholder="مثال: Basic Chassis"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">كود شاسيه إضافي 1</Label>
+                  <Input
+                    value={settings.additional_chassis_code_1 || ''}
+                    onChange={(e) => handleInputChange('additional_chassis_code_1', e.target.value)}
+                    className="h-11 bg-background/50 focus:bg-background transition-colors"
+                    placeholder="مثال: Add 1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">كود شاسيه إضافي 2</Label>
+                  <Input
+                    value={settings.additional_chassis_code_2 || ''}
+                    onChange={(e) => handleInputChange('additional_chassis_code_2', e.target.value)}
+                    className="h-11 bg-background/50 focus:bg-background transition-colors"
+                    placeholder="مثال: Add 2"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
