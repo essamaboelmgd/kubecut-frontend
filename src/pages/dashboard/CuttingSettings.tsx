@@ -4,12 +4,12 @@ import { Save, Loader2, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
 import {
   Card,
@@ -121,7 +121,7 @@ export default function CuttingSettings() {
   };
 
 
-  
+
   const handleInputChange = (key: keyof SettingsModel, value: any) => {
     if (!settings) return;
     setSettings({ ...settings, [key]: value });
@@ -133,7 +133,7 @@ export default function CuttingSettings() {
     let numValue = value === '' ? 0 : parseFloat(value);
     if (isNaN(numValue)) numValue = 0;
     if (numValue < 0) numValue = 0;
-    
+
     setSettings({ ...settings, [key]: numValue });
   };
 
@@ -172,7 +172,7 @@ export default function CuttingSettings() {
 
   // Helper to safely display numeric values (avoid NaN)
   const getSafeValue = (val: any) => {
-      return (val === undefined || val === null || isNaN(val)) ? '' : val;
+    return (val === undefined || val === null || isNaN(val)) ? '' : val;
   };
 
   if (isLoading) {
@@ -220,15 +220,15 @@ export default function CuttingSettings() {
           <Card className="glass-card h-full border-primary/10">
             <CardHeader className="pb-4 border-b border-border/40">
               <div className="flex items-center gap-3">
-                 <div className="rounded-xl bg-primary/10 p-2.5 text-primary ring-1 ring-primary/20">
-                    <Settings2 className="h-5 w-5" />
-                 </div>
-                 <div>
-                    <CardTitle className="text-lg font-bold">طريقة التجميع</CardTitle>
-                    <CardDescription>
-                        تحديد كيفية تجميع الوحدات والمقابض
-                    </CardDescription>
-                 </div>
+                <div className="rounded-xl bg-primary/10 p-2.5 text-primary ring-1 ring-primary/20">
+                  <Settings2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">طريقة التجميع</CardTitle>
+                  <CardDescription>
+                    تحديد كيفية تجميع الوحدات والمقابض
+                  </CardDescription>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
@@ -276,14 +276,14 @@ export default function CuttingSettings() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">ارتفاع قطاع المقبض</Label>
                   <div className="relative">
-                     <Input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        value={getSafeValue(settings.handle_profile_height)}
-                        onChange={(e) => handleNumericChange('handle_profile_height', e.target.value)}
-                        className="h-11 pr-3 bg-background/50"
-                        placeholder="0"
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={getSafeValue(settings.handle_profile_height)}
+                      onChange={(e) => handleNumericChange('handle_profile_height', e.target.value)}
+                      className="h-11 pr-3 bg-background/50"
+                      placeholder="0"
                     />
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">سم</span>
                   </div>
@@ -292,13 +292,13 @@ export default function CuttingSettings() {
                   <Label className="text-sm font-medium">سقوط الضلفة</Label>
                   <div className="relative">
                     <Input
-                        type="number"
-                         min="0"
-                         step="0.1"
-                        value={getSafeValue(settings.chassis_handle_drop)}
-                        onChange={(e) => handleNumericChange('chassis_handle_drop', e.target.value)}
-                        className="h-11 pr-3 bg-background/50"
-                         placeholder="0"
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={getSafeValue(settings.chassis_handle_drop)}
+                      onChange={(e) => handleNumericChange('chassis_handle_drop', e.target.value)}
+                      className="h-11 pr-3 bg-background/50"
+                      placeholder="0"
                     />
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">سم</span>
                   </div>
@@ -310,22 +310,22 @@ export default function CuttingSettings() {
 
         {/* Dimensions & Deductions */}
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
         >
           <Card className="glass-card h-full border-accent/10">
-             <CardHeader className="pb-4 border-b border-border/40">
+            <CardHeader className="pb-4 border-b border-border/40">
               <div className="flex items-center gap-3">
-                 <div className="rounded-xl bg-accent/10 p-2.5 text-accent ring-1 ring-accent/20">
-                    <Settings2 className="h-5 w-5" />
-                 </div>
-                 <div>
-                    <CardTitle className="text-lg font-bold">الأبعاد والخصومات</CardTitle>
-                    <CardDescription>
-                        تحديد سمك الخامات وقيم الخصم المختلفة
-                    </CardDescription>
-                 </div>
+                <div className="rounded-xl bg-accent/10 p-2.5 text-accent ring-1 ring-accent/20">
+                  <Settings2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg font-bold">الأبعاد والخصومات</CardTitle>
+                  <CardDescription>
+                    تحديد سمك الخامات وقيم الخصم المختلفة
+                  </CardDescription>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="grid gap-5 sm:grid-cols-2 pt-6">
@@ -336,97 +336,98 @@ export default function CuttingSettings() {
                 { label: 'خصم الرف من العمق', key: 'shelf_depth_deduction' },
                 { label: 'خصم عرض الضلفة', key: 'door_width_deduction_no_edge' },
                 { label: 'خصم ارتفاع ضلفة أرضي', key: 'ground_door_height_deduction_no_edge' },
+                { label: 'سعر متر الزجاج', key: 'glass_price_m2' },
               ].map((item) => (
-                  <div key={item.key} className="space-y-2">
-                    <Label className="text-sm font-medium">{item.label}</Label>
-                    <div className="relative group">
-                        <Input
-                        type="number"
-                         min="0"
-                         step="0.1"
-                        value={getSafeValue((settings as any)[item.key])}
-                        onChange={(e) => handleNumericChange(item.key as keyof SettingsModel, e.target.value)}
-                        className="h-11 pr-3 bg-background/50 focus:bg-background transition-colors"
-                         placeholder="0"
-                        />
-                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">سم</span>
-                    </div>
+                <div key={item.key} className="space-y-2">
+                  <Label className="text-sm font-medium">{item.label}</Label>
+                  <div className="relative group">
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={getSafeValue((settings as any)[item.key])}
+                      onChange={(e) => handleNumericChange(item.key as keyof SettingsModel, e.target.value)}
+                      className="h-11 pr-3 bg-background/50 focus:bg-background transition-colors"
+                      placeholder="0"
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">سم</span>
                   </div>
+                </div>
               ))}
             </CardContent>
           </Card>
         </motion.div>
 
         <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.3, duration: 0.5 }}
-           className="md:col-span-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="md:col-span-2"
         >
           <Card className="glass-card border-white/5">
             <CardHeader className="pb-4 border-b border-border/40">
-                <CardTitle className="text-lg font-bold">أكواد الضلف</CardTitle>
-                <CardDescription>
+              <CardTitle className="text-lg font-bold">أكواد الضلف</CardTitle>
+              <CardDescription>
                 تخصيص الرمز المستخدم للضلف في تقارير القص
-                </CardDescription>
+              </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 sm:grid-cols-2 pt-6">
-               <div className="space-y-2">
-                  <Label className="text-sm font-medium">كود الضلف الأساسي</Label>
-                  <Input
-                    value={settings.basic_door_code || ''}
-                    onChange={(e) => handleInputChange('basic_door_code', e.target.value)}
-                    className="h-11 bg-background/50 focus:bg-background transition-colors"
-                    placeholder="مثال: Basic, ضلف أساسي"
-                  />
-               </div>
-               <div className="space-y-2">
-                  <Label className="text-sm font-medium">كود الضلف الإضافي</Label>
-                  <Input
-                    value={settings.additional_door_code || ''}
-                    onChange={(e) => handleInputChange('additional_door_code', e.target.value)}
-                    className="h-11 bg-background/50 focus:bg-background transition-colors"
-                    placeholder="مثال: Additional, ضلف إضافي"
-                  />
-               </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">كود الضلف الأساسي</Label>
+                <Input
+                  value={settings.basic_door_code || ''}
+                  onChange={(e) => handleInputChange('basic_door_code', e.target.value)}
+                  className="h-11 bg-background/50 focus:bg-background transition-colors"
+                  placeholder="مثال: Basic, ضلف أساسي"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">كود الضلف الإضافي</Label>
+                <Input
+                  value={settings.additional_door_code || ''}
+                  onChange={(e) => handleInputChange('additional_door_code', e.target.value)}
+                  className="h-11 bg-background/50 focus:bg-background transition-colors"
+                  placeholder="مثال: Additional, ضلف إضافي"
+                />
+              </div>
             </CardContent>
           </Card>
         </motion.div>
 
         {/* Router Settings */}
         <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.3, duration: 0.5 }}
-           className="md:col-span-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="md:col-span-2"
         >
           <Card className="glass-card border-white/5">
             <CardHeader className="pb-4 border-b border-border/40">
-                <CardTitle className="text-lg font-bold">إعدادات المفحار</CardTitle>
-                <CardDescription>
+              <CardTitle className="text-lg font-bold">إعدادات المفحار</CardTitle>
+              <CardDescription>
                 تحديد أبعاد ومسافات المفحار
-                </CardDescription>
+              </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 sm:grid-cols-3 pt-6">
               {[
-                  { label: 'عمق المفحار', key: 'router_depth' },
-                  { label: 'بعد المفحار', key: 'router_distance' },
-                  { label: 'سمك المفحار', key: 'router_thickness' },
+                { label: 'عمق المفحار', key: 'router_depth' },
+                { label: 'بعد المفحار', key: 'router_distance' },
+                { label: 'سمك المفحار', key: 'router_thickness' },
               ].map(item => (
                 <div key={item.key} className="space-y-2">
-                    <Label className="text-sm font-medium">{item.label}</Label>
-                    <div className="relative group">
-                        <Input
-                        type="number"
-                         min="0"
-                         step="0.1"
-                        value={getSafeValue((settings as any)[item.key])}
-                        onChange={(e) => handleNumericChange(item.key as keyof SettingsModel, e.target.value)}
-                        className="h-11 pr-3 bg-background/50 focus:bg-background transition-colors"
-                         placeholder="0"
-                        />
-                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">سم</span>
-                    </div>
+                  <Label className="text-sm font-medium">{item.label}</Label>
+                  <div className="relative group">
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={getSafeValue((settings as any)[item.key])}
+                      onChange={(e) => handleNumericChange(item.key as keyof SettingsModel, e.target.value)}
+                      className="h-11 pr-3 bg-background/50 focus:bg-background transition-colors"
+                      placeholder="0"
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">سم</span>
+                  </div>
                 </div>
               ))}
             </CardContent>
@@ -435,56 +436,56 @@ export default function CuttingSettings() {
 
         {/* Part Edge Settings */}
         <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.4, duration: 0.5 }}
-           className="md:col-span-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="md:col-span-2"
         >
           <Card className="glass-card border-white/5">
             <CardHeader className="pb-4 border-b border-border/40">
-                <CardTitle className="text-lg font-bold">لصق الشريط والمفحار</CardTitle>
-                <CardDescription>
+              <CardTitle className="text-lg font-bold">لصق الشريط والمفحار</CardTitle>
+              <CardDescription>
                 تحديد نوع الشريط والمفحار لكل جزء من الوحدة
-                </CardDescription>
+              </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
+              <div className="rounded-md border border-border/40 overflow-hidden">
                 <div className="rounded-md border border-border/40 overflow-hidden">
-                <div className="rounded-md border border-border/40 overflow-hidden">
-                    {/* Header - Hidden on mobile, shown on tablet/desktop */}
-                    <div className="hidden sm:grid sm:grid-cols-2 bg-muted/50 p-4 border-b border-border/40 font-medium text-muted-foreground">
-                        <div>اسم الجزء</div>
-                        <div>رمز الشريط والمفحار</div>
-                    </div>
-                    
-                    <div className="divide-y divide-border/40">
-                        {Object.entries(PART_LABELS).map(([key, label]) => (
-                            <div key={key} className="flex flex-col sm:grid sm:grid-cols-2 gap-2 sm:gap-4 p-4 hover:bg-muted/20 transition-colors sm:items-center">
-                                <div className="font-medium text-foreground">{label}</div>
-                                <div className="w-full">
-                                    <Select
-                                        value={settings?.part_edge_settings?.[key as keyof import('@/lib/api').PartEdgeSettings] || '-'}
-                                        onValueChange={(value) => handlePartEdgeChange(key as keyof import('@/lib/api').PartEdgeSettings, value)}
-                                    >
-                                        <SelectTrigger className="w-full bg-background/50 h-11 sm:h-10">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="max-h-[300px]">
-                                            {Object.entries(edgeBandingOptions).map(([optKey, optLabel]) => (
-                                                <SelectItem key={optKey} value={optKey}>
-                                                    <span className="flex items-center gap-2">
-                                                        <span className="font-mono font-bold bg-muted px-1.5 py-0.5 rounded text-xs min-w-[30px] text-center">{optKey}</span>
-                                                        <span className="text-muted-foreground text-xs truncate">{optLabel.split(' : ')[1] || optLabel}</span>
-                                                    </span>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                  {/* Header - Hidden on mobile, shown on tablet/desktop */}
+                  <div className="hidden sm:grid sm:grid-cols-2 bg-muted/50 p-4 border-b border-border/40 font-medium text-muted-foreground">
+                    <div>اسم الجزء</div>
+                    <div>رمز الشريط والمفحار</div>
+                  </div>
+
+                  <div className="divide-y divide-border/40">
+                    {Object.entries(PART_LABELS).map(([key, label]) => (
+                      <div key={key} className="flex flex-col sm:grid sm:grid-cols-2 gap-2 sm:gap-4 p-4 hover:bg-muted/20 transition-colors sm:items-center">
+                        <div className="font-medium text-foreground">{label}</div>
+                        <div className="w-full">
+                          <Select
+                            value={settings?.part_edge_settings?.[key as keyof import('@/lib/api').PartEdgeSettings] || '-'}
+                            onValueChange={(value) => handlePartEdgeChange(key as keyof import('@/lib/api').PartEdgeSettings, value)}
+                          >
+                            <SelectTrigger className="w-full bg-background/50 h-11 sm:h-10">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-[300px]">
+                              {Object.entries(edgeBandingOptions).map(([optKey, optLabel]) => (
+                                <SelectItem key={optKey} value={optKey}>
+                                  <span className="flex items-center gap-2">
+                                    <span className="font-mono font-bold bg-muted px-1.5 py-0.5 rounded text-xs min-w-[30px] text-center">{optKey}</span>
+                                    <span className="text-muted-foreground text-xs truncate">{optLabel.split(' : ')[1] || optLabel}</span>
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>

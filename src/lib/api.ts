@@ -141,6 +141,8 @@ export interface UnitCalculateRequest {
   fixed_part_cm?: number;
   options?: Record<string, any>;
   door_code_type?: 'basic' | 'additional';
+  is_glass_doors?: boolean;
+  is_glass_shelves?: boolean;
   settings_override?: Partial<SettingsModel>;
 }
 
@@ -180,6 +182,8 @@ export interface UnitEstimateRequest {
   fixed_part_cm?: number;
   options?: Record<string, any>;
   door_code_type?: 'basic' | 'additional';
+  is_glass_doors?: boolean;
+  is_glass_shelves?: boolean;
   settings_override?: Partial<SettingsModel>;
 }
 
@@ -273,6 +277,8 @@ export interface Unit extends UnitCalculateResponse {
   created_at?: string;
   updated_at?: string;
   door_code_type?: 'basic' | 'additional';
+  is_glass_doors?: boolean;
+  is_glass_shelves?: boolean;
 }
 
 
@@ -311,6 +317,7 @@ export interface SettingsModel {
   materials?: Record<string, MaterialInfo>;
   basic_door_code?: string;
   additional_door_code?: string;
+  glass_price_m2: number;
 }
 
 export interface MaterialInfo {

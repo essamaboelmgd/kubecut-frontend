@@ -157,6 +157,8 @@ export default function ProjectDetails() {
     flip_door_height: 40,
     bottom_door_height: 70,
     door_code_type: 'basic',
+    is_glass_doors: false,
+    is_glass_shelves: false,
   });
 
   // Reset/Adjust defaults when type changes
@@ -195,6 +197,9 @@ export default function ProjectDetails() {
       defaults.width_cm = 60;
       defaults.width_2_cm = 0;
     }
+
+    defaults.is_glass_doors = false;
+    defaults.is_glass_shelves = false;
 
     setNewUnit(defaults);
   };
@@ -253,7 +258,10 @@ export default function ProjectDetails() {
         bottom_door_height: isTall ? Number(newUnit.bottom_door_height) : 0,
         drawer_count: Number(newUnit.drawer_count),
         door_count: Number(newUnit.door_count),
+        // door_count: Number(newUnit.door_count),
         door_code_type: newUnit.door_code_type as 'basic' | 'additional',
+        is_glass_doors: Boolean(newUnit.is_glass_doors),
+        is_glass_shelves: Boolean(newUnit.is_glass_shelves),
         settings_override: isCustomSettingsEnabled && Object.keys(customSettings).length > 0 ? customSettings : undefined,
       };
 
@@ -434,6 +442,8 @@ export default function ProjectDetails() {
       drawer_count: unit.drawer_count || 0,
       door_count: unit.door_count || 0,
       door_code_type: unit.door_code_type || 'basic',
+      is_glass_doors: unit.is_glass_doors || false,
+      is_glass_shelves: unit.is_glass_shelves || false,
     });
 
     if (unit.settings_override) {
@@ -858,6 +868,31 @@ export default function ProjectDetails() {
                           <SelectItem value="additional">كود إضافي (Additional)</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+                  </div>
+
+                  {/* Glass Options */}
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <Label className="text-base font-medium">خيارات الزجاج</Label>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center justify-between bg-muted/20 p-3 rounded-lg border border-border/50">
+                        <Label htmlFor="glass_doors" className="cursor-pointer">ضلف زجاج</Label>
+                        <Switch
+                          id="glass_doors"
+                          checked={newUnit.is_glass_doors}
+                          onCheckedChange={(checked) => setNewUnit({ ...newUnit, is_glass_doors: checked })}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between bg-muted/20 p-3 rounded-lg border border-border/50">
+                        <Label htmlFor="glass_shelves" className="cursor-pointer">أرفف زجاج</Label>
+                        <Switch
+                          id="glass_shelves"
+                          checked={newUnit.is_glass_shelves}
+                          onCheckedChange={(checked) => setNewUnit({ ...newUnit, is_glass_shelves: checked })}
+                        />
+                      </div>
                     </div>
                   </div>
 
