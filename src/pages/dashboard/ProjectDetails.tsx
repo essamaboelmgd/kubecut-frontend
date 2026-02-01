@@ -494,17 +494,17 @@ export default function ProjectDetails() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <Button
               variant="ghost"
-              className="group hover:bg-background/20"
+              className="group hover:bg-background/20 self-start sm:self-auto"
               onClick={() => navigate('/dashboard/projects')}
             >
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
               العودة للمشاريع
             </Button>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
               <Button
                 onClick={handleExportProject}
                 disabled={isExporting}
@@ -547,7 +547,7 @@ export default function ProjectDetails() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 border border-white/10 shadow-2xl">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-5 sm:p-8 border border-white/10 shadow-2xl">
             <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
               <Layers className="h-64 w-64 text-primary" />
             </div>
@@ -560,13 +560,13 @@ export default function ProjectDetails() {
                 </span>
                 قيد العمل
               </div>
-              <h1 className="text-4xl font-bold tracking-tight mb-2">{project.name}</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold tracking-tight mb-2">{project.name}</h1>
               <div className="flex items-center gap-2 text-muted-foreground mb-4">
                 <span className="font-semibold text-foreground/80">{project.client_name}</span>
                 <span>•</span>
                 <span>تم التحديث {new Date(project.updated_at || project.created_at).toLocaleDateString('ar-EG')}</span>
               </div>
-              <p className="max-w-2xl text-lg text-muted-foreground/90 leading-relaxed">
+              <p className="max-w-2xl text-base sm:text-lg text-muted-foreground/90 leading-relaxed">
                 {project.description || 'لا يوجد وصف للمشروع'}
               </p>
             </div>
