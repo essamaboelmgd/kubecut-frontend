@@ -148,6 +148,25 @@ export default function CuttingSettings() {
     });
   };
 
+  const handleMaterialChange = (materialKey: string, field: keyof import('@/lib/api').MaterialInfo, value: string) => {
+    if (!settings) return;
+    const numValue = value === '' ? 0 : parseFloat(value);
+
+    const currentMaterials = settings.materials || {};
+    const currentMaterial = currentMaterials[materialKey] || {};
+
+    setSettings({
+      ...settings,
+      materials: {
+        ...currentMaterials,
+        [materialKey]: {
+          ...currentMaterial,
+          [field]: isNaN(numValue) ? 0 : numValue
+        }
+      }
+    });
+  };
+
   const handleSave = async () => {
     if (!settings) return;
     try {
@@ -350,10 +369,28 @@ export default function CuttingSettings() {
                       className="h-11 pr-3 bg-background/50 focus:bg-background transition-colors"
                       placeholder="0"
                     />
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">سم</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                      {item.key === 'glass_price_m2' ? 'ج.م' : 'سم'}
+                    </span>
                   </div>
                 </div>
               ))}
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">سعر لوح الخشب (الكونتر)</Label>
+                <div className="relative group">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    value={getSafeValue(settings?.materials?.['plywood_sheet']?.price_per_sheet)}
+                    onChange={(e) => handleMaterialChange('plywood_sheet', 'price_per_sheet', e.target.value)}
+                    className="h-11 pr-3 bg-background/50 focus:bg-background transition-colors"
+                    placeholder="0"
+                  />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground group-hover:text-foreground transition-colors">ج.م</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
