@@ -140,7 +140,7 @@ export interface UnitCalculateRequest {
   drawer_height_cm?: number;
   fixed_part_cm?: number;
   options?: Record<string, any>;
-  door_code_type?: 'basic' | 'additional';
+  door_code_type?: 'basic' | 'additional' | 'additional_1' | 'additional_2';
   chassis_code_type?: 'basic' | 'additional_1' | 'additional_2';
   is_glass_doors?: boolean;
   is_glass_shelves?: boolean;
@@ -182,7 +182,7 @@ export interface UnitEstimateRequest {
   drawer_height_cm?: number;
   fixed_part_cm?: number;
   options?: Record<string, any>;
-  door_code_type?: 'basic' | 'additional';
+  door_code_type?: 'basic' | 'additional' | 'additional_1' | 'additional_2';
   chassis_code_type?: 'basic' | 'additional_1' | 'additional_2';
   is_glass_doors?: boolean;
   is_glass_shelves?: boolean;
@@ -278,7 +278,7 @@ export interface Unit extends UnitCalculateResponse {
   created_by?: string;
   created_at?: string;
   updated_at?: string;
-  door_code_type?: 'basic' | 'additional';
+  door_code_type?: 'basic' | 'additional' | 'additional_1' | 'additional_2';
   chassis_code_type?: 'basic' | 'additional_1' | 'additional_2';
   is_glass_doors?: boolean;
   is_glass_shelves?: boolean;

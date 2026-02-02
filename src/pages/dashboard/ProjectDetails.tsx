@@ -260,7 +260,7 @@ export default function ProjectDetails() {
         bottom_door_height: isTall ? Number(newUnit.bottom_door_height) : 0,
         drawer_count: Number(newUnit.drawer_count),
         door_count: Number(newUnit.door_count),
-        door_code_type: newUnit.door_code_type as 'basic' | 'additional',
+        door_code_type: newUnit.door_code_type as 'basic' | 'additional' | 'additional_1' | 'additional_2',
         chassis_code_type: newUnit.chassis_code_type as 'basic' | 'additional_1' | 'additional_2',
         is_glass_doors: Boolean(newUnit.is_glass_doors),
         is_glass_shelves: Boolean(newUnit.is_glass_shelves),
@@ -869,7 +869,8 @@ export default function ProjectDetails() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="basic">كود أساسي (Basic)</SelectItem>
-                            <SelectItem value="additional">كود إضافي (Additional)</SelectItem>
+                            <SelectItem value="additional_1">كود إضافي 1 (Add 1)</SelectItem>
+                            <SelectItem value="additional_2">كود إضافي 2 (Add 2)</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
