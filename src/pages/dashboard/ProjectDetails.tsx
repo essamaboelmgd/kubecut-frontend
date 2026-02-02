@@ -756,7 +756,7 @@ export default function ProjectDetails() {
                       </div>
                     )}
 
-                    {isTall && (
+                    {isTall && newUnit.type !== 'tall_wooden_base' && (
                       <div className="space-y-2">
                         <Label>ارتفاع الضلفة السفلية (سم)</Label>
                         <Input
@@ -875,7 +875,7 @@ export default function ProjectDetails() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>نوع كود الشاسيه</Label>
+                        <Label>{newUnit.type === 'tall_wooden_base' ? 'نوع كود القاعدة' : 'نوع كود الشاسيه'}</Label>
                         <Select
                           value={newUnit.chassis_code_type}
                           onValueChange={(value) => setNewUnit({ ...newUnit, chassis_code_type: value })}
