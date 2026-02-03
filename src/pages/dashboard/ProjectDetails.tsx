@@ -160,6 +160,7 @@ export default function ProjectDetails() {
     chassis_code_type: 'basic',
     is_glass_doors: false,
     is_glass_shelves: false,
+    door_type: 'hinged',
   });
 
   // Reset/Adjust defaults when type changes
@@ -447,6 +448,7 @@ export default function ProjectDetails() {
       chassis_code_type: unit.chassis_code_type || 'basic',
       is_glass_doors: unit.is_glass_doors || false,
       is_glass_shelves: unit.is_glass_shelves || false,
+      door_type: unit.door_type || 'hinged',
     });
 
     if (unit.settings_override) {
@@ -839,6 +841,25 @@ export default function ProjectDetails() {
                           value={newUnit.door_count}
                           onChange={(e) => setNewUnit({ ...newUnit, door_count: Number(e.target.value) })}
                         />
+                      </div>
+                    )}
+
+                    {/* Door Type Selection - Show for compatible units */}
+                    {['wall', 'tall_doors_appliances', 'tall_drawers_side_doors_top', 'tall_drawers_bottom_rail_top_doors', 'tall_drawers_side_appliances_doors', 'tall_drawers_bottom_appliances_doors_top', 'wall_microwave'].includes(newUnit.type) && (
+                      <div className="space-y-2">
+                        <Label>نوع الضلفة</Label>
+                        <Select
+                          value={newUnit.door_type}
+                          onValueChange={(value) => setNewUnit({ ...newUnit, door_type: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر نوع الضلفة" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="hinged">مفصلي (Hinged)</SelectItem>
+                            <SelectItem value="flip">قلاب (Flip)</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     )}
 
