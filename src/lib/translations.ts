@@ -34,6 +34,9 @@ export const partNameMap: Record<string, string> = {
      'internal_shelf': 'رف داخلي',
      'assembly_mirror': 'مراية تجميع',
      'corner_wall_shelf': 'رف ركنه',
+     'door_1': 'باب 1',
+     'door_2': 'باب 2',
+     'top_door_flip': 'ضلفة علوية قلاب',
 };
 
 export const unitTypeLabels: Record<string, string> = {
