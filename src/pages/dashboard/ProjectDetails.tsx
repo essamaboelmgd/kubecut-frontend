@@ -62,7 +62,7 @@ const unitCategories = [
       { value: 'sink_fixed', label: 'حوض ثابت' },
       { value: 'drawers', label: 'ادراج' },
       { value: 'drawers_bottom_rail', label: 'ادراج م سفلية' },
-      { value: 'corner_l_ground', label: 'ركنة L ارضي' },
+      { value: 'corner_l_ground', label: 'ركنه L ارضي' },
     ]
   },
   {
@@ -84,14 +84,14 @@ const unitCategories = [
       { value: 'wall_fixed', label: 'علوي ثابت' },
       { value: 'wall_flip_top_doors_bottom', label: 'علوي قلاب + ضلف' },
       { value: 'wall_microwave', label: 'علوي ميكرويف' },
-      { value: 'corner_l_wall', label: 'ركنة L علوي' },
+      { value: 'corner_l_wall', label: 'علوي L ركنة' },
     ]
   },
   {
     label: 'وحدات خاصة (Special)',
     types: [
       { value: 'three_turbo', label: 'وحدة 3 تربو' },
-      { value: 'drawer_built_in_oven', label: 'درج + فرن بيلت إن' },
+      { value: 'drawer_built_in_oven', label: 'وحدة فرن + درج م جانبية' },
       { value: 'drawer_bottom_rail_built_in_oven', label: 'درج سفلي + فرن بيلت إن' },
       { value: 'two_small_20_one_large_side', label: '2 صغير 20 + 1 كبير (جنب)' },
       { value: 'two_small_20_one_large_bottom', label: '2 صغير 20 + 1 كبير (سفلي)' },
