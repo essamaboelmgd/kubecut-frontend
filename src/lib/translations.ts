@@ -66,7 +66,7 @@ export const unitTypeLabels: Record<string, string> = {
      corner_l_wall: 'علوي L ركنة',
      three_turbo: 'وحدة 3 تربو',
      drawer_built_in_oven: 'وحدة فرن + درج م جانبية',
-     drawer_bottom_rail_built_in_oven: 'درج سفلي + فرن بيلت إن',
+     drawer_bottom_rail_built_in_oven: 'وحدة فرن + درج م سفلية',
      two_small_20_one_large_side: '2درج صغير20سم + درج كبير م جانبية',
      two_small_20_one_large_bottom: '2درج صغير20سم + درج كبير م سفلية',
      one_small_16_two_large_side: 'درج صغير 16 سم + 2 درج كبير م جانبية',

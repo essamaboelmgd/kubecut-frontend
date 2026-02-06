@@ -92,7 +92,7 @@ const unitCategories = [
     types: [
       { value: 'three_turbo', label: 'وحدة 3 تربو' },
       { value: 'drawer_built_in_oven', label: 'وحدة فرن + درج م جانبية' },
-      { value: 'drawer_bottom_rail_built_in_oven', label: 'درج سفلي + فرن بيلت إن' },
+      { value: 'drawer_bottom_rail_built_in_oven', label: 'وحدة فرن + درج م سفلية' },
       { value: 'two_small_20_one_large_side', label: '2 صغير 20 + 1 كبير (جنب)' },
       { value: 'two_small_20_one_large_bottom', label: '2 صغير 20 + 1 كبير (سفلي)' },
       { value: 'one_small_16_two_large_side', label: '1 صغير 16 + 2 كبير (جنب)' },
