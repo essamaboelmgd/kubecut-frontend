@@ -81,42 +81,57 @@ export const getEdgeMarks = (code: string | undefined) => {
      const tape_mark = "-------";
      const groove_mark = "م";
 
+     // General Rule: Any "M" code puts a groove on the LEFT side
+     if (code.includes("M")) {
+          marks.left = groove_mark;
+     }
+
      if (code.includes("OM")) {
-          marks.top = tape_mark; marks.bottom = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
+          marks.top = tape_mark; marks.bottom = tape_mark; marks.right = tape_mark;
+          // Left is Groove
      } else if (code.includes("O")) {
           marks.top = tape_mark; marks.bottom = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
-     } else if (code.includes("UM-يمين")) {
-          marks.top = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
-     } else if (code.includes("UM-شمال")) {
-          marks.top = tape_mark; marks.right = tape_mark; marks.left = tape_mark;
+     } else if (code.includes("UM-يمين") || code.includes("LM-يمين")) {
+          // Rule: Tape UP, No Tape DOWN. Groove Left.
+          marks.top = tape_mark;
+          marks.right = tape_mark;
+          // Left is Groove
+     } else if (code.includes("UM-شمال") || code.includes("LM-شمال")) {
+          // Rule: Tape DOWN, No Tape UP. Groove Left.
+          marks.bottom = tape_mark;
+          marks.right = tape_mark;
+          // Left is Groove
      } else if (code.includes("UM")) {
-          marks.top = tape_mark; marks.left = tape_mark; marks.right = tape_mark;
+          marks.top = tape_mark; marks.bottom = tape_mark; marks.right = tape_mark;
+          // Left is Groove
      } else if (code.includes("CM")) {
-          marks.left = tape_mark; marks.top = tape_mark; marks.bottom = tape_mark;
+          marks.top = tape_mark; marks.bottom = tape_mark;
+          // Left is Groove
      } else if (code.includes("C")) {
           marks.left = tape_mark; marks.top = tape_mark; marks.bottom = tape_mark;
-     } else if (code.includes("LM-يمين")) {
-          marks.left = tape_mark; marks.top = tape_mark; marks.right = groove_mark;
-     } else if (code.includes("LM-شمال")) {
-          marks.right = tape_mark; marks.top = tape_mark; marks.left = groove_mark;
      } else if (code.includes("LM")) {
-          marks.left = tape_mark; marks.top = tape_mark;
+          marks.top = tape_mark;
+          // Left is Groove
      } else if (code.includes("L") && !code.includes("LL")) {
           marks.left = tape_mark; marks.top = tape_mark;
      } else if (code.includes("IIM")) {
-          marks.left = tape_mark; marks.right = groove_mark;
+          marks.right = tape_mark;
+          // Left is Groove
      } else if (code.includes("II")) {
           marks.left = tape_mark; marks.right = tape_mark;
      } else if (code.includes("IM")) {
-          marks.left = tape_mark; marks.right = groove_mark;
+          marks.right = tape_mark;
+          // Left is Groove
      } else if (code.includes("I")) {
           marks.left = tape_mark;
      } else if (code.includes("\\\\M")) {
           marks.top = tape_mark; marks.bottom = tape_mark;
+          // Left is Groove
      } else if (code.includes("\\\\")) {
           marks.top = tape_mark; marks.bottom = tape_mark;
      } else if (code.includes("\\M")) {
-          marks.top = tape_mark; marks.bottom = groove_mark;
+          marks.top = tape_mark;
+          // Left is Groove
      } else if (code.includes("\\")) {
           marks.top = tape_mark;
      }

@@ -23,11 +23,11 @@ import { settingsApi, type SettingsModel } from '@/lib/api';
 
 const assemblyMethods = {
   full_sides_back_routed: 'جانبين كاملين (ظهر مفحار)',
-  full_base_back_routed: 'أرضية كاملة (ظهر مفحار)',
+  // full_base_back_routed: 'أرضية كاملة (ظهر مفحار)',
   base_full_top_sides_back_routed: 'قاعدة كاملة + علوي جانبين (ظهر مفحار)',
-  full_sides_back_flush: 'جانبين كاملين (ظهر لطش)',
-  full_base_back_flush: 'أرضية كاملة (ظهر لطش)',
-  base_full_top_sides_back_flush: 'قاعدة كاملة + علوي جانبين (ظهر لطش)',
+  // full_sides_back_flush: 'جانبين كاملين (ظهر لطش)',
+  // full_base_back_flush: 'أرضية كاملة (ظهر لطش)',
+  // base_full_top_sides_back_flush: 'قاعدة كاملة + علوي جانبين (ظهر لطش)',
 };
 
 const handleTypes = {
