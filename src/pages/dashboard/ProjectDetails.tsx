@@ -265,6 +265,7 @@ export default function ProjectDetails() {
         chassis_code_type: newUnit.chassis_code_type as 'basic' | 'additional_1' | 'additional_2',
         is_glass_doors: Boolean(newUnit.is_glass_doors),
         is_glass_shelves: Boolean(newUnit.is_glass_shelves),
+        door_type: newUnit.door_type as 'hinged' | 'flip',
         settings_override: isCustomSettingsEnabled && Object.keys(customSettings).length > 0 ? customSettings : undefined,
       };
 
