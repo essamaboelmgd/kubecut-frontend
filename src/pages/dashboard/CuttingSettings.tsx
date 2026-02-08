@@ -33,8 +33,8 @@ const assemblyMethods = {
 const handleTypes = {
   built_in: 'مقبض بيلت ان',
   regular: 'مقبض عادي',
-  hidden_cl_chassis: 'مقبض مخفي (C-L) / شاسية',
-  hidden_cl_drop: 'مقبض مخفي (C-L) / ساقط',
+  hidden_cl_chassis: 'مقبض ارضي (C/L) علوي شاسية',
+  hidden_cl_drop: 'مقبض ارضي (C/L) علوي ساقط',
 };
 
 // Edge Banding Options
@@ -293,7 +293,7 @@ export default function CuttingSettings() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">ارتفاع قطاع المقبض</Label>
+                  <Label className="text-sm font-medium">ارتفاع قطاع المقبض - C/L</Label>
                   <div className="relative">
                     <Input
                       type="number"
@@ -308,7 +308,7 @@ export default function CuttingSettings() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">سقوط الضلفة</Label>
+                  <Label className="text-sm font-medium">سقوط الضلفة - قطاع الشاسيه</Label>
                   <div className="relative">
                     <Input
                       type="number"

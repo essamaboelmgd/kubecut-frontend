@@ -11,8 +11,8 @@ export const assemblyMethods = {
 export const handleTypes = {
     built_in: 'مقبض بيلت ان',
     regular: 'مقبض عادي',
-    hidden_cl_chassis: 'مقبض مخفي (C-L) / شاسية',
-    hidden_cl_drop: 'مقبض مخفي (C-L) / ساقط',
+    hidden_cl_chassis: 'مقبض ارضي (C/L) علوي شاسية',
+    hidden_cl_drop: 'مقبض ارضي (C/L) علوي ساقط',
 };
 
 export const edgeBandingOptions = {
