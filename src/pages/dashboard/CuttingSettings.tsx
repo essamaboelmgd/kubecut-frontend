@@ -403,57 +403,36 @@ export default function CuttingSettings() {
         >
           <Card className="glass-card border-white/5">
             <CardHeader className="pb-4 border-b border-border/40">
-              <CardTitle className="text-lg font-bold">أكواد الضلف والشاسيه</CardTitle>
+              <CardTitle className="text-lg font-bold">أكواد التقطيع</CardTitle>
               <CardDescription>
-                تخصيص الرموز المستخدمة للضلف والشاسيه في تقارير القص
+                تخصيص الرموز المستخدمة في تقارير القص (3 أكواد موحدة للضلف والشاسيه)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 pt-6">
-              <div className="grid gap-6 sm:grid-cols-2">
+              <div className="grid gap-6 sm:grid-cols-3">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">كود الضلف الأساسي</Label>
+                  <Label className="text-sm font-medium">كود أساسي</Label>
                   <Input
-                    value={settings.basic_door_code || ''}
-                    onChange={(e) => handleInputChange('basic_door_code', e.target.value)}
+                    value={settings.code_basic || ''}
+                    onChange={(e) => handleInputChange('code_basic', e.target.value)}
                     className="h-11 bg-background/50 focus:bg-background transition-colors"
-                    placeholder="مثال: Basic, ضلف أساسي"
+                    placeholder="مثال: Basic"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">كود الضلف الإضافي</Label>
+                  <Label className="text-sm font-medium">كود إضافي 1</Label>
                   <Input
-                    value={settings.additional_door_code || ''}
-                    onChange={(e) => handleInputChange('additional_door_code', e.target.value)}
-                    className="h-11 bg-background/50 focus:bg-background transition-colors"
-                    placeholder="مثال: Additional, ضلف إضافي"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-6 sm:grid-cols-3 border-t border-border/40 pt-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">كود شاسيه أساسي</Label>
-                  <Input
-                    value={settings.basic_chassis_code || ''}
-                    onChange={(e) => handleInputChange('basic_chassis_code', e.target.value)}
-                    className="h-11 bg-background/50 focus:bg-background transition-colors"
-                    placeholder="مثال: Basic Chassis"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">كود شاسيه إضافي 1</Label>
-                  <Input
-                    value={settings.additional_chassis_code_1 || ''}
-                    onChange={(e) => handleInputChange('additional_chassis_code_1', e.target.value)}
+                    value={settings.code_add_1 || ''}
+                    onChange={(e) => handleInputChange('code_add_1', e.target.value)}
                     className="h-11 bg-background/50 focus:bg-background transition-colors"
                     placeholder="مثال: Add 1"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">كود شاسيه إضافي 2</Label>
+                  <Label className="text-sm font-medium">كود إضافي 2</Label>
                   <Input
-                    value={settings.additional_chassis_code_2 || ''}
-                    onChange={(e) => handleInputChange('additional_chassis_code_2', e.target.value)}
+                    value={settings.code_add_2 || ''}
+                    onChange={(e) => handleInputChange('code_add_2', e.target.value)}
                     className="h-11 bg-background/50 focus:bg-background transition-colors"
                     placeholder="مثال: Add 2"
                   />

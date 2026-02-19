@@ -215,26 +215,35 @@ export function UnitSettingsOverride({
                     </div>
                 </div>
 
-                {/* Section 3: Door Codes */}
+                {/* Section 3: أكواد التقطيع */}
                 <div>
-                    {renderSectionHeader("أكواد الضلف")}
-                    <div className="grid gap-4 md:grid-cols-2">
+                    {renderSectionHeader("أكواد التقطيع")}
+                    <div className="grid gap-4 md:grid-cols-3">
                         <div className="space-y-2">
-                            <Label className="text-xs font-medium">كود الضلف الأساسي</Label>
+                            <Label className="text-xs font-medium">كود أساسي</Label>
                             <Input
                                 className="h-9 text-xs"
-                                value={getValue('basic_door_code')}
-                                onChange={(e) => handleInputChange('basic_door_code', e.target.value)}
+                                value={getValue('code_basic')}
+                                onChange={(e) => handleInputChange('code_basic', e.target.value)}
                                 placeholder="مثل: Basic"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label className="text-xs font-medium">كود الضلف الإضافي</Label>
+                            <Label className="text-xs font-medium">كود إضافي 1</Label>
                             <Input
                                 className="h-9 text-xs"
-                                value={getValue('additional_door_code')}
-                                onChange={(e) => handleInputChange('additional_door_code', e.target.value)}
-                                placeholder="مثل: Additional"
+                                value={getValue('code_add_1')}
+                                onChange={(e) => handleInputChange('code_add_1', e.target.value)}
+                                placeholder="مثل: Add 1"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs font-medium">كود إضافي 2</Label>
+                            <Input
+                                className="h-9 text-xs"
+                                value={getValue('code_add_2')}
+                                onChange={(e) => handleInputChange('code_add_2', e.target.value)}
+                                placeholder="مثل: Add 2"
                             />
                         </div>
                     </div>

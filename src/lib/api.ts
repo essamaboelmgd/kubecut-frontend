@@ -318,11 +318,9 @@ export interface SettingsModel {
   ground_door_height_deduction_no_edge: number;
   edge_banding_waste_per_size: number;
   materials?: Record<string, MaterialInfo>;
-  basic_door_code?: string;
-  additional_door_code?: string;
-  basic_chassis_code?: string;
-  additional_chassis_code_1?: string;
-  additional_chassis_code_2?: string;
+  code_basic?: string;
+  code_add_1?: string;
+  code_add_2?: string;
   glass_price_m2: number;
 }
 
