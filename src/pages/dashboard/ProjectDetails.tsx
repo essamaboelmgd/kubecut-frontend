@@ -910,6 +910,7 @@ export default function ProjectDetails() {
                             <SelectValue placeholder="اختر نوع كود الشاسيه" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="default">افتراضي</SelectItem>
                             <SelectItem value="basic">كود أساسي (Basic)</SelectItem>
                             <SelectItem value="additional_1">كود إضافي 1 (Add 1)</SelectItem>
                             <SelectItem value="additional_2">كود إضافي 2 (Add 2)</SelectItem>
