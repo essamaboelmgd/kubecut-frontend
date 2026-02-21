@@ -142,6 +142,7 @@ export interface UnitCalculateRequest {
   options?: Record<string, any>;
   door_code_type?: 'basic' | 'additional' | 'additional_1' | 'additional_2';
   chassis_code_type?: 'basic' | 'additional_1' | 'additional_2';
+  front_edge_type?: 'default' | 'basic' | 'additional';
   is_glass_doors?: boolean;
   is_glass_shelves?: boolean;
   settings_override?: Partial<SettingsModel>;
@@ -184,6 +185,7 @@ export interface UnitEstimateRequest {
   options?: Record<string, any>;
   door_code_type?: 'basic' | 'additional' | 'additional_1' | 'additional_2';
   chassis_code_type?: 'basic' | 'additional_1' | 'additional_2';
+  front_edge_type?: 'default' | 'basic' | 'additional';
   is_glass_doors?: boolean;
   is_glass_shelves?: boolean;
   settings_override?: Partial<SettingsModel>;
@@ -321,6 +323,8 @@ export interface SettingsModel {
   code_basic?: string;
   code_add_1?: string;
   code_add_2?: string;
+  front_edge_basic?: string;
+  front_edge_add?: string;
   glass_price_m2: number;
 }
 

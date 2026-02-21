@@ -438,6 +438,30 @@ export default function CuttingSettings() {
                   />
                 </div>
               </div>
+
+              <div className="border-t border-border/40 pt-4">
+                <p className="text-sm text-muted-foreground mb-3">كود الشريط الأمامي للوحدة</p>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">كود شريط أمامي أساسي</Label>
+                    <Input
+                      value={settings.front_edge_basic || ''}
+                      onChange={(e) => handleInputChange('front_edge_basic', e.target.value)}
+                      className="h-11 bg-background/50 focus:bg-background transition-colors"
+                      placeholder="مثال: أبيض"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">كود شريط أمامي إضافي</Label>
+                    <Input
+                      value={settings.front_edge_add || ''}
+                      onChange={(e) => handleInputChange('front_edge_add', e.target.value)}
+                      className="h-11 bg-background/50 focus:bg-background transition-colors"
+                      placeholder="مثال: بني"
+                    />
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>

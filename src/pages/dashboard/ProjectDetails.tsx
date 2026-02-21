@@ -158,6 +158,7 @@ export default function ProjectDetails() {
     bottom_door_height: 70,
     door_code_type: 'basic',
     chassis_code_type: 'basic',
+    front_edge_type: 'default',
     is_glass_doors: false,
     is_glass_shelves: false,
     door_type: 'hinged',
@@ -263,6 +264,7 @@ export default function ProjectDetails() {
         door_count: Number(newUnit.door_count),
         door_code_type: newUnit.door_code_type as 'basic' | 'additional' | 'additional_1' | 'additional_2',
         chassis_code_type: newUnit.chassis_code_type as 'basic' | 'additional_1' | 'additional_2',
+        front_edge_type: (newUnit.front_edge_type || 'default') as 'default' | 'basic' | 'additional',
         is_glass_doors: Boolean(newUnit.is_glass_doors),
         is_glass_shelves: Boolean(newUnit.is_glass_shelves),
         door_type: newUnit.door_type as 'hinged' | 'flip',
@@ -447,6 +449,7 @@ export default function ProjectDetails() {
       door_count: unit.door_count || 0,
       door_code_type: unit.door_code_type || 'basic',
       chassis_code_type: unit.chassis_code_type || 'basic',
+      front_edge_type: unit.front_edge_type || 'default',
       is_glass_doors: unit.is_glass_doors || false,
       is_glass_shelves: unit.is_glass_shelves || false,
       door_type: unit.door_type || 'hinged',
@@ -910,6 +913,23 @@ export default function ProjectDetails() {
                             <SelectItem value="basic">كود أساسي (Basic)</SelectItem>
                             <SelectItem value="additional_1">كود إضافي 1 (Add 1)</SelectItem>
                             <SelectItem value="additional_2">كود إضافي 2 (Add 2)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>لون الشريط الامامي</Label>
+                        <Select
+                          value={newUnit.front_edge_type || 'default'}
+                          onValueChange={(value) => setNewUnit({ ...newUnit, front_edge_type: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر لون الشريط الامامي" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="default">افتراضي</SelectItem>
+                            <SelectItem value="basic">كود شريط أساسي</SelectItem>
+                            <SelectItem value="additional">كود شريط إضافي</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
