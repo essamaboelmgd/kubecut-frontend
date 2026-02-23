@@ -561,6 +561,208 @@ export default function CuttingSettings() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Board Settings */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="md:col-span-2"
+        >
+          <Card className="glass-card border-white/5">
+            <CardHeader className="pb-4 border-b border-border/40">
+              <CardTitle className="text-lg font-bold">إعدادات الألواح</CardTitle>
+              <CardDescription>
+                تحديد أبعاد وتكاليف كل نوع لوح
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="rounded-md border border-border/40 overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-muted/50 border-b border-border/40">
+                      <th className="p-3 text-right font-medium text-muted-foreground">اللوح</th>
+                      <th className="p-3 text-center font-medium text-muted-foreground">العرض (سم)</th>
+                      <th className="p-3 text-center font-medium text-muted-foreground">الطول (سم)</th>
+                      <th className="p-3 text-center font-medium text-muted-foreground">تكلفة التقطيع</th>
+                      <th className="p-3 text-center font-medium text-muted-foreground">تكلفة متر الشريط</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/40">
+                    {([
+                      { key: 'board_chassis', label: 'الشاسية' },
+                      { key: 'board_basic', label: 'كود أساسي' },
+                      { key: 'board_add1', label: 'كود اضافي 1' },
+                      { key: 'board_add2', label: 'كود اضافي 2' },
+                      { key: 'board_back', label: 'ظهر' },
+                      { key: 'board_back_basic', label: 'ظهر أساسي' },
+                      { key: 'board_back_add', label: 'ظهر اضافي' },
+                    ] as const).map(board => {
+                      const boardData = (settings as any)?.[board.key] || { width_cm: 0, height_cm: 0, cutting_cost: 0, edge_band_cost_per_meter: 0 };
+                      const updateBoard = (field: string, value: string) => {
+                        if (!settings) return;
+                        const numVal = value === '' ? 0 : parseFloat(value);
+                        setSettings({
+                          ...settings,
+                          [board.key]: { ...boardData, [field]: isNaN(numVal) ? 0 : numVal }
+                        });
+                      };
+                      return (
+                        <tr key={board.key} className="hover:bg-muted/20 transition-colors">
+                          <td className="p-3 font-medium">{board.label}</td>
+                          {(['width_cm', 'height_cm', 'cutting_cost', 'edge_band_cost_per_meter'] as const).map(field => (
+                            <td key={field} className="p-2">
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                value={boardData[field] || ''}
+                                onChange={(e) => updateBoard(field, e.target.value)}
+                                className="h-9 text-center bg-background/50"
+                                placeholder="0"
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Accessory Prices */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+        >
+          <Card className="glass-card border-white/5">
+            <CardHeader className="pb-4 border-b border-border/40">
+              <CardTitle className="text-lg font-bold">أسعار الإكسسوارات</CardTitle>
+              <CardDescription>
+                تحديد سعر كل إكسسوار
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="rounded-md border border-border/40 overflow-hidden">
+                <div className="hidden sm:grid sm:grid-cols-2 bg-muted/50 p-3 border-b border-border/40 font-medium text-muted-foreground text-sm">
+                  <div>الإكسسوار</div>
+                  <div>السعر</div>
+                </div>
+                <div className="divide-y divide-border/40">
+                  {([
+                    { key: 'straight_hinge', label: 'مفصلات عدلة' },
+                    { key: 'side_drawer_slide', label: 'مجر درج جانبية' },
+                    { key: 'bottom_drawer_slide', label: 'مجر درج سفلية' },
+                    { key: 'flip_arm', label: 'دراع قلاب' },
+                    { key: 'spider_hinge', label: 'مفصلة عقربة' },
+                    { key: 'blind_corner_hinge', label: 'مفصلة بلايند كورنر' },
+                    { key: 'shelf_support', label: 'تكاية رف' },
+                    { key: 'leg_set', label: 'طقم رجل' },
+                    { key: 'kitchen_hanger', label: 'علاقة مطبخ' },
+                    { key: 'regular_handle', label: 'مقبض عادي' },
+                    { key: 'dressing_angle', label: 'زاوية دريسنج' },
+                    { key: 'socle_angle', label: 'زاوية سوكلو' },
+                  ] as const).map(acc => {
+                    const accPrices = settings?.accessory_prices || {} as any;
+                    return (
+                      <div key={acc.key} className="flex flex-col sm:grid sm:grid-cols-2 gap-2 sm:gap-4 p-3 hover:bg-muted/20 transition-colors sm:items-center">
+                        <div className="font-medium text-sm">{acc.label}</div>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          value={(accPrices as any)[acc.key] || ''}
+                          onChange={(e) => {
+                            if (!settings) return;
+                            const numVal = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            setSettings({
+                              ...settings,
+                              accessory_prices: {
+                                ...accPrices,
+                                [acc.key]: isNaN(numVal) ? 0 : numVal
+                              } as any
+                            });
+                          }}
+                          className="h-9 bg-background/50"
+                          placeholder="0"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Bar Settings */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
+          <Card className="glass-card border-white/5">
+            <CardHeader className="pb-4 border-b border-border/40">
+              <CardTitle className="text-lg font-bold">أسعار الأعواد</CardTitle>
+              <CardDescription>
+                تحديد مقاس وسعر كل عود
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="rounded-md border border-border/40 overflow-hidden">
+                <div className="hidden sm:grid sm:grid-cols-3 bg-muted/50 p-3 border-b border-border/40 font-medium text-muted-foreground text-sm">
+                  <div>العود</div>
+                  <div>المقاس (سم)</div>
+                  <div>السعر</div>
+                </div>
+                <div className="divide-y divide-border/40">
+                  {([
+                    { key: 'bar_built_in_handle', label: 'مقبض بيلت ان' },
+                    { key: 'bar_glass_profile', label: 'قطاع زجاج' },
+                    { key: 'bar_socle', label: 'عود سوكلو' },
+                  ] as const).map(bar => {
+                    const barData = (settings as any)?.[bar.key] || { size_cm: 0, price: 0 };
+                    const updateBar = (field: string, value: string) => {
+                      if (!settings) return;
+                      const numVal = value === '' ? 0 : parseFloat(value);
+                      setSettings({
+                        ...settings,
+                        [bar.key]: { ...barData, [field]: isNaN(numVal) ? 0 : numVal }
+                      });
+                    };
+                    return (
+                      <div key={bar.key} className="flex flex-col sm:grid sm:grid-cols-3 gap-2 sm:gap-4 p-3 hover:bg-muted/20 transition-colors sm:items-center">
+                        <div className="font-medium text-sm">{bar.label}</div>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          value={barData.size_cm || ''}
+                          onChange={(e) => updateBar('size_cm', e.target.value)}
+                          className="h-9 bg-background/50"
+                          placeholder="0"
+                        />
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          value={barData.price || ''}
+                          onChange={(e) => updateBar('price', e.target.value)}
+                          className="h-9 bg-background/50"
+                          placeholder="0"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );

@@ -1056,7 +1056,7 @@ export default function ProjectDetails() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50">
+                  <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50">
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                       <span>مس: {unit.total_area_m2?.toFixed(2) || '0.00'} م²</span>
@@ -1065,6 +1065,12 @@ export default function ProjectDetails() {
                       <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                       <span>حافة: {unit.total_edge_band_m?.toFixed(2) || '0.00'} م</span>
                     </div>
+                    {(unit as any).price_estimate > 0 && (
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                        <span>تكلفة: {((unit as any).price_estimate || 0).toFixed(0)} ج.م</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Decorative Corner */}

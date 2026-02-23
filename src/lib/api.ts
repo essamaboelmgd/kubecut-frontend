@@ -326,6 +326,50 @@ export interface SettingsModel {
   front_edge_basic?: string;
   front_edge_add?: string;
   glass_price_m2: number;
+
+  // Board Settings
+  board_chassis?: BoardSettings;
+  board_basic?: BoardSettings;
+  board_add1?: BoardSettings;
+  board_add2?: BoardSettings;
+  board_back?: BoardSettings;
+  board_back_basic?: BoardSettings;
+  board_back_add?: BoardSettings;
+
+  // Accessory Prices
+  accessory_prices?: AccessoryPrices;
+
+  // Bar Settings
+  bar_built_in_handle?: BarSettings;
+  bar_glass_profile?: BarSettings;
+  bar_socle?: BarSettings;
+}
+
+export interface BoardSettings {
+  width_cm: number;
+  height_cm: number;
+  cutting_cost: number;
+  edge_band_cost_per_meter: number;
+}
+
+export interface AccessoryPrices {
+  straight_hinge: number;
+  side_drawer_slide: number;
+  bottom_drawer_slide: number;
+  flip_arm: number;
+  spider_hinge: number;
+  blind_corner_hinge: number;
+  shelf_support: number;
+  leg_set: number;
+  kitchen_hanger: number;
+  regular_handle: number;
+  dressing_angle: number;
+  socle_angle: number;
+}
+
+export interface BarSettings {
+  size_cm: number;
+  price: number;
 }
 
 export interface MaterialInfo {
