@@ -348,6 +348,7 @@ export interface SettingsModel {
 export interface BoardSettings {
   width_cm: number;
   height_cm: number;
+  price_per_sheet: number;
   cutting_cost: number;
   edge_band_cost_per_meter: number;
 }
@@ -363,8 +364,11 @@ export interface AccessoryPrices {
   leg_set: number;
   kitchen_hanger: number;
   regular_handle: number;
-  dressing_angle: number;
+  door_glass: number;
+  shelf_glass: number;
   socle_angle: number;
+  glass_profile_angle: number;
+  assembly_brushes: number;
 }
 
 export interface BarSettings {

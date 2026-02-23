@@ -584,6 +584,7 @@ export default function CuttingSettings() {
                       <th className="p-3 text-right font-medium text-muted-foreground">اللوح</th>
                       <th className="p-3 text-center font-medium text-muted-foreground">العرض (سم)</th>
                       <th className="p-3 text-center font-medium text-muted-foreground">الطول (سم)</th>
+                      <th className="p-3 text-center font-medium text-muted-foreground">سعر اللوح</th>
                       <th className="p-3 text-center font-medium text-muted-foreground">تكلفة التقطيع</th>
                       <th className="p-3 text-center font-medium text-muted-foreground">تكلفة متر الشريط</th>
                     </tr>
@@ -598,7 +599,7 @@ export default function CuttingSettings() {
                       { key: 'board_back_basic', label: 'ظهر أساسي' },
                       { key: 'board_back_add', label: 'ظهر اضافي' },
                     ] as const).map(board => {
-                      const boardData = (settings as any)?.[board.key] || { width_cm: 0, height_cm: 0, cutting_cost: 0, edge_band_cost_per_meter: 0 };
+                      const boardData = (settings as any)?.[board.key] || { width_cm: 0, height_cm: 0, price_per_sheet: 0, cutting_cost: 0, edge_band_cost_per_meter: 0 };
                       const updateBoard = (field: string, value: string) => {
                         if (!settings) return;
                         const numVal = value === '' ? 0 : parseFloat(value);
@@ -610,7 +611,7 @@ export default function CuttingSettings() {
                       return (
                         <tr key={board.key} className="hover:bg-muted/20 transition-colors">
                           <td className="p-3 font-medium">{board.label}</td>
-                          {(['width_cm', 'height_cm', 'cutting_cost', 'edge_band_cost_per_meter'] as const).map(field => (
+                          {(['width_cm', 'height_cm', 'price_per_sheet', 'cutting_cost', 'edge_band_cost_per_meter'] as const).map(field => (
                             <td key={field} className="p-2">
                               <Input
                                 type="number"
@@ -655,17 +656,20 @@ export default function CuttingSettings() {
                 <div className="divide-y divide-border/40">
                   {([
                     { key: 'straight_hinge', label: 'مفصلات عدلة' },
-                    { key: 'side_drawer_slide', label: 'مجر درج جانبية' },
-                    { key: 'bottom_drawer_slide', label: 'مجر درج سفلية' },
                     { key: 'flip_arm', label: 'دراع قلاب' },
-                    { key: 'spider_hinge', label: 'مفصلة عقربة' },
+                    { key: 'side_drawer_slide', label: 'مجرة درج جانبية' },
+                    { key: 'bottom_drawer_slide', label: 'مجرة درج سفلية' },
+                    { key: 'spider_hinge', label: 'مفصلات عقربة' },
                     { key: 'blind_corner_hinge', label: 'مفصلة بلايند كورنر' },
                     { key: 'shelf_support', label: 'تكاية رف' },
                     { key: 'leg_set', label: 'طقم رجل' },
                     { key: 'kitchen_hanger', label: 'علاقة مطبخ' },
                     { key: 'regular_handle', label: 'مقبض عادي' },
-                    { key: 'dressing_angle', label: 'زاوية دريسنج' },
-                    { key: 'socle_angle', label: 'زاوية سوكلو' },
+                    { key: 'door_glass', label: 'زجاج ضلف' },
+                    { key: 'shelf_glass', label: 'زجاج أرفف' },
+                    { key: 'socle_angle', label: 'زاوية وزر' },
+                    { key: 'glass_profile_angle', label: 'زاوية قطاع زجاج' },
+                    { key: 'assembly_brushes', label: 'فراشات تجميع' },
                   ] as const).map(acc => {
                     const accPrices = settings?.accessory_prices || {} as any;
                     return (
