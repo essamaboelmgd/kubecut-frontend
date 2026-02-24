@@ -141,10 +141,10 @@ export default function ProjectDetails() {
 
   const [newUnit, setNewUnit] = useState({
     type: 'ground',
-    width_cm: 60, // Changed default to generic 60
+    width_cm: 0,
     width_2_cm: 0,
-    height_cm: 85, // Default ground height
-    depth_cm: 56, // Default ground depth
+    height_cm: 0,
+    depth_cm: 0,
     depth_2_cm: 0,
     shelf_count: 1,
     door_count: 2,
@@ -170,40 +170,40 @@ export default function ProjectDetails() {
 
     // Set sensible defaults based on type category
     if (type.includes('wall')) {
-      defaults.height_cm = 70;
-      defaults.depth_cm = 32;
+      defaults.height_cm = 0;
+      defaults.depth_cm = 0;
       defaults.flip_door_height = 35; // Shared defaults
     } else if (type.includes('tall')) {
-      defaults.height_cm = 220;
-      defaults.depth_cm = 58;
+      defaults.height_cm = 0;
+      defaults.depth_cm = 0;
       defaults.bottom_door_height = 70; // Standard bottom door
     } else {
       // Ground/Sink/Corner Ground
-      defaults.height_cm = 85;
-      defaults.depth_cm = 56;
+      defaults.height_cm = 0;
+      defaults.depth_cm = 0;
       defaults.drawer_height_cm = 20;
     }
 
     if (type.includes('corner')) {
-      defaults.width_cm = 90;
-      defaults.width_2_cm = 90; // Default for 90 degree corner
-      defaults.width_2_cm = 90; // Default for 90 degree corner
+      defaults.width_cm = 0;
+      defaults.width_2_cm = 0; // Default for 90 degree corner
+      defaults.width_2_cm = 0; // Default for 90 degree corner
       if (type.includes('corner_45')) {
-        defaults.width_cm = 105; // Common for 45 corner
+        defaults.width_cm = 0; // Common for 45 corner
       }
       if (type === 'corner_l_ground') {
-        defaults.height_cm = 70;
-        defaults.depth_cm = 40;
-        defaults.depth_2_cm = 30;
+        defaults.height_cm = 0;
+        defaults.depth_cm = 0;
+        defaults.depth_2_cm = 0;
       }
     } else {
-      defaults.width_cm = 60;
+      defaults.width_cm = 0;
       defaults.width_2_cm = 0;
     }
 
     defaults.is_glass_doors = false;
     defaults.is_glass_shelves = false;
-    defaults.chassis_code_type = 'basic';
+    defaults.chassis_code_type = 'default';
 
     setNewUnit(defaults);
   };
@@ -825,19 +825,20 @@ export default function ProjectDetails() {
 
                   {/* Basic Options */}
                   <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                    {!isSideFlush && (
-                      <div className="space-y-2">
-                        <Label>عدد الرفوف</Label>
-                        <Input
-                          type="number"
-                          value={newUnit.shelf_count}
-                          onChange={(e) => setNewUnit({ ...newUnit, shelf_count: Number(e.target.value) })}
-                        />
-                      </div>
-                    )}
+                    {!isSideFlush &&
+                      !(newUnit.type.includes('drawer') || newUnit.type.includes('turbo') || newUnit.type.includes('drawers')) && (
+                        <div className="space-y-2">
+                          <Label>عدد الرفوف</Label>
+                          <Input
+                            type="number"
+                            value={newUnit.shelf_count}
+                            onChange={(e) => setNewUnit({ ...newUnit, shelf_count: Number(e.target.value) })}
+                          />
+                        </div>
+                      )}
 
                     {/* Door Count - Hide for pure drawer/special units */}
-                    {(!['drawers_unit', 'drawers_bottom_rail_unit', 'three_turbo', 'drawer_built_in_oven', 'drawer_bottom_rail_built_in_oven'].includes(newUnit.type) && !newUnit.type.startsWith('two_small') && !newUnit.type.startsWith('one_small')) && (
+                    {!(newUnit.type.includes('drawer') || newUnit.type.includes('turbo') || newUnit.type.includes('drawers') || newUnit.type.startsWith('two_small') || newUnit.type.startsWith('one_small')) && (
                       <div className="space-y-2">
                         <Label>{isSideFlush ? 'العدد' : 'عدد الضلف'}</Label>
                         <Input
