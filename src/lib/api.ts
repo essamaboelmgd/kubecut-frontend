@@ -142,6 +142,7 @@ export interface UnitCalculateRequest {
   options?: Record<string, any>;
   door_code_type?: 'basic' | 'additional' | 'additional_1' | 'additional_2';
   chassis_code_type?: 'default' | 'basic' | 'additional_1' | 'additional_2';
+  dummy_side_code?: 'none' | 'basic' | 'additional_1' | 'additional_2';
   front_edge_type?: 'default' | 'basic' | 'additional';
   is_glass_doors?: boolean;
   is_glass_shelves?: boolean;
@@ -185,6 +186,7 @@ export interface UnitEstimateRequest {
   options?: Record<string, any>;
   door_code_type?: 'basic' | 'additional' | 'additional_1' | 'additional_2';
   chassis_code_type?: 'default' | 'basic' | 'additional_1' | 'additional_2';
+  dummy_side_code?: 'none' | 'basic' | 'additional_1' | 'additional_2';
   front_edge_type?: 'default' | 'basic' | 'additional';
   is_glass_doors?: boolean;
   is_glass_shelves?: boolean;
@@ -282,6 +284,7 @@ export interface Unit extends UnitCalculateResponse {
   updated_at?: string;
   door_code_type?: 'basic' | 'additional' | 'additional_1' | 'additional_2';
   chassis_code_type?: 'default' | 'basic' | 'additional_1' | 'additional_2';
+  dummy_side_code?: 'none' | 'basic' | 'additional_1' | 'additional_2';
   is_glass_doors?: boolean;
   is_glass_shelves?: boolean;
 }
