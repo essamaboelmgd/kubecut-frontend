@@ -248,6 +248,7 @@ export default function Store() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const paginationRange = usePagination({ totalPages, currentPage });
 
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
@@ -557,7 +558,7 @@ export default function Store() {
           </Button>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            {usePagination({ totalPages, currentPage }).map((page, idx) => {
+            {paginationRange.map((page, idx) => {
               if (page === '...') {
                 return (
                   <Button

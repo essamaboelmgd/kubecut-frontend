@@ -22,6 +22,8 @@ export default function Projects() {
   const isAdmin = user?.role === 'admin';
   const [activeTab, setActiveTab] = useState<AdminTab>('mine');
 
+  const paginationRange = usePagination({ totalPages, currentPage });
+
   const fetchProjects = async (page: number, searchQuery: string) => {
     try {
       setIsLoading(true);
@@ -254,7 +256,7 @@ export default function Projects() {
           </Button>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            {usePagination({ totalPages, currentPage }).map((page, idx) => {
+            {paginationRange.map((page, idx) => {
               if (page === '...') {
                 return (
                   <Button
