@@ -10,7 +10,7 @@ import {
   Zap,
   ChevronLeft,
   ChevronRight,
-  FileDown,
+  Download,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -217,8 +217,6 @@ export default function Users() {
     }
   };
 
-
-
   const openSubscriptionDialog = (user: User) => {
     setSelectedUser(user);
 
@@ -308,7 +306,7 @@ export default function Users() {
               {isExporting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <FileDown className="h-4 w-4" />
+                <Download className="h-4 w-4" />
               )}
               تصدير Excel
             </Button>
