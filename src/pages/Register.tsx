@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { authApi } from '@/lib/api';
+import { trackPixelEvent } from '@/lib/pixel';
 
 export default function Register() {
   const [full_name, setFullName] = useState('');
@@ -23,7 +24,7 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!full_name || !phone || !password || !confirmPassword) {
       toast({
         title: 'خطأ',
@@ -50,24 +51,26 @@ export default function Register() {
       });
       return;
     }
-    
+
     // Validate Egyptian Phone Number
     const phoneRegex = /^01[0-9]{9}$/;
     if (!phoneRegex.test(phone)) {
-        toast({
-            title: 'خطأ',
-            description: 'رقم الهاتف غير صحيح (يجب أن يبدأ ب 01 ويتكون من 11 رقم)',
-            variant: 'destructive',
-        });
-        return;
+      toast({
+        title: 'خطأ',
+        description: 'رقم الهاتف غير صحيح (يجب أن يبدأ ب 01 ويتكون من 11 رقم)',
+        variant: 'destructive',
+      });
+      return;
     }
 
     setIsLoading(true);
 
     try {
       const response = await authApi.register({ phone, password, full_name });
-      
-     toast({
+
+      trackPixelEvent('CompleteRegistration');
+
+      toast({
         title: 'تم إنشاء الحساب',
         description: 'مرحباً بك في كيوب كت. يرجى تسجيل الدخول.',
       });

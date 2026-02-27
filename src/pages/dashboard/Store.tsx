@@ -48,12 +48,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-    Pencil,
-    Trash2,
-    Upload,
-    Loader2
+  Pencil,
+  Trash2,
+  Upload,
+  Loader2
 } from 'lucide-react';
 import { MarketplaceItemCreate } from '../../lib/api';
+import { trackPixelEvent } from '@/lib/pixel';
 
 const statusLabels: Record<string, string> = {
   all: 'الكل',
@@ -62,16 +63,16 @@ const statusLabels: Record<string, string> = {
   reserved: 'محجوز',
 };
 
-const ProductCard = ({ 
-  item, 
-  onAddToCart, 
-  getImageUrl, 
+const ProductCard = ({
+  item,
+  onAddToCart,
+  getImageUrl,
   statusLabels,
   isAdmin,
   onEdit,
   onDelete
-}: { 
-  item: MarketplaceItem; 
+}: {
+  item: MarketplaceItem;
   onAddToCart: (item: MarketplaceItem) => void;
   getImageUrl: (path: string) => string;
   statusLabels: Record<string, string>;
@@ -122,7 +123,7 @@ const ProductCard = ({
             <ImageIcon className="h-16 w-16" />
           </div>
         )}
-        
+
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -147,7 +148,7 @@ const ProductCard = ({
             </Button>
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
               {item.images.map((_, idx) => (
-                <div 
+                <div
                   key={idx}
                   className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentImageIndex ? 'w-4 bg-primary' : 'w-1.5 bg-white/50'}`}
                 />
@@ -159,74 +160,73 @@ const ProductCard = ({
         {/* Status Overlays */}
         {!isAvailable && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-[2px] z-10">
-            <div className={`px-4 py-1.5 rounded-full border shadow-lg font-bold text-sm ${
-                item.status !== 'available' 
-                ? 'bg-destructive/10 text-destructive border-destructive/20' 
+            <div className={`px-4 py-1.5 rounded-full border shadow-lg font-bold text-sm ${item.status !== 'available'
+                ? 'bg-destructive/10 text-destructive border-destructive/20'
                 : 'bg-orange-500/10 text-orange-500 border-orange-500/20'
-            }`}>
+              }`}>
               {item.status !== 'available' ? statusLabels[item.status] : 'نفذت الكمية'}
             </div>
           </div>
         )}
-        
+
         {/* Unit Badge */}
         <div className="absolute top-2 right-2 flex flex-col gap-2 z-20">
-            <span className="bg-background/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-medium border border-white/10 shadow-sm">
-                {item.unit}
+          <span className="bg-background/80 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-medium border border-white/10 shadow-sm">
+            {item.unit}
+          </span>
+          {item.quantity <= 5 && item.quantity > 0 && (
+            <span className="bg-orange-500/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-sm animate-pulse">
+              متبقى {item.quantity}
             </span>
-             {item.quantity <= 5 && item.quantity > 0 && (
-                <span className="bg-orange-500/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-bold text-white shadow-sm animate-pulse">
-                    متبقى {item.quantity}
-                </span>
-            )}
+          )}
         </div>
-        
+
         {/* Admin Controls overlay on top left */}
         {isAdmin && (
-             <div className="absolute top-2 left-2 flex gap-1 z-30">
-                <Button 
-                    variant="secondary" 
-                    size="icon" 
-                    className="h-8 w-8 rounded-full bg-white/90 shadow-sm hover:bg-white text-foreground"
-                    onClick={(e) => { e.stopPropagation(); onEdit?.(item); }}
-                >
-                    <Pencil className="h-4 w-4" />
-                </Button>
-                <Button 
-                    variant="destructive" 
-                    size="icon" 
-                    className="h-8 w-8 rounded-full shadow-sm"
-                    onClick={(e) => { e.stopPropagation(); onDelete?.(item); }}
-                >
-                    <Trash2 className="h-4 w-4" />
-                </Button>
-             </div>
+          <div className="absolute top-2 left-2 flex gap-1 z-30">
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-white/90 shadow-sm hover:bg-white text-foreground"
+              onClick={(e) => { e.stopPropagation(); onEdit?.(item); }}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              className="h-8 w-8 rounded-full shadow-sm"
+              onClick={(e) => { e.stopPropagation(); onDelete?.(item); }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         )}
       </div>
 
       <div className="p-5 space-y-4">
         <div>
-            <h3 className="font-bold text-lg line-clamp-1 group-hover:text-primary transition-colors">{item.title}</h3>
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-1 min-h-[2.5rem]">
+          <h3 className="font-bold text-lg line-clamp-1 group-hover:text-primary transition-colors">{item.title}</h3>
+          <p className="text-sm text-muted-foreground line-clamp-2 mt-1 min-h-[2.5rem]">
             {item.description || 'لا يوجد وصف للمنتج'}
-            </p>
+          </p>
         </div>
-        
+
         <div className="flex items-center justify-between pt-2 border-t border-white/5">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">السعر</span>
             <span className="text-xl font-bold font-mono text-primary">{item.price} <span className="text-xs text-muted-foreground font-sans font-normal">ج.م</span></span>
           </div>
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             onClick={(e) => {
-                e.stopPropagation();
-                onAddToCart(item);
+              e.stopPropagation();
+              onAddToCart(item);
             }}
             className={`rounded-xl px-4 transition-all duration-300 hover:scale-105 shadow-md shadow-primary/20`}
             variant="default"
           >
-             تفاصيل / شراء
+            تفاصيل / شراء
           </Button>
         </div>
       </div>
@@ -243,7 +243,7 @@ export default function Store() {
   const [items, setItems] = useState<MarketplaceItem[]>([]);
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -270,30 +270,30 @@ export default function Store() {
   });
 
   const handleEditClick = (item: MarketplaceItem) => {
-      setEditingItem(item);
-      setFormData({
-        title: item.title,
-        description: item.description,
-        price: item.price,
-        quantity: item.quantity,
-        unit: item.unit,
-        images: item.images || [],
-        location: item.location || '',
-      });
-      setIsEditOpen(true);
+    setEditingItem(item);
+    setFormData({
+      title: item.title,
+      description: item.description,
+      price: item.price,
+      quantity: item.quantity,
+      unit: item.unit,
+      images: item.images || [],
+      location: item.location || '',
+    });
+    setIsEditOpen(true);
   };
 
   const handleDeleteClick = (item: MarketplaceItem) => {
-      setItemToDelete(item);
-      setIsDeleteOpen(true);
+    setItemToDelete(item);
+    setIsDeleteOpen(true);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
-    
+
     setIsUploading(true);
     const files = Array.from(e.target.files);
-    
+
     // Validate file size (20MB)
     const validFiles = files.filter(file => {
       const isValidSize = file.size <= 20 * 1024 * 1024; // 20MB
@@ -317,12 +317,12 @@ export default function Store() {
       const uploadPromises = validFiles.map(file => marketplaceApi.uploadImage(file));
       const results = await Promise.all(uploadPromises);
       const newUrls = results.map(r => r.url);
-      
+
       setFormData(prev => ({
         ...prev,
         images: [...(prev.images || []), ...newUrls]
       }));
-      
+
       toast({
         title: 'تم الرفع',
         description: 'تم رفع الصور بنجاح',
@@ -366,38 +366,42 @@ export default function Store() {
   };
 
   const handleDeleteConfirm = async () => {
-      if (!itemToDelete) return;
-      try {
-          await marketplaceApi.deleteItem(itemToDelete.item_id);
-          toast({ title: 'تم الحذف', description: 'تم حذف المنتج بنجاح' });
-          fetchItems();
-      } catch (error) {
-          toast({
-            title: 'خطأ',
-            description: 'فشل حذف المنتج',
-            variant: 'destructive',
-          });
-      } finally {
-          setIsDeleteOpen(false);
-          setItemToDelete(null);
-      }
+    if (!itemToDelete) return;
+    try {
+      await marketplaceApi.deleteItem(itemToDelete.item_id);
+      toast({ title: 'تم الحذف', description: 'تم حذف المنتج بنجاح' });
+      fetchItems();
+    } catch (error) {
+      toast({
+        title: 'خطأ',
+        description: 'فشل حذف المنتج',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleteOpen(false);
+      setItemToDelete(null);
+    }
   };
 
   useEffect(() => {
+    trackPixelEvent('ViewContent');
+  }, []);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
-        fetchItems();
+      fetchItems();
     }, 500); // Debounce search
     return () => clearTimeout(timer);
   }, [search, statusFilter, currentPage]);
 
   const handleSearchChange = (val: string) => {
-      setSearch(val);
-      setCurrentPage(1);
+    setSearch(val);
+    setCurrentPage(1);
   };
 
   const handleStatusChange = (val: string) => {
-      setStatusFilter(val);
-      setCurrentPage(1);
+    setStatusFilter(val);
+    setCurrentPage(1);
   };
 
   const fetchItems = async () => {
@@ -501,21 +505,21 @@ export default function Store() {
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
       >
         {filteredItems.map((item, index) => (
-            <React.Fragment key={item.item_id}>
-                <ProductCard
-                    item={item}
-                    onAddToCart={handleAddToCart}
-                    getImageUrl={getImageUrl}
-                    statusLabels={statusLabels}
-                    isAdmin={isAdmin}
-                    onEdit={handleEditClick}
-                    onDelete={handleDeleteClick}
-                />
-                {/* Insert Ad every 6 items */}
-                {(index + 1) % 6 === 0 && ads.length > 0 && (
-                    <SponsoredCard ad={ads[Math.floor((index + 1) / 6) % ads.length]} />
-                )}
-            </React.Fragment>
+          <React.Fragment key={item.item_id}>
+            <ProductCard
+              item={item}
+              onAddToCart={handleAddToCart}
+              getImageUrl={getImageUrl}
+              statusLabels={statusLabels}
+              isAdmin={isAdmin}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
+            />
+            {/* Insert Ad every 6 items */}
+            {(index + 1) % 6 === 0 && ads.length > 0 && (
+              <SponsoredCard ad={ads[Math.floor((index + 1) / 6) % ads.length]} />
+            )}
+          </React.Fragment>
         ))}
       </motion.div>
 
@@ -533,180 +537,180 @@ export default function Store() {
       {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-8 pb-8">
-            <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1 || loading}
-                className="h-10 w-10"
-            >
-                <ChevronRight className="h-4 w-4" />
-            </Button>
-            
-            <div className="flex items-center gap-2">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <Button
-                        key={page}
-                        variant={currentPage === page ? "default" : "outline"}
-                        size="icon"
-                        onClick={() => setCurrentPage(page)}
-                        disabled={loading}
-                        className={`h-10 w-10 ${currentPage === page ? 'bg-primary text-primary-foreground' : ''}`}
-                    >
-                        {page}
-                    </Button>
-                ))}
-            </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1 || loading}
+            className="h-10 w-10"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
 
-            <Button
-                variant="outline"
+          <div className="flex items-center gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
                 size="icon"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages || loading}
-                 className="h-10 w-10"
-            >
-                <ChevronLeft className="h-4 w-4" />
-            </Button>
+                onClick={() => setCurrentPage(page)}
+                disabled={loading}
+                className={`h-10 w-10 ${currentPage === page ? 'bg-primary text-primary-foreground' : ''}`}
+              >
+                {page}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages || loading}
+            className="h-10 w-10"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
         </div>
       )}
 
       {/* Edit Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-          <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>تعديل المنتج</DialogTitle>
-              <DialogDescription>
-                تعديل بيانات المنتج المعروض
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
+        <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>تعديل المنتج</DialogTitle>
+            <DialogDescription>
+              تعديل بيانات المنتج المعروض
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">اسم المنتج</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="مثال: لوح كونتر أرو"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">الوصف</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="وصف تفصيلي للمنتج..."
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="title">اسم المنتج</Label>
+                <Label htmlFor="price">السعر (ج.م)</Label>
                 <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="مثال: لوح كونتر أرو"
+                  id="price"
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="description">الوصف</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="وصف تفصيلي للمنتج..."
+                <Label htmlFor="quantity">الكمية المتاحة</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  value={formData.quantity}
+                  onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="price">السعر (ج.م)</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="quantity">الكمية المتاحة</Label>
-                  <Input
-                    id="quantity"
-                    type="number"
-                    value={formData.quantity}
-                    onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) })}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="unit">الوحدة</Label>
-                  <Input
-                    id="unit"
-                    value={formData.unit}
-                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    placeholder="مثال: قطعة، متر، لوح"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="location">الموقع (اختياري)</Label>
-                  <Input
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="المخزن الرئيسي"
-                  />
-                </div>
-              </div>
-              
-              {/* Image Upload Section */}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label className="flex items-center gap-1">
-                  صور المنتج
-                  <span className="text-destructive">*</span>
-                </Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {formData.images?.map((url, index) => (
-                    <div key={index} className="relative aspect-square overflow-hidden rounded-md border border-border group">
-                      <img 
-                        src={getImageUrl(url)} 
-                        alt={`Preview ${index}`} 
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 rounded-full bg-destructive p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/90"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                  <div className="relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-muted-foreground/50 transition-colors hover:bg-muted/50">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      className="absolute inset-0 cursor-pointer opacity-0"
-                      onChange={handleImageUpload}
-                      disabled={isUploading}
+                <Label htmlFor="unit">الوحدة</Label>
+                <Input
+                  id="unit"
+                  value={formData.unit}
+                  onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                  placeholder="مثال: قطعة، متر، لوح"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="location">الموقع (اختياري)</Label>
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  placeholder="المخزن الرئيسي"
+                />
+              </div>
+            </div>
+
+            {/* Image Upload Section */}
+            <div className="grid gap-2">
+              <Label className="flex items-center gap-1">
+                صور المنتج
+                <span className="text-destructive">*</span>
+              </Label>
+              <div className="grid grid-cols-3 gap-2">
+                {formData.images?.map((url, index) => (
+                  <div key={index} className="relative aspect-square overflow-hidden rounded-md border border-border group">
+                    <img
+                      src={getImageUrl(url)}
+                      alt={`Preview ${index}`}
+                      className="h-full w-full object-cover"
                     />
-                      {isUploading ? (
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    ) : (
-                      <>
-                        <Upload className="mb-1 h-6 w-6 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">رفع صور</span>
-                      </>
-                    )}
+                    <button
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 rounded-full bg-destructive p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/90"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </div>
+                ))}
+                <div className="relative flex aspect-square cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-muted-foreground/50 transition-colors hover:bg-muted/50">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                    onChange={handleImageUpload}
+                    disabled={isUploading}
+                  />
+                  {isUploading ? (
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  ) : (
+                    <>
+                      <Upload className="mb-1 h-6 w-6 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">رفع صور</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEditOpen(false)}>إلغاء</Button>
-              <Button onClick={handleSaveEdit} disabled={isSubmitting || !formData.title || !formData.price || !formData.images?.length}>
-                {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-                حفظ التعديلات
-              </Button>
-            </DialogFooter>
-          </DialogContent>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditOpen(false)}>إلغاء</Button>
+            <Button onClick={handleSaveEdit} disabled={isSubmitting || !formData.title || !formData.price || !formData.images?.length}>
+              {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+              حفظ التعديلات
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation Alert */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
-            <AlertDialogHeader>
-                <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
-                <AlertDialogDescription>
-                    سيتم حذف المنتج "{itemToDelete?.title}" نهائياً من المتجر. لا يمكن التراجع عن هذا الإجراء.
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    نعم، احذف المنتج
-                </AlertDialogAction>
-            </AlertDialogFooter>
+          <AlertDialogHeader>
+            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+            <AlertDialogDescription>
+              سيتم حذف المنتج "{itemToDelete?.title}" نهائياً من المتجر. لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              نعم، احذف المنتج
+            </AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 

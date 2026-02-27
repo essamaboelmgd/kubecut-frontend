@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { marketplaceApi, MarketplaceItem, API_URL } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { trackCustomPixelEvent } from '@/lib/pixel';
 
 export default function StoreItemDetails() {
   const { id } = useParams();
@@ -32,6 +33,7 @@ export default function StoreItemDetails() {
         if (!id) return;
         const data = await marketplaceApi.getItem(id);
         setItem(data);
+        trackCustomPixelEvent('ViewProduct', { product_id: id, product_name: data.title });
       } catch (error) {
         toast({
           title: 'خطأ',
@@ -98,9 +100,9 @@ export default function StoreItemDetails() {
                 className="h-full w-full object-cover"
               />
             ) : (
-                <div className="flex h-full items-center justify-center text-muted-foreground">
-                    لا توجد صور
-                </div>
+              <div className="flex h-full items-center justify-center text-muted-foreground">
+                لا توجد صور
+              </div>
             )}
 
             {/* Navigation */}
@@ -125,7 +127,7 @@ export default function StoreItemDetails() {
               </>
             )}
           </div>
-          
+
           {/* Thumbnails */}
           {item.images && item.images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-2">
@@ -133,9 +135,8 @@ export default function StoreItemDetails() {
                 <button
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
-                  className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
-                    idx === currentImageIndex ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'
-                  }`}
+                  className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${idx === currentImageIndex ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'
+                    }`}
                 >
                   <img src={getImageUrl(img)} alt="" className="h-full w-full object-cover" />
                 </button>
@@ -148,19 +149,19 @@ export default function StoreItemDetails() {
         <div className="space-y-6">
           <div>
             <div className="flex items-start justify-between">
-                <div>
-                     <h2 className="text-3xl font-bold">{item.title}</h2>
-                     <div className="flex items-center gap-2 mt-2 text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span>{item.location || 'غير محدد'}</span>
-                     </div>
+              <div>
+                <h2 className="text-3xl font-bold">{item.title}</h2>
+                <div className="flex items-center gap-2 mt-2 text-muted-foreground">
+                  <MapPin className="h-4 w-4" />
+                  <span>{item.location || 'غير محدد'}</span>
                 </div>
-                <div className="text-right">
-                    <div className="text-2xl font-bold text-primary font-mono">{item.price} <span className="text-sm">ج.م</span></div>
-                    <Badge variant={item.status === 'available' ? 'default' : 'destructive'} className="mt-1">
-                        {item.status === 'available' ? 'متاح' : 'غير متاح'}
-                    </Badge>
-                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-primary font-mono">{item.price} <span className="text-sm">ج.م</span></div>
+                <Badge variant={item.status === 'available' ? 'default' : 'destructive'} className="mt-1">
+                  {item.status === 'available' ? 'متاح' : 'غير متاح'}
+                </Badge>
+              </div>
             </div>
           </div>
 
@@ -172,49 +173,49 @@ export default function StoreItemDetails() {
           </div>
 
           <div className="space-y-3">
-             <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card/50">
-                 <div className="h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary">
-                     <User className="h-5 w-5" />
-                 </div>
-                 <div>
-                     <div className="text-sm text-muted-foreground">البائع</div>
-                     <div className="font-medium">{item.seller_name || 'غير معروف'}</div>
-                 </div>
-             </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card/50">
+              <div className="h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary">
+                <User className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-sm text-muted-foreground">البائع</div>
+                <div className="font-medium">{item.seller_name || 'غير معروف'}</div>
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-3 pt-4">
-              {item.seller_phone ? (
-                  <>
-                    <a href={`tel:${item.seller_phone}`} className="w-full">
-                        <Button className="w-full gap-2 h-12 text-lg" variant="default">
-                            <Phone className="h-5 w-5" />
-                            اتصال بالبائع
-                        </Button>
-                    </a>
-                    <a href={`https://wa.me/2${item.seller_phone}`} target="_blank" rel="noopener noreferrer" className="w-full">
-                        <Button className="w-full gap-2 h-12 text-lg bg-[#25D366] hover:bg-[#128C7E] text-white border-none">
-                            <MessageCircle className="h-5 w-5" />
-                            تواصل واتساب
-                        </Button>
-                    </a>
-                  </>
-              ) : (
-                  <Button disabled className="w-full gap-2" variant="secondary">
-                       <Phone className="h-4 w-4" />
-                       رقم الهاتف غير متاح
+            {item.seller_phone ? (
+              <>
+                <a href={`tel:${item.seller_phone}`} className="w-full">
+                  <Button className="w-full gap-2 h-12 text-lg" variant="default">
+                    <Phone className="h-5 w-5" />
+                    اتصال بالبائع
                   </Button>
-              )}
+                </a>
+                <a href={`https://wa.me/2${item.seller_phone}`} target="_blank" rel="noopener noreferrer" className="w-full">
+                  <Button className="w-full gap-2 h-12 text-lg bg-[#25D366] hover:bg-[#128C7E] text-white border-none">
+                    <MessageCircle className="h-5 w-5" />
+                    تواصل واتساب
+                  </Button>
+                </a>
+              </>
+            ) : (
+              <Button disabled className="w-full gap-2" variant="secondary">
+                <Phone className="h-4 w-4" />
+                رقم الهاتف غير متاح
+              </Button>
+            )}
           </div>
 
           {/* Disclaimer */}
           <div className="mt-6 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-sm">
-             <div className="flex gap-2">
-                 <AlertTriangle className="h-5 w-5 shrink-0" />
-                 <p>
-                    <strong>إخلاء مسؤولية:</strong> الموقع مجرد وسيط للعرض ولا يتحمل أي مسؤولية عن جودة المنتجات أو المعاملات المالية. يرجى معاينة المنتج جيداً قبل الشراء.
-                 </p>
-             </div>
+            <div className="flex gap-2">
+              <AlertTriangle className="h-5 w-5 shrink-0" />
+              <p>
+                <strong>إخلاء مسؤولية:</strong> الموقع مجرد وسيط للعرض ولا يتحمل أي مسؤولية عن جودة المنتجات أو المعاملات المالية. يرجى معاينة المنتج جيداً قبل الشراء.
+              </p>
+            </div>
           </div>
 
         </div>

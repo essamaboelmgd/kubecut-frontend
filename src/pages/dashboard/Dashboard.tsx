@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  FolderKanban, 
-  Layers, 
-  TrendingUp, 
+import {
+  FolderKanban,
+  Layers,
+  TrendingUp,
   Calculator,
   ArrowUpLeft,
   ArrowDownLeft,
@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { dashboardApi, type DashboardStats, type RecentProject, type TipOfTheDay, adsApi, Ad } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { AdCarousel } from '@/components/ads/AdCarousel';
+import { trackCustomPixelEvent } from '@/lib/pixel';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -26,6 +27,8 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    trackCustomPixelEvent('ViewDashboard');
+
     const fetchData = async () => {
       try {
         const [statsData, projectsData, tipData, adsData] = await Promise.all([
@@ -34,7 +37,7 @@ export default function Dashboard() {
           dashboardApi.getTipOfTheDay(),
           adsApi.getAds('dashboard_banner')
         ]);
-        
+
         setStats(statsData);
         setRecentProjects(projectsData);
         setTip(tipData);
@@ -50,39 +53,39 @@ export default function Dashboard() {
         setIsLoading(false);
       }
     };
-    
+
     fetchData();
   }, [toast]);
 
   const statItems = [
-    { 
-      label: 'المشاريع النشطة', 
-      value: stats?.projects.toString() || '0', 
-      icon: FolderKanban, 
+    {
+      label: 'المشاريع النشطة',
+      value: stats?.projects.toString() || '0',
+      icon: FolderKanban,
       change: '+2', // Demo value for change
       trend: 'up',
       color: 'text-primary'
     },
-    { 
-      label: 'الوحدات المحسوبة', 
-      value: stats?.units.toString() || '0', 
-      icon: Layers, 
+    {
+      label: 'الوحدات المحسوبة',
+      value: stats?.units.toString() || '0',
+      icon: Layers,
       change: '+8', // Demo value
       trend: 'up',
       color: 'text-accent'
     },
-    { 
-      label: 'حسابات التقطيع', 
-      value: stats?.cutting_calculations.toString() || '0', 
-      icon: Calculator, 
-      change: 'جديد', 
+    {
+      label: 'حسابات التقطيع',
+      value: stats?.cutting_calculations.toString() || '0',
+      icon: Calculator,
+      change: 'جديد',
       trend: 'up',
       color: 'text-primary'
     },
-    { 
-      label: 'نسبة التوفير', 
-      value: `${stats?.savings_percentage || 0}%`, 
-      icon: TrendingUp, 
+    {
+      label: 'نسبة التوفير',
+      value: `${stats?.savings_percentage || 0}%`,
+      icon: TrendingUp,
       change: '+12%', // Demo value
       trend: 'up',
       color: 'text-accent'
@@ -116,11 +119,11 @@ export default function Dashboard() {
       {/* Ads Banner */}
       {ads.length > 0 && (
         <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.05, duration: 0.5 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05, duration: 0.5 }}
         >
-            <AdCarousel ads={ads} />
+          <AdCarousel ads={ads} />
         </motion.div>
       )}
 
@@ -143,9 +146,8 @@ export default function Dashboard() {
               <div className={`rounded-lg bg-primary/10 p-2.5 ${stat.color}`}>
                 <stat.icon className="h-5 w-5" />
               </div>
-              <div className={`flex items-center gap-1 text-xs ${
-                stat.trend === 'up' ? 'text-green-600' : 'text-red-500'
-              }`}>
+              <div className={`flex items-center gap-1 text-xs ${stat.trend === 'up' ? 'text-green-600' : 'text-red-500'
+                }`}>
                 {stat.trend === 'up' ? (
                   <ArrowUpLeft className="h-3 w-3" />
                 ) : (

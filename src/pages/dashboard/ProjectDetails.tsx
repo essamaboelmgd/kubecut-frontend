@@ -50,6 +50,7 @@ import { projectsApi, unitsApi, settingsApi, type Project, type UnitCalculateReq
 import { unitTypeLabels } from '@/lib/translations';
 import { ProjectPrintView } from '@/components/printing/ProjectPrintView';
 import { UnitSettingsOverride } from '@/components/units/UnitSettingsOverride';
+import { trackCustomPixelEvent } from '@/lib/pixel';
 
 // Unit Categories and Types with Arabic Labels
 const unitCategories = [
@@ -308,6 +309,7 @@ export default function ProjectDetails() {
         const savedUnit = await unitsApi.create(unitData);
         const unitId = (savedUnit as any).unit_id || savedUnit.unit_id;
         await projectsApi.addUnitToProject(project.project_id, unitId);
+        trackCustomPixelEvent('CreateUnit');
         toast({ title: 'تم الإضافة', description: 'تم إضافة الوحدة بنجاح' });
       }
 
