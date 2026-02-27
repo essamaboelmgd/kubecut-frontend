@@ -27,6 +27,7 @@ import { marketplaceApi, MarketplaceItem, API_URL, adsApi, Ad } from '../../lib/
 import { SponsoredCard } from '@/components/ads/SponsoredCard';
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePagination } from '@/hooks/usePagination';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -555,19 +556,35 @@ export default function Store() {
             <ChevronRight className="h-4 w-4" />
           </Button>
 
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="icon"
-                onClick={() => setCurrentPage(page)}
-                disabled={loading}
-                className={`h-10 w-10 ${currentPage === page ? 'bg-primary text-primary-foreground' : ''}`}
-              >
-                {page}
-              </Button>
-            ))}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {usePagination({ totalPages, currentPage }).map((page, idx) => {
+              if (page === '...') {
+                return (
+                  <Button
+                    key={`ellipsis-${idx}`}
+                    variant="ghost"
+                    size="icon"
+                    disabled
+                    className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground cursor-default hover:bg-transparent"
+                  >
+                    ...
+                  </Button>
+                );
+              }
+
+              return (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => setCurrentPage(page as number)}
+                  disabled={loading}
+                  className={`h-8 w-8 sm:h-10 sm:w-10 ${currentPage === page ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'hover:bg-primary/10 hover:text-primary'} transition-all`}
+                >
+                  {page}
+                </Button>
+              );
+            })}
           </div>
 
           <Button

@@ -82,7 +82,8 @@ export default function DashboardLayout() {
   const cartCount = getCartCount();
 
   // Public store paths - accessible without login
-  const isPublicStorePath = location.pathname === '/dashboard/store';
+  const currentPath = location.pathname.replace(/\/$/, '').toLowerCase();
+  const isPublicStorePath = currentPath.startsWith('/dashboard/store');
 
   // Close sidebar on route change
   useEffect(() => {

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { projectsApi, type Project } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePagination } from '@/hooks/usePagination';
 
 type AdminTab = 'mine' | 'others';
 
@@ -252,19 +253,35 @@ export default function Projects() {
             <ChevronRight className="h-4 w-4" />
           </Button>
 
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="icon"
-                onClick={() => setCurrentPage(page)}
-                disabled={isLoading}
-                className={`h-10 w-10 ${currentPage === page ? 'bg-primary text-primary-foreground' : ''}`}
-              >
-                {page}
-              </Button>
-            ))}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {usePagination({ totalPages, currentPage }).map((page, idx) => {
+              if (page === '...') {
+                return (
+                  <Button
+                    key={`ellipsis-${idx}`}
+                    variant="ghost"
+                    size="icon"
+                    disabled
+                    className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground cursor-default hover:bg-transparent"
+                  >
+                    ...
+                  </Button>
+                );
+              }
+
+              return (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => setCurrentPage(page as number)}
+                  disabled={isLoading}
+                  className={`h-8 w-8 sm:h-10 sm:w-10 ${currentPage === page ? 'bg-primary text-primary-foreground' : ''}`}
+                >
+                  {page}
+                </Button>
+              );
+            })}
           </div>
 
           <Button
