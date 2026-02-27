@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Navigate, useLocation, Link, Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Settings2, 
-  FolderKanban, 
+import {
+  LayoutDashboard,
+  Settings2,
+  FolderKanban,
   ShoppingCart,
-  User, 
+  User,
   LogOut,
   Menu,
   X,
@@ -67,9 +67,9 @@ const sidebarCategories: SidebarCategory[] = [
   {
     title: 'الحساب',
     items: [
-       { icon: Users, label: 'المستخدمين', href: '/dashboard/users', adminOnly: true },
-       { icon: FileText, label: 'طلبات الشحن', href: '/dashboard/token-requests', adminOnly: true },
-       { icon: User, label: 'إعدادات الحساب', href: '/dashboard/account' },
+      { icon: Users, label: 'المستخدمين', href: '/dashboard/users', adminOnly: true },
+      { icon: FileText, label: 'طلبات الشحن', href: '/dashboard/token-requests', adminOnly: true },
+      { icon: User, label: 'إعدادات الحساب', href: '/dashboard/account' },
     ]
   }
 ];
@@ -80,6 +80,9 @@ export default function DashboardLayout() {
   const { getCartCount } = useCart();
   const location = useLocation();
   const cartCount = getCartCount();
+
+  // Public store paths - accessible without login
+  const isPublicStorePath = location.pathname === '/dashboard/store';
 
   // Close sidebar on route change
   useEffect(() => {
@@ -94,8 +97,37 @@ export default function DashboardLayout() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isPublicStorePath) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Guest layout for public store
+  if (!isAuthenticated && isPublicStorePath) {
+    return (
+      <div className="flex min-h-screen flex-col font-cairo">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur-sm">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/60 text-primary-foreground shadow-lg shadow-primary/20">
+              <img src="/logo.png" alt="Logo" className="h-6 w-6 object-contain brightness-0 invert" />
+            </div>
+            <span className="text-lg font-bold">كيوب كت</span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/login">تسجيل الدخول</Link>
+            </Button>
+            <Button variant="hero" size="sm" asChild>
+              <Link to="/register">إنشاء حساب</Link>
+            </Button>
+          </div>
+        </header>
+        <main className="flex-1 w-full overflow-x-hidden p-4 lg:p-6">
+          <Outlet />
+        </main>
+      </div>
+    );
   }
 
   const userInitials = user?.full_name
@@ -143,7 +175,7 @@ export default function DashboardLayout() {
                 </h3>
                 {category.items.map((item) => {
                   if (item.adminOnly && user?.role !== 'admin') return null;
-                  
+
                   return (
                     <NavLink
                       key={item.href}
@@ -178,25 +210,25 @@ export default function DashboardLayout() {
           {/* User Profile Snippet */}
           <div className="p-4 mt-auto">
             <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-card/50 to-card/30 p-4 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-md hover:border-primary/20">
-                <div className="flex items-center gap-3 relative z-10">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5 text-primary ring-1 ring-primary/20 transition-transform group-hover:scale-105">
-                      <User className="h-5 w-5" />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                      <span className="truncate text-sm font-bold text-foreground/90">{user?.full_name || 'مستخدم'}</span>
-                      <span className="truncate text-xs text-muted-foreground">{user?.phone}</span>
-                  </div>
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/5 text-primary ring-1 ring-primary/20 transition-transform group-hover:scale-105">
+                  <User className="h-5 w-5" />
                 </div>
-                <Button 
-                    variant="ghost" 
-                    className="mt-3 w-full justify-start h-9 text-xs font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors relative z-10" 
-                    onClick={logout}
-                >
-                  <LogOut className="mr-2 h-3.5 w-3.5" />
-                  تسجيل خروج
-                </Button>
-                {/* Background Decoration */}
-                <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/10" />
+                <div className="flex flex-col min-w-0">
+                  <span className="truncate text-sm font-bold text-foreground/90">{user?.full_name || 'مستخدم'}</span>
+                  <span className="truncate text-xs text-muted-foreground">{user?.phone}</span>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                className="mt-3 w-full justify-start h-9 text-xs font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors relative z-10"
+                onClick={logout}
+              >
+                <LogOut className="mr-2 h-3.5 w-3.5" />
+                تسجيل خروج
+              </Button>
+              {/* Background Decoration */}
+              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/5 blur-2xl transition-all group-hover:bg-primary/10" />
             </div>
           </div>
         </div>
@@ -233,23 +265,23 @@ export default function DashboardLayout() {
           <div className="flex items-center gap-3">
             {/* Wallet Widget */}
             <Link to="/dashboard/wallet-history">
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20 hover:border-amber-500/50 transition-all cursor-pointer group">
-                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500/20 group-hover:bg-amber-500/30 transition-colors">
-                        <Wallet className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                     </div>
-                     <div className="flex flex-col items-start pr-1">
-                        <span className="text-[10px] text-muted-foreground leading-none">الرصيد</span>
-                        <span className="text-sm font-bold text-amber-600 dark:text-amber-400 leading-none mt-0.5">
-                            {user?.wallet_balance ?? 0} توكن
-                        </span>
-                     </div>
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20 hover:border-amber-500/50 transition-all cursor-pointer group">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500/20 group-hover:bg-amber-500/30 transition-colors">
+                  <Wallet className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 </div>
+                <div className="flex flex-col items-start pr-1">
+                  <span className="text-[10px] text-muted-foreground leading-none">الرصيد</span>
+                  <span className="text-sm font-bold text-amber-600 dark:text-amber-400 leading-none mt-0.5">
+                    {user?.wallet_balance ?? 0} توكن
+                  </span>
+                </div>
+              </div>
             </Link>
-            
+
             <Link to="/dashboard/wallet-history" className="md:hidden">
-                 <div className="flex items-center justify-center w-9 h-9 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                    <Wallet className="h-5 w-5" />
-                 </div>
+              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                <Wallet className="h-5 w-5" />
+              </div>
             </Link>
 
             <ThemeToggle />

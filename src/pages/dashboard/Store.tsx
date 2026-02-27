@@ -161,8 +161,8 @@ const ProductCard = ({
         {!isAvailable && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-[2px] z-10">
             <div className={`px-4 py-1.5 rounded-full border shadow-lg font-bold text-sm ${item.status !== 'available'
-                ? 'bg-destructive/10 text-destructive border-destructive/20'
-                : 'bg-orange-500/10 text-orange-500 border-orange-500/20'
+              ? 'bg-destructive/10 text-destructive border-destructive/20'
+              : 'bg-orange-500/10 text-orange-500 border-orange-500/20'
               }`}>
               {item.status !== 'available' ? statusLabels[item.status] : 'نفذت الكمية'}
             </div>
@@ -436,6 +436,14 @@ export default function Store() {
   const filteredItems = items;
 
   const handleAddToCart = (item: MarketplaceItem) => {
+    if (!user) {
+      toast({
+        title: 'تسجيل الدخول مطلوب',
+        description: 'يجب تسجيل الدخول لعرض تفاصيل المنتج',
+      });
+      navigate('/login', { state: { from: { pathname: `/dashboard/store/${item.item_id}` } } });
+      return;
+    }
     navigate(`/dashboard/store/${item.item_id}`);
   };
 

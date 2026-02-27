@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -18,14 +18,24 @@ import { marketplaceApi, MarketplaceItem, API_URL } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { trackCustomPixelEvent } from '@/lib/pixel';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function StoreItemDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [item, setItem] = useState<MarketplaceItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      navigate('/login', { state: { from: location }, replace: true });
+    }
+  }, [authLoading, isAuthenticated, navigate, location]);
 
   useEffect(() => {
     const fetchItem = async () => {
