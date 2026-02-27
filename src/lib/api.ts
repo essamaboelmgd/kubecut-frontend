@@ -559,6 +559,16 @@ export const authApi = {
     });
     return handleResponse(response);
   },
+
+  exportUsersToExcel: async (): Promise<Blob> => {
+    const response = await fetch(`${API_URL}/auth/users/export-excel`, {
+      headers: getHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to export users');
+    }
+    return response.blob();
+  },
 };
 
 export const projectsApi = {

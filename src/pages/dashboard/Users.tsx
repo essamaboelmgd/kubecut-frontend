@@ -10,6 +10,7 @@ import {
   Zap,
   ChevronLeft,
   ChevronRight,
+  FileDown,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -53,6 +54,7 @@ export default function Users() {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Selection
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -100,6 +102,26 @@ export default function Users() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await authApi.exportUsersToExcel();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `users_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast({ title: 'تم التصدير', description: 'تم تصدير بيانات العملاء بنجاح' });
+    } catch (error) {
+      toast({ title: 'خطأ', description: 'فشل تصدير البيانات', variant: 'destructive' });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -277,12 +299,26 @@ export default function Users() {
               إجمالي عدد العملاء: <span className="font-bold text-primary text-lg">{totalUsers}</span>
             </p>
           </div>
-          {selectedUsers.length > 0 && (
-            <Button onClick={() => setIsBulkSubOpen(true)} className="gap-2 bg-amber-500 hover:bg-amber-600 text-black font-bold">
-              <Settings className="h-4 w-4" />
-              تعديل الاشتراكات ({selectedUsers.length})
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleExportExcel}
+              disabled={isExporting}
+              className="gap-2 bg-green-600 hover:bg-green-700 text-white font-bold"
+            >
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileDown className="h-4 w-4" />
+              )}
+              تصدير Excel
             </Button>
-          )}
+            {selectedUsers.length > 0 && (
+              <Button onClick={() => setIsBulkSubOpen(true)} className="gap-2 bg-amber-500 hover:bg-amber-600 text-black font-bold">
+                <Settings className="h-4 w-4" />
+                تعديل الاشتراكات ({selectedUsers.length})
+              </Button>
+            )}
+          </div>
         </div>
       </motion.div>
 
