@@ -411,9 +411,9 @@ export default function Store() {
         marketplaceApi.getAll(search, statusFilter, currentPage),
         adsApi.getAds('store_grid')
       ]);
-      setItems(data.items);
-      setTotalPages(data.total_pages);
-      setAds(adsData);
+      setItems(data?.items || (Array.isArray(data) ? data : []));
+      setTotalPages(data?.total_pages || 1);
+      setAds(Array.isArray(adsData) ? adsData : []);
     } catch (error) {
       console.error(error);
       toast({

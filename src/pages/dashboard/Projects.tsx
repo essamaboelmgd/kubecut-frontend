@@ -26,9 +26,10 @@ export default function Projects() {
       setIsLoading(true);
       const scope = isAdmin ? activeTab : undefined;
       const data = await projectsApi.getAll(page, 20, searchQuery || undefined, scope);
-      setProjects(data.items);
-      setTotalPages(data.total_pages);
-      setCurrentPage(data.page);
+      const items = data?.items || (Array.isArray(data) ? data : []);
+      setProjects(items);
+      setTotalPages(data?.total_pages || 1);
+      setCurrentPage(data?.page || 1);
     } catch (error) {
       toast({
         title: 'خطأ',
@@ -92,8 +93,8 @@ export default function Projects() {
           <button
             onClick={() => handleTabChange('mine')}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === 'mine'
-                ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
           >
             <FolderKanban className="h-4 w-4" />
@@ -102,8 +103,8 @@ export default function Projects() {
           <button
             onClick={() => handleTabChange('others')}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === 'others'
-                ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
           >
             <Users className="h-4 w-4" />
