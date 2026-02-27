@@ -72,6 +72,7 @@ export interface Project {
   description: string;
   client_name: string;
   units: Unit[];
+  owner_name?: string;
   status?: 'active' | 'completed' | 'pending';
   created_at: string;
   updated_at?: string;
@@ -571,9 +572,23 @@ export const authApi = {
   },
 };
 
+export interface ProjectListResponse {
+  items: Project[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}
+
 export const projectsApi = {
-  getAll: async (): Promise<Project[]> => {
-    const response = await fetch(`${API_URL}/projects/`, {
+  getAll: async (page: number = 1, limit: number = 20, search?: string, scope?: string): Promise<ProjectListResponse> => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
+    if (search) queryParams.append('q', search);
+    if (scope) queryParams.append('scope', scope);
+
+    const response = await fetch(`${API_URL}/projects/?${queryParams.toString()}`, {
       headers: getHeaders(),
     });
     return handleResponse(response);
