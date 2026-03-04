@@ -45,6 +45,14 @@ export const partNameMap: Record<string, string> = {
      'ظهر': 'ظهر',
      'ضلفة': 'ضلفة',
      'ضلفة قلاب': 'ضلفة قلاب',
+     'مرايا أمامية': 'مرايا أمامية',
+     'مرايا خلفية': 'مرايا خلفية',
+     'جنب ١': 'جنب ١',
+     'جنب ٢': 'جنب ٢',
+     'عرض درج': 'عرض درج',
+     'عمق درج': 'عمق درج',
+     'قاع درج': 'قاع درج',
+     'وش درج': 'وش درج',
 };
 
 export const unitTypeLabels: Record<string, string> = {
@@ -81,6 +89,7 @@ export const unitTypeLabels: Record<string, string> = {
      one_small_16_two_large_bottom: 'درج صغير 16 سم + 2 درج كبير م سفلية',
      corner_l_ground: 'ركنه L ارضي',
      wall_tray: 'وحدة صواني علوية',
+     ground_drawer_side_doors: 'وحدة درج م جانبية + ضلف',
 };
 
 export const getEdgeMarks = (code: string | undefined) => {
