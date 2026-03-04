@@ -105,6 +105,7 @@ const unitCategories = [
       { value: 'glass_side', label: 'وحدة زجاج من الجنب' },
       { value: 'shoe_cabinet_doors', label: 'جزامة ضلف' },
       { value: 'shoe_cabinet_drawer_doors', label: 'جزامة درج + ضلف' },
+      { value: 'tv_screen_doors', label: 'وحدة شاشة ضلف' },
     ]
   },
 ];
