@@ -86,6 +86,7 @@ const unitCategories = [
       { value: 'wall_flip_top_doors_bottom', label: 'علوي قلاب + ضلف' },
       { value: 'wall_microwave', label: 'علوي ميكرويف' },
       { value: 'corner_l_wall', label: 'علوي L ركنة' },
+      { value: 'wall_tray', label: 'وحدة صواني علوية' },
     ]
   },
   {
@@ -856,7 +857,7 @@ export default function ProjectDetails() {
                     )}
 
                     {/* Door Type Selection - Show for compatible units */}
-                    {['wall', 'tall_doors_appliances', 'tall_drawers_side_doors_top', 'tall_drawers_bottom_rail_top_doors', 'tall_drawers_side_appliances_doors', 'tall_drawers_bottom_appliances_doors_top', 'wall_microwave'].includes(newUnit.type) && (
+                    {['wall', 'wall_tray', 'tall_doors_appliances', 'tall_drawers_side_doors_top', 'tall_drawers_bottom_rail_top_doors', 'tall_drawers_side_appliances_doors', 'tall_drawers_bottom_appliances_doors_top', 'wall_microwave'].includes(newUnit.type) && (
                       <div className="space-y-2">
                         <Label>نوع الضلفة</Label>
                         <Select

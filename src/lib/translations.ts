@@ -37,6 +37,14 @@ export const partNameMap: Record<string, string> = {
      'door_1': 'باب 1',
      'door_2': 'باب 2',
      'top_door_flip': 'ضلفة علوية قلاب',
+     'برنيطة': 'برنيطة',
+     'قاعدة': 'قاعدة',
+     'جانب أيمن': 'جانب أيمن',
+     'جانب أيسر': 'جانب أيسر',
+     'رف': 'رف',
+     'ظهر': 'ظهر',
+     'ضلفة': 'ضلفة',
+     'ضلفة قلاب': 'ضلفة قلاب',
 };
 
 export const unitTypeLabels: Record<string, string> = {
@@ -72,6 +80,7 @@ export const unitTypeLabels: Record<string, string> = {
      one_small_16_two_large_side: 'درج صغير 16 سم + 2 درج كبير م جانبية',
      one_small_16_two_large_bottom: 'درج صغير 16 سم + 2 درج كبير م سفلية',
      corner_l_ground: 'ركنه L ارضي',
+     wall_tray: 'وحدة صواني علوية',
 };
 
 export const getEdgeMarks = (code: string | undefined) => {
