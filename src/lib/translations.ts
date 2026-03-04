@@ -91,6 +91,7 @@ export const unitTypeLabels: Record<string, string> = {
      wall_tray: 'وحدة صواني علوية',
      ground_drawer_side_doors: 'وحدة درج م جانبية + ضلف',
      ground_drawer_bottom_doors: 'وحدة درج م سفلية + ضلف',
+     glass_side: 'وحدة زجاج من الجنب',
 };
 
 export const getEdgeMarks = (code: string | undefined) => {

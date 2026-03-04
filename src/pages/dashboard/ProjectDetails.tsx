@@ -102,6 +102,7 @@ const unitCategories = [
       { value: 'one_small_16_two_large_side', label: '1 صغير 16 + 2 كبير (جنب)' },
       { value: 'one_small_16_two_large_bottom', label: '1 صغير 16 + 2 كبير (سفلي)' },
       { value: 'side_flush', label: 'جنب لطش' },
+      { value: 'glass_side', label: 'وحدة زجاج من الجنب' },
     ]
   },
 ];
