@@ -94,6 +94,7 @@ export const unitTypeLabels: Record<string, string> = {
      ground_drawer_bottom_doors: 'وحدة درج م سفلية + ضلف',
      glass_side: 'وحدة زجاج من الجنب',
      shoe_cabinet_doors: 'جزامة ضلف',
+     shoe_cabinet_drawer_doors: 'جزامة درج + ضلف',
 };
 
 export const getEdgeMarks = (code: string | undefined) => {

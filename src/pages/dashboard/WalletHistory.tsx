@@ -355,7 +355,7 @@ const WalletHistory = () => {
                     <DialogFooter className="flex-col gap-2 sm:justify-center">
                         <Button className="w-full gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white" asChild>
                             <a
-                                href={`https://wa.me/201024739491?text=${encodeURIComponent(`مرحباً، أرغب في تأكيد طلب شراء توكنز رقم #${lastRequestId.slice(-6)} بقيمة ${lastRequestAmount * 5} جنيه`)}`}
+                                href={`https://wa.me/201093667136?text=${encodeURIComponent(`مرحباً، أرغب في تأكيد طلب شراء توكنز رقم #${lastRequestId.slice(-6)} بقيمة ${lastRequestAmount * 5} جنيه`)}`}
                                 target="_blank"
                                 rel="noreferrer"
                             >
