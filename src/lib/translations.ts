@@ -53,6 +53,7 @@ export const partNameMap: Record<string, string> = {
      'عمق درج': 'عمق درج',
      'قاع درج': 'قاع درج',
      'وش درج': 'وش درج',
+     'جالسة': 'جالسة',
 };
 
 export const unitTypeLabels: Record<string, string> = {
@@ -92,6 +93,7 @@ export const unitTypeLabels: Record<string, string> = {
      ground_drawer_side_doors: 'وحدة درج م جانبية + ضلف',
      ground_drawer_bottom_doors: 'وحدة درج م سفلية + ضلف',
      glass_side: 'وحدة زجاج من الجنب',
+     shoe_cabinet_doors: 'جزامة ضلف',
 };
 
 export const getEdgeMarks = (code: string | undefined) => {
