@@ -65,6 +65,7 @@ const unitCategories = [
       { value: 'drawers_bottom_rail', label: 'ادراج م سفلية' },
       { value: 'corner_l_ground', label: 'ركنه L ارضي' },
       { value: 'ground_drawer_side_doors', label: 'وحدة درج م جانبية + ضلف' },
+      { value: 'ground_drawer_bottom_doors', label: 'وحدة درج م سفلية + ضلف' },
     ]
   },
   {

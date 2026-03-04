@@ -90,6 +90,7 @@ export const unitTypeLabels: Record<string, string> = {
      corner_l_ground: 'ركنه L ارضي',
      wall_tray: 'وحدة صواني علوية',
      ground_drawer_side_doors: 'وحدة درج م جانبية + ضلف',
+     ground_drawer_bottom_doors: 'وحدة درج م سفلية + ضلف',
 };
 
 export const getEdgeMarks = (code: string | undefined) => {
