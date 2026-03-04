@@ -105,7 +105,7 @@ export type UnitType =
   | "three_turbo" | "drawer_built_in_oven" | "drawer_bottom_rail_built_in_oven"
   | "wall_tray" | "ground_drawer_side_doors" | "ground_drawer_bottom_doors"
   | "glass_side" | "shoe_cabinet_doors" | "shoe_cabinet_drawer_doors"
-  | "tv_screen_doors";
+  | "tv_screen_doors" | "tv_screen_3_drawers";
 
 export type DoorType = "hinged" | "flip";
 
