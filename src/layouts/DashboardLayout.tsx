@@ -69,6 +69,7 @@ const sidebarCategories: SidebarCategory[] = [
     items: [
       { icon: Users, label: 'المستخدمين', href: '/dashboard/users', adminOnly: true },
       { icon: FileText, label: 'طلبات الشحن', href: '/dashboard/token-requests', adminOnly: true },
+      { icon: Wallet, label: 'محفظة التوكنز', href: '/dashboard/wallet-history' },
       { icon: User, label: 'إعدادات الحساب', href: '/dashboard/account' },
     ]
   }

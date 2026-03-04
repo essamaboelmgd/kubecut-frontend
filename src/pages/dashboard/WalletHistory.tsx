@@ -77,8 +77,8 @@ const WalletHistory = () => {
         }
     });
 
-    const handleRequestTokens = (amount: number) => {
-        if (confirm(`هل تود طلب شراء ${amount} توكن بسعر ${amount * 5} جنيه؟`)) {
+    const handleRequestTokens = (amount: number, price: number) => {
+        if (confirm(`هل تود طلب شراء ${amount} توكن بسعر ${price} جنيه؟`)) {
             requestMutation.mutate({
                 amount,
                 notes: `شراء باقة ${amount} توكن`
@@ -97,9 +97,9 @@ const WalletHistory = () => {
     }
 
     const packages = [
-        { amount: 0, label: "باقة المبتدئين", icon: Coins, color: "blue", popular: false },
-        { amount: 0, label: "باقة المحترفين", icon: Zap, color: "indigo", popular: true },
-        { amount: 0, label: "باقة الشركات", icon: Crown, color: "amber", popular: false },
+        { amount: 100, price: 300, label: "باقة المبتدئين", icon: Coins, color: "blue", popular: false },
+        { amount: 250, price: 500, label: "باقة المحترفين", icon: Zap, color: "indigo", popular: true },
+        { amount: 500, price: 600, label: "باقة الشركات", icon: Crown, color: "amber", popular: false },
     ];
 
     return (
@@ -194,15 +194,15 @@ const WalletHistory = () => {
                             </CardHeader>
                             <CardContent className="text-center">
                                 <div className="text-3xl font-bold mb-1">
-                                    {pkg.amount * 5} <span className="text-sm font-normal text-muted-foreground">ج.م</span>
+                                    {pkg.price} <span className="text-sm font-normal text-muted-foreground">ج.م</span>
                                 </div>
-                                <p className="text-xs text-muted-foreground">0 جنيه / توكن</p>
+                                <p className="text-xs text-muted-foreground">{(pkg.price / pkg.amount).toFixed(1)} جنيه / توكن</p>
                             </CardContent>
                             <CardFooter>
                                 <Button
                                     className="w-full font-bold gap-2"
                                     variant={pkg.popular ? "default" : "outline"}
-                                    onClick={() => handleRequestTokens(pkg.amount)}
+                                    onClick={() => handleRequestTokens(pkg.amount, pkg.price)}
                                     disabled={requestMutation.isPending}
                                 >
                                     {requestMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "طلب شراء"}
@@ -348,14 +348,14 @@ const WalletHistory = () => {
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">المبلغ المطلوب:</span>
-                            <span className="font-bold">{lastRequestAmount * 5} ج.م</span>
+                            <span className="font-bold">{packages.find(p => p.amount === lastRequestAmount)?.price ?? lastRequestAmount * 5} ج.م</span>
                         </div>
                     </div>
 
                     <DialogFooter className="flex-col gap-2 sm:justify-center">
                         <Button className="w-full gap-2 bg-[#25D366] hover:bg-[#128C7E] text-white" asChild>
                             <a
-                                href={`https://wa.me/201093667136?text=${encodeURIComponent(`مرحباً، أرغب في تأكيد طلب شراء توكنز رقم #${lastRequestId.slice(-6)} بقيمة ${lastRequestAmount * 5} جنيه`)}`}
+                                href={`https://wa.me/201093667136?text=${encodeURIComponent(`مرحباً، أرغب في تأكيد طلب شراء توكنز رقم #${lastRequestId.slice(-6)} بقيمة ${packages.find(p => p.amount === lastRequestAmount)?.price ?? lastRequestAmount * 5} جنيه`)}`}
                                 target="_blank"
                                 rel="noreferrer"
                             >
