@@ -908,9 +908,9 @@ export default function ProjectDetails() {
                             <SelectValue placeholder="اختر نوع كود الضلفة" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="basic">كود أساسي (Basic)</SelectItem>
-                            <SelectItem value="additional_1">كود إضافي 1 (Add 1)</SelectItem>
-                            <SelectItem value="additional_2">كود إضافي 2 (Add 2)</SelectItem>
+                            <SelectItem value="basic">كود أساسي (Basic) {defaultSettings?.code_basic ? `- ${defaultSettings.code_basic}` : ''}</SelectItem>
+                            <SelectItem value="additional_1">كود إضافي 1 (Add 1) {defaultSettings?.code_add_1 ? `- ${defaultSettings.code_add_1}` : ''}</SelectItem>
+                            <SelectItem value="additional_2">كود إضافي 2 (Add 2) {defaultSettings?.code_add_2 ? `- ${defaultSettings.code_add_2}` : ''}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -926,9 +926,9 @@ export default function ProjectDetails() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="default">افتراضي</SelectItem>
-                            <SelectItem value="basic">كود أساسي (Basic)</SelectItem>
-                            <SelectItem value="additional_1">كود إضافي 1 (Add 1)</SelectItem>
-                            <SelectItem value="additional_2">كود إضافي 2 (Add 2)</SelectItem>
+                            <SelectItem value="basic">كود أساسي (Basic) {defaultSettings?.code_basic ? `- ${defaultSettings.code_basic}` : ''}</SelectItem>
+                            <SelectItem value="additional_1">كود إضافي 1 (Add 1) {defaultSettings?.code_add_1 ? `- ${defaultSettings.code_add_1}` : ''}</SelectItem>
+                            <SelectItem value="additional_2">كود إضافي 2 (Add 2) {defaultSettings?.code_add_2 ? `- ${defaultSettings.code_add_2}` : ''}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -944,9 +944,9 @@ export default function ProjectDetails() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="none">بدون جنب عيرة (افتراضي)</SelectItem>
-                            <SelectItem value="basic">جنب عيرة كود أساسي</SelectItem>
-                            <SelectItem value="additional_1">جنب عيرة كود إضافي 1</SelectItem>
-                            <SelectItem value="additional_2">جنب عيرة كود إضافي 2</SelectItem>
+                            <SelectItem value="basic">جنب عيرة كود أساسي {defaultSettings?.code_basic ? `- ${defaultSettings.code_basic}` : ''}</SelectItem>
+                            <SelectItem value="additional_1">جنب عيرة كود إضافي 1 {defaultSettings?.code_add_1 ? `- ${defaultSettings.code_add_1}` : ''}</SelectItem>
+                            <SelectItem value="additional_2">جنب عيرة كود إضافي 2 {defaultSettings?.code_add_2 ? `- ${defaultSettings.code_add_2}` : ''}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -962,8 +962,8 @@ export default function ProjectDetails() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="default">افتراضي</SelectItem>
-                            <SelectItem value="basic">كود شريط أساسي</SelectItem>
-                            <SelectItem value="additional">كود شريط إضافي</SelectItem>
+                            <SelectItem value="basic">كود شريط أساسي {defaultSettings?.front_edge_basic ? `- ${defaultSettings.front_edge_basic}` : ''}</SelectItem>
+                            <SelectItem value="additional">كود شريط إضافي {defaultSettings?.front_edge_add ? `- ${defaultSettings.front_edge_add}` : ''}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
