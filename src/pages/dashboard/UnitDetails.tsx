@@ -29,6 +29,7 @@ import { unitsApi, type Unit, type CostEstimate, type InternalCounter, type Edge
 import { partNameMap, unitTypeLabels, getEdgeMarks } from '@/lib/translations';
 import { UnitPrintView } from '@/components/printing/UnitPrintView';
 import { UnitSettingsOverride } from '@/components/units/UnitSettingsOverride';
+import { exportToWord } from '@/lib/exportWord';
 import {
   Table,
   TableBody,
@@ -344,11 +345,11 @@ export default function UnitDetails() {
           </Button>
           <Button
             variant="outline"
-            onClick={() => window.print()}
+            onClick={() => exportToWord('unit-print-view', `${unit?.type || 'الوحدة'}.doc`)}
             className="bg-primary/5 hover:bg-primary/10 border-primary/20"
           >
-            <Printer className="h-4 w-4" />
-            طباعة
+            <Printer className="h-4 w-4 mr-2" />
+            تصدير Word
           </Button>
         </motion.div>
 
@@ -628,7 +629,7 @@ export default function UnitDetails() {
       </div>
 
       {/* Hidden Print Section */}
-      <div className="hidden print:block absolute inset-0 bg-white z-50 p-8">
+      <div id="unit-print-view" className="hidden print:block absolute inset-0 bg-white z-50 p-8">
         <UnitPrintView unit={unit} />
       </div>
     </>

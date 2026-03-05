@@ -49,6 +49,7 @@ import { useToast } from '@/hooks/use-toast';
 import { projectsApi, unitsApi, settingsApi, type Project, type UnitCalculateRequest as CreateUnitData, type SettingsModel } from '../../lib/api';
 import { unitTypeLabels } from '@/lib/translations';
 import { ProjectPrintView } from '@/components/printing/ProjectPrintView';
+import { exportToWord } from '@/lib/exportWord';
 import { UnitSettingsOverride } from '@/components/units/UnitSettingsOverride';
 import { trackCustomPixelEvent } from '@/lib/pixel';
 
@@ -558,12 +559,12 @@ export default function ProjectDetails() {
                 تصدير الكل
               </Button>
               <Button
-                onClick={() => window.print()}
+                onClick={() => exportToWord('project-print-view', `${project?.name || 'مشروع'}.doc`)}
                 variant="outline"
                 className="hover:bg-primary/5 hover:text-primary hover:border-primary/20"
               >
                 <Printer className="h-4 w-4 ml-2" />
-                طباعة
+                تصدير Word
               </Button>
 
               <Button
@@ -1224,7 +1225,7 @@ export default function ProjectDetails() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="hidden print:block absolute inset-0 bg-white z-50 p-8" dir="rtl">
+      <div id="project-print-view" className="hidden print:block absolute inset-0 bg-white z-50 p-8" dir="rtl">
         <ProjectPrintView project={project} />
       </div>
     </>
