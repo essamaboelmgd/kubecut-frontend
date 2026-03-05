@@ -12,7 +12,8 @@ import {
 
   Loader2,
   FileSpreadsheet,
-  Printer
+  Printer,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -559,11 +560,19 @@ export default function ProjectDetails() {
                 تصدير الكل
               </Button>
               <Button
-                onClick={() => exportToWord('project-print-view', `${project?.name || 'مشروع'}.doc`)}
+                onClick={() => window.print()}
                 variant="outline"
                 className="hover:bg-primary/5 hover:text-primary hover:border-primary/20"
               >
                 <Printer className="h-4 w-4 ml-2" />
+                طباعة PDF
+              </Button>
+              <Button
+                onClick={() => exportToWord('project-print-view', `${project?.name || 'مشروع'}.doc`)}
+                variant="outline"
+                className="hover:bg-primary/5 hover:text-primary hover:border-primary/20"
+              >
+                <FileText className="h-4 w-4 ml-2" />
                 تصدير Word
               </Button>
 

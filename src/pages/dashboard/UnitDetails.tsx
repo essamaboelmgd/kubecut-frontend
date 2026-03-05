@@ -14,6 +14,7 @@ import {
   Loader2,
   FileSpreadsheet,
   Printer,
+  FileText,
   Settings2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -345,10 +346,18 @@ export default function UnitDetails() {
           </Button>
           <Button
             variant="outline"
+            onClick={() => window.print()}
+            className="bg-primary/5 hover:bg-primary/10 border-primary/20"
+          >
+            <Printer className="h-4 w-4 ml-2" />
+            طباعة PDF
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => exportToWord('unit-print-view', `${unit?.type || 'الوحدة'}.doc`)}
             className="bg-primary/5 hover:bg-primary/10 border-primary/20"
           >
-            <Printer className="h-4 w-4 mr-2" />
+            <FileText className="h-4 w-4 ml-2" />
             تصدير Word
           </Button>
         </motion.div>
