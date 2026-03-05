@@ -511,6 +511,13 @@ export default function ProjectDetails() {
     }
   };
 
+  const handleCreateNewUnitClick = () => {
+    setEditingUnitId(null);
+    setIsCustomSettingsEnabled(false);
+    setCustomSettings({});
+    handleTypeChange('ground');
+  };
+
   if (isLoading || !project) {
     return (
       <div className="flex justify-center py-12">
@@ -663,7 +670,7 @@ export default function ProjectDetails() {
             <h2 className="text-lg font-semibold">الوحدات</h2>
             <Dialog open={isAddUnitOpen} onOpenChange={setIsAddUnitOpen}>
               <DialogTrigger asChild>
-                <Button variant="hero" size="sm">
+                <Button variant="hero" size="sm" onClick={handleCreateNewUnitClick}>
                   <Plus className="h-4 w-4" />
                   إنشاء وحدة جديدة
                 </Button>
