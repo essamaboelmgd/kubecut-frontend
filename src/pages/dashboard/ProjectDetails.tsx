@@ -122,6 +122,7 @@ export default function ProjectDetails() {
   const [isExporting, setIsExporting] = useState(false);
   const [isAddUnitOpen, setIsAddUnitOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [unitQuantity, setUnitQuantity] = useState(1);
 
   // Custom unit settings
   const [isCustomSettingsEnabled, setIsCustomSettingsEnabled] = useState(false);
@@ -315,12 +316,18 @@ export default function ProjectDetails() {
           });
         }
       } else {
-        // Create Mode
-        const savedUnit = await unitsApi.create(unitData);
-        const unitId = (savedUnit as any).unit_id || savedUnit.unit_id;
-        await projectsApi.addUnitToProject(project.project_id, unitId);
+        // Create Mode - Handling Quantity
         trackCustomPixelEvent('CreateUnit');
-        toast({ title: 'تم الإضافة', description: 'تم إضافة الوحدة بنجاح' });
+        const quantityToCreate = unitQuantity > 0 ? Math.min(unitQuantity, 50) : 1; // max 50 at once to avoid timeouts
+
+        // Loop creation
+        for (let i = 0; i < quantityToCreate; i++) {
+          const savedUnit = await unitsApi.create(unitData);
+          const unitId = (savedUnit as any).unit_id || savedUnit.unit_id;
+          await projectsApi.addUnitToProject(project.project_id, unitId);
+        }
+
+        toast({ title: 'تم الإضافة', description: `تم إضافة ${quantityToCreate > 1 ? quantityToCreate + ' وحدات' : 'الوحدة'} بنجاح` });
       }
 
       const updatedProject = await projectsApi.getById(project.project_id);
@@ -517,6 +524,7 @@ export default function ProjectDetails() {
     setEditingUnitId(null);
     setIsCustomSettingsEnabled(false);
     setCustomSettings({});
+    setUnitQuantity(1);
     handleTypeChange('ground');
   };
 
@@ -717,6 +725,23 @@ export default function ProjectDetails() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Unit Quantity (Only show on Creation, not Edit) */}
+                  {!editingUnitId && (
+                    <div className="space-y-2">
+                      <Label>عدد الوحدات المراد إضافتها (نسخ بنفس المواصفات)</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="50"
+                        value={unitQuantity || ''}
+                        onChange={(e) => setUnitQuantity(Number(e.target.value.replace(/^0+(?=\d)/, '')))}
+                        placeholder="1"
+                        dir="ltr"
+                        className="bg-accent/5 focus:bg-background transition-colors text-right font-mono"
+                      />
+                    </div>
+                  )}
 
                   {/* Dimensions */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
