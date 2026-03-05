@@ -14,17 +14,17 @@ export const UnitPrintView = ({ unit, showTitle = true }: UnitPrintViewProps) =>
   return (
     <div className="mb-8 p-4 print-section break-inside-avoid" dir="rtl">
       {showTitle && (
-        <div className="mb-4 border-b-2 border-black pb-2" style={{ borderBottom: '2px solid black', marginBottom: '20px', paddingBottom: '10px' }}>
-          <table style={{ width: '100%', border: 'none' }}>
+        <div className="mb-4">
+          <table className="unit-header-table">
             <tbody>
               <tr>
-                <td style={{ border: 'none', textAlign: 'right', padding: 0 }}>
-                  <h2 className="text-xl font-bold" style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 5px 0' }}>{unitTypeLabels[unit.type] || unit.type}</h2>
-                  <p className="text-sm" style={{ margin: 0, fontSize: '14px' }}>أبعاد: {unit.width_cm} × {unit.height_cm} × {unit.depth_cm}</p>
+                <td style={{ textAlign: 'right', width: '50%' }}>
+                  <h2>{unitTypeLabels[unit.type] || unit.type}</h2>
+                  <p>أبعاد: {unit.width_cm} × {unit.height_cm} × {unit.depth_cm}</p>
                 </td>
-                <td style={{ border: 'none', textAlign: 'left', padding: 0, verticalAlign: 'bottom' }}>
-                  <p className="text-sm" style={{ margin: 0, fontSize: '14px' }}>المساحة: {unit.total_area_m2.toFixed(2)} م²</p>
-                  <p className="text-sm" style={{ margin: 0, fontSize: '14px' }}>الشريط: {unit.total_edge_band_m ? unit.total_edge_band_m.toFixed(2) : '0.00'} م</p>
+                <td style={{ textAlign: 'left', width: '50%', verticalAlign: 'bottom' }}>
+                  <p>المساحة: {unit.total_area_m2.toFixed(2)} م²</p>
+                  <p>الشريط: {unit.total_edge_band_m ? unit.total_edge_band_m.toFixed(2) : '0.00'} م</p>
                 </td>
               </tr>
             </tbody>
@@ -33,28 +33,35 @@ export const UnitPrintView = ({ unit, showTitle = true }: UnitPrintViewProps) =>
       )}
 
       <div className="mb-6 break-inside-avoid">
-        <table className="w-full text-center border-collapse text-sm">
+        <table className="w-full text-center border-collapse text-sm parts-table">
           <thead>
-            <tr className="bg-gray-100 border-b border-black">
-              <th className="border border-black p-1 w-[40px]">م</th>
-              <th className="border border-black p-1">القطعة</th>
-              <th className="border border-black p-1">العرض</th>
-              <th className="border border-black p-1">الارتفاع</th>
-              <th className="border border-black p-1">الكمية</th>
-              <th className="border border-black p-1">ملاحظات</th>
+            <tr>
+              <th style={{ width: '40px' }}>م</th>
+              <th>القطعة</th>
+              <th>العرض</th>
+              <th>الارتفاع</th>
+              <th>الكمية</th>
+              <th>ملاحظات</th>
             </tr>
           </thead>
           <tbody>
             {parts.map((part, i) => {
               const displayName = partNameMap[part.name] || partNameMap[part.name.toLowerCase()] || part.name;
+
+              // Clean up long decimals for display
+              const formatDim = (val: number) => {
+                if (val === undefined || val === null) return "-";
+                return Number.isInteger(val) ? val : Number(val).toFixed(1);
+              };
+
               return (
-                <tr key={i} className="border-b border-black">
-                  <td className="border border-black p-1">{i + 1}</td>
-                  <td className="border border-black p-1 font-bold">{displayName}</td>
-                  <td className="border border-black p-1">{part.width_cm}</td>
-                  <td className="border border-black p-1">{part.height_cm}</td>
-                  <td className="border border-black p-1 font-bold">{part.qty || (part as any).quantity || 1}</td>
-                  <td className="border border-black p-1 text-xs">{(part as any).description || ""}</td>
+                <tr key={i}>
+                  <td>{i + 1}</td>
+                  <td style={{ fontWeight: 'bold' }}>{displayName}</td>
+                  <td>{formatDim(part.width_cm)}</td>
+                  <td>{formatDim(part.height_cm)}</td>
+                  <td style={{ fontWeight: 'bold' }}>{part.qty || (part as any).quantity || 1}</td>
+                  <td style={{ fontSize: '12px' }}>{(part as any).description || ""}</td>
                 </tr>
               );
             })}
