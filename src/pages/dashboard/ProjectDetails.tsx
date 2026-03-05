@@ -624,16 +624,16 @@ export default function ProjectDetails() {
             },
             {
               label: 'المساحة الإجمالية',
-              value: project.units.reduce((acc, u) => acc + u.total_area_m2, 0).toFixed(1),
-              unit: 'م²',
+              value: 'قريباً',
+              unit: '',
               icon: Ruler,
               color: 'text-emerald-500',
               bg: 'bg-emerald-500/10'
             },
             {
               label: 'شريط الحافة',
-              value: project.units.reduce((acc, u) => acc + u.total_edge_band_m, 0).toFixed(1),
-              unit: 'م',
+              value: 'قريباً',
+              unit: '',
               icon: Calculator,
               color: 'text-amber-500',
               bg: 'bg-amber-500/10'
@@ -707,8 +707,8 @@ export default function ProjectDetails() {
                       <Label>{isCorner ? 'العرض 1 (سم)' : 'العرض (سم)'}</Label>
                       <Input
                         type="number"
-                        value={newUnit.width_cm}
-                        onChange={(e) => setNewUnit({ ...newUnit, width_cm: Number(e.target.value) })}
+                        value={newUnit.width_cm || ''}
+                        onChange={(e) => setNewUnit({ ...newUnit, width_cm: Number(e.target.value.replace(/^0+(?=\d)/, '')) })}
                       />
                     </div>
 
@@ -717,8 +717,8 @@ export default function ProjectDetails() {
                         <Label>العرض 2 (سم)</Label>
                         <Input
                           type="number"
-                          value={newUnit.width_2_cm}
-                          onChange={(e) => setNewUnit({ ...newUnit, width_2_cm: Number(e.target.value) })}
+                          value={newUnit.width_2_cm || ''}
+                          onChange={(e) => setNewUnit({ ...newUnit, width_2_cm: Number(e.target.value.replace(/^0+(?=\d)/, '')) })}
                         />
                       </div>
                     )}
@@ -727,8 +727,8 @@ export default function ProjectDetails() {
                       <Label>الارتفاع (سم)</Label>
                       <Input
                         type="number"
-                        value={newUnit.height_cm}
-                        onChange={(e) => setNewUnit({ ...newUnit, height_cm: Number(e.target.value) })}
+                        value={newUnit.height_cm || ''}
+                        onChange={(e) => setNewUnit({ ...newUnit, height_cm: Number(e.target.value.replace(/^0+(?=\d)/, '')) })}
                       />
                     </div>
 
@@ -737,8 +737,8 @@ export default function ProjectDetails() {
                         <Label>{isCorner ? 'العمق 1 (سم)' : 'العمق (سم)'}</Label>
                         <Input
                           type="number"
-                          value={newUnit.depth_cm}
-                          onChange={(e) => setNewUnit({ ...newUnit, depth_cm: Number(e.target.value) })}
+                          value={newUnit.depth_cm || ''}
+                          onChange={(e) => setNewUnit({ ...newUnit, depth_cm: Number(e.target.value.replace(/^0+(?=\d)/, '')) })}
                         />
                       </div>
                     )}
@@ -748,8 +748,8 @@ export default function ProjectDetails() {
                         <Label>العمق 2 (سم) - اختياري</Label>
                         <Input
                           type="number"
-                          value={newUnit.depth_2_cm}
-                          onChange={(e) => setNewUnit({ ...newUnit, depth_2_cm: Number(e.target.value) })}
+                          value={newUnit.depth_2_cm || ''}
+                          onChange={(e) => setNewUnit({ ...newUnit, depth_2_cm: Number(e.target.value.replace(/^0+(?=\d)/, '')) })}
                         />
                       </div>
                     )}
@@ -759,8 +759,8 @@ export default function ProjectDetails() {
                         <Label>الجزء الثابت (سم)</Label>
                         <Input
                           type="number"
-                          value={newUnit.fixed_part_cm}
-                          onChange={(e) => setNewUnit({ ...newUnit, fixed_part_cm: Number(e.target.value) })}
+                          value={newUnit.fixed_part_cm || ''}
+                          onChange={(e) => setNewUnit({ ...newUnit, fixed_part_cm: Number(e.target.value.replace(/^0+(?=\d)/, '')) })}
                         />
                       </div>
                     )}
@@ -770,8 +770,8 @@ export default function ProjectDetails() {
                         <Label>ارتفاع القلاب (سم)</Label>
                         <Input
                           type="number"
-                          value={newUnit.flip_door_height}
-                          onChange={(e) => setNewUnit({ ...newUnit, flip_door_height: Number(e.target.value) })}
+                          value={newUnit.flip_door_height || ''}
+                          onChange={(e) => setNewUnit({ ...newUnit, flip_door_height: Number(e.target.value.replace(/^0+(?=\d)/, '')) })}
                         />
                       </div>
                     )}
@@ -781,8 +781,8 @@ export default function ProjectDetails() {
                         <Label>ارتفاع الضلفة السفلية (سم)</Label>
                         <Input
                           type="number"
-                          value={newUnit.bottom_door_height}
-                          onChange={(e) => setNewUnit({ ...newUnit, bottom_door_height: Number(e.target.value) })}
+                          value={newUnit.bottom_door_height || ''}
+                          onChange={(e) => setNewUnit({ ...newUnit, bottom_door_height: Number(e.target.value.replace(/^0+(?=\d)/, '')) })}
                         />
                       </div>
                     )}
@@ -792,8 +792,8 @@ export default function ProjectDetails() {
                         <Label>ارتفاع الدرج (سم)</Label>
                         <Input
                           type="number"
-                          value={newUnit.drawer_height_cm}
-                          onChange={(e) => setNewUnit({ ...newUnit, drawer_height_cm: Number(e.target.value) })}
+                          value={newUnit.drawer_height_cm || ''}
+                          onChange={(e) => setNewUnit({ ...newUnit, drawer_height_cm: Number(e.target.value.replace(/^0+(?=\d)/, '')) })}
                         />
                       </div>
                     )}
@@ -1044,73 +1044,87 @@ export default function ProjectDetails() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {project.units.map((unit, index) => (
-              <motion.div
-                key={unit.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + index * 0.05, duration: 0.4 }}
-              >
-                <Link
-                  to={`/dashboard/units/${unit.id}`}
-                  className="glass-card group relative block overflow-hidden p-6 transition-all duration-300 hover:shadow-glow hover:-translate-y-1"
+            {[...project.units]
+              .sort((a, b) => {
+                // If units have created_at, use it
+                if (a.created_at && b.created_at) {
+                  return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                }
+                // Fallback to sorting by ID (Mongo ObjectIDs sort by creation time)
+                const idA = a.id || (a as any).unit_id || '';
+                const idB = b.id || (b as any).unit_id || '';
+                return idA.localeCompare(idB);
+              })
+              .map((unit, index) => (
+                <motion.div
+                  key={unit.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + index * 0.05, duration: 0.4 }}
                 >
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/80 text-secondary-foreground shadow-sm">
-                        <Layers className="h-5 w-5" />
+                  <Link
+                    to={`/dashboard/units/${unit.id}`}
+                    className="glass-card group relative block overflow-hidden p-6 transition-all duration-300 hover:shadow-glow hover:-translate-y-1"
+                  >
+                    <div className="mb-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/80 text-secondary-foreground shadow-sm">
+                          <Layers className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">
+                            {index + 1}. {unitTypeLabels[unit.type] || unit.type}
+                          </h4>
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {unit.type === 'side_flush'
+                              ? `${unit.width_cm} × ${unit.height_cm}`
+                              : `${unit.width_cm} × ${unit.height_cm} × ${unit.depth_cm}`
+                            }
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">
-                          {index + 1}. {unitTypeLabels[unit.type] || unit.type}
-                        </h4>
-                        <span className="text-xs text-muted-foreground font-mono">
-                          {unit.width_cm} × {unit.height_cm} × {unit.depth_cm}
-                        </span>
+                      <div className="flex items-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                          onClick={(e) => handleEditUnitClick(e, unit)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          onClick={(e) => handleDeleteUnitClick(e, unit.id || (unit as any).unit_id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                        onClick={(e) => handleEditUnitClick(e, unit)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        onClick={(e) => handleDeleteUnitClick(e, unit.id || (unit as any).unit_id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50">
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      <span>مس: {unit.total_area_m2?.toFixed(2) || '0.00'} م²</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                      <span>حافة: {unit.total_edge_band_m?.toFixed(2) || '0.00'} م</span>
-                    </div>
-                    {(unit as any).price_estimate > 0 && (
+                    <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50">
                       <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-                        <span>تكلفة: {((unit as any).price_estimate || 0).toFixed(0)} ج.م</span>
+                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        <span>مس: قريباً</span>
                       </div>
-                    )}
-                  </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                        <span>حافة: قريباً</span>
+                      </div>
+                      {(unit as any).price_estimate > 0 && (
+                        <div className="flex items-center gap-2">
+                          <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                          <span>تكلفة: {((unit as any).price_estimate || 0).toFixed(0)} ج.م</span>
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Decorative Corner */}
-                  <div className="absolute top-0 left-0 h-16 w-16 bg-gradient-to-br from-primary/10 to-transparent -translate-x-8 -translate-y-8 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out" />
-                </Link>
-              </motion.div>
-            ))}
+                    {/* Decorative Corner */}
+                    <div className="absolute top-0 left-0 h-16 w-16 bg-gradient-to-br from-primary/10 to-transparent -translate-x-8 -translate-y-8 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out" />
+                  </Link>
+                </motion.div>
+              ))}
           </div>
         </motion.div>
       </div>

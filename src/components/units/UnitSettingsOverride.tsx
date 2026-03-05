@@ -48,7 +48,8 @@ export function UnitSettingsOverride({
         onSettingsChange({ ...settings, [key]: value });
     };
 
-    const handleNumericChange = (key: keyof SettingsModel, value: string) => {
+    const handleNumericChange = (key: keyof SettingsModel, rawValue: string) => {
+        const value = rawValue.replace(/^0+(?=\d)/, '');
         let numValue = value === '' ? undefined : parseFloat(value);
         if (numValue !== undefined && isNaN(numValue)) numValue = 0;
 

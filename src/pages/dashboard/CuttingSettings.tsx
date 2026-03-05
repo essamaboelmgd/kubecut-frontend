@@ -127,9 +127,9 @@ export default function CuttingSettings() {
     setSettings({ ...settings, [key]: value });
   };
 
-  const handleNumericChange = (key: keyof SettingsModel, value: string) => {
+  const handleNumericChange = (key: keyof SettingsModel, rawValue: string) => {
     if (!settings) return;
-    // If empty or invalid number, default to 0. Enforce non-negative.
+    const value = rawValue.replace(/^0+(?=\d)/, '');
     let numValue = value === '' ? 0 : parseFloat(value);
     if (isNaN(numValue)) numValue = 0;
     if (numValue < 0) numValue = 0;
@@ -148,8 +148,9 @@ export default function CuttingSettings() {
     });
   };
 
-  const handleMaterialChange = (materialKey: string, field: keyof import('@/lib/api').MaterialInfo, value: string) => {
+  const handleMaterialChange = (materialKey: string, field: keyof import('@/lib/api').MaterialInfo, rawValue: string) => {
     if (!settings) return;
+    const value = rawValue.replace(/^0+(?=\d)/, '');
     const numValue = value === '' ? 0 : parseFloat(value);
 
     const currentMaterials = settings.materials || {};
